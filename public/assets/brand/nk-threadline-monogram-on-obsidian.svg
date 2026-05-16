@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="nk-monogram-obsidian-title nk-monogram-obsidian-desc">
+  <title id="nk-monogram-obsidian-title">NK Threadline Precision monogram on obsidian</title>
+  <desc id="nk-monogram-obsidian-desc">An ivory and antique-gold NK monogram centered on an obsidian background.</desc>
+  <rect width="160" height="160" fill="#070707"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M46 120V40" stroke="#F4EFE4" stroke-width="11"/>
+    <path d="M46 40L80 120" stroke="#F4EFE4" stroke-width="11"/>
+    <path d="M80 80L116 44" stroke="#F4EFE4" stroke-width="11"/>
+    <path d="M80 80L118 120" stroke="#F4EFE4" stroke-width="11"/>
+    <path d="M80 40V120" stroke="#B9974A" stroke-width="7"/>
+  </g>
+</svg>

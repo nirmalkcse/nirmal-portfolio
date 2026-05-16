@@ -1,0 +1,119 @@
+.goldTrace {
+  background:
+    linear-gradient(
+      180deg,
+      transparent,
+      color-mix(in srgb, var(--color-antique-gold) 70%, transparent) 16%,
+      color-mix(in srgb, var(--color-champagne) 86%, transparent) 50%,
+      color-mix(in srgb, var(--color-antique-gold) 64%, transparent) 84%,
+      transparent
+    );
+  box-shadow: var(--gold-thread-glow);
+  inset-block: 86px 72px;
+  inset-inline-start: clamp(12px, 2vw, 28px);
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  transform: scaleY(0.18);
+  transform-origin: top;
+  transition:
+    opacity var(--duration-page) var(--ease-standard),
+    transform var(--duration-cinematic) var(--ease-emphasized);
+  width: 1px;
+  z-index: var(--z-raised);
+}
+
+.goldTrace[data-active="true"] {
+  opacity: 0.72;
+  transform: scaleY(1);
+}
+
+.stampStack {
+  bottom: clamp(16px, 3vw, 28px);
+  display: grid;
+  gap: var(--space-2);
+  pointer-events: none;
+  position: fixed;
+  right: clamp(16px, 3vw, 28px);
+  z-index: var(--z-toast);
+}
+
+.stamp {
+  animation: hidden-delight-stamp var(--duration-panel) var(--ease-out) both;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-antique-gold) 14%, transparent),
+      transparent 42%
+    ),
+    color-mix(in srgb, var(--color-carbon) 92%, var(--color-obsidian));
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-surface);
+  color: var(--color-ivory-soft);
+  max-width: min(360px, calc(100vw - 32px));
+  padding: var(--space-3) var(--space-4);
+}
+
+.stampTitle {
+  color: var(--color-champagne);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  text-transform: uppercase;
+}
+
+.stampDetail {
+  color: var(--color-warm-silver);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  margin-top: var(--space-1);
+}
+
+:global(.hidden-delight-footer-mark) {
+  position: relative;
+}
+
+:global(body.gold-thread-unlocked) :global(.hidden-delight-footer-mark)::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-champagne) 82%, transparent),
+    transparent
+  );
+  box-shadow: var(--gold-thread-glow);
+  content: "";
+  height: 1px;
+  inset-inline: -8px;
+  inset-block-end: -8px;
+  opacity: 0.9;
+  position: absolute;
+  transform-origin: left;
+}
+
+@keyframes hidden-delight-stamp {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-sm)) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp {
+    animation: none;
+  }
+
+  .goldTrace {
+    transition-duration: 1ms;
+  }
+
+  .goldTrace,
+  .goldTrace[data-active="true"] {
+    transform: none;
+  }
+}

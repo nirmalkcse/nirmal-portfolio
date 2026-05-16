@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 160" role="img" aria-labelledby="nk-lockup-obsidian-title nk-lockup-obsidian-desc">
+  <title id="nk-lockup-obsidian-title">NK Threadline Precision horizontal lockup on obsidian</title>
+  <desc id="nk-lockup-obsidian-desc">An ivory and antique-gold NK horizontal lockup on an obsidian background.</desc>
+  <rect width="560" height="160" fill="#070707"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M54 120V40" stroke="#F4EFE4" stroke-width="11"/>
+    <path d="M54 40L88 120" stroke="#F4EFE4" stroke-width="11"/>
+    <path d="M88 80L124 44" stroke="#F4EFE4" stroke-width="11"/>
+    <path d="M88 80L126 120" stroke="#F4EFE4" stroke-width="11"/>
+    <path d="M88 40V120" stroke="#B9974A" stroke-width="7"/>
+  </g>
+  <g transform="translate(188 32)">
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 70V26" stroke="#F4EFE4" stroke-width="6"/>
+      <path d="M20 26L47 70" stroke="#F4EFE4" stroke-width="6"/>
+      <path d="M47 26V70" stroke="#B9974A" stroke-width="4"/>
+    </g>
+    <text x="62" y="62" fill="#F4EFE4" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="40" font-weight="500" letter-spacing="0.2">irmal Kumar</text>
+  </g>
+</svg>

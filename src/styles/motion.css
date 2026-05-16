@@ -1,0 +1,319 @@
+:root {
+  --duration-instant: 80ms;
+  --duration-feedback: 140ms;
+  --duration-state: 220ms;
+  --duration-panel: 380ms;
+  --duration-page: 560ms;
+  --duration-cinematic: 900ms;
+  --motion-fast: var(--duration-feedback);
+  --motion-standard: var(--duration-state);
+  --motion-slow: var(--duration-page);
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-emphasized: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-linear: linear;
+  --motion-distance-xs: 2px;
+  --motion-distance-sm: 6px;
+  --motion-distance-md: 12px;
+  --motion-distance-lg: 24px;
+  --motion-opacity-enter: 0;
+  --motion-opacity-exit: 0;
+  --motion-opacity-muted: 0.72;
+  --motion-scale-press: 0.99;
+  --motion-scale-focus: 1.01;
+  --motion-stagger-step: 48ms;
+  --gold-thread-opacity: 0.58;
+  --gold-thread-offset: clamp(-28px, -2vw, -16px);
+  --gold-thread-glow: 0 0 24px
+    color-mix(in srgb, var(--color-antique-gold) 18%, transparent);
+}
+
+@keyframes motion-section-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-md));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes motion-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-sm)) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes motion-thread-draw {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+
+  to {
+    opacity: var(--gold-thread-opacity);
+    transform: scaleY(1);
+  }
+}
+
+.motion-section {
+  isolation: isolate;
+  position: relative;
+}
+
+.motion-section > * {
+  position: relative;
+  z-index: 1;
+}
+
+.gold-thread-section {
+  position: relative;
+}
+
+.gold-thread-section::before {
+  background:
+    linear-gradient(
+      180deg,
+      transparent,
+      color-mix(in srgb, var(--color-antique-gold) 72%, transparent) 18%,
+      color-mix(in srgb, var(--color-champagne) 74%, transparent) 50%,
+      color-mix(in srgb, var(--color-antique-gold) 64%, transparent) 82%,
+      transparent
+    );
+  box-shadow: var(--gold-thread-glow);
+  content: "";
+  inset-block: clamp(18px, 4vw, 48px);
+  inset-inline-start: var(--gold-thread-offset);
+  opacity: var(--gold-thread-opacity);
+  pointer-events: none;
+  position: absolute;
+  transform: scaleY(0);
+  transform-origin: top;
+  width: 1px;
+  z-index: 0;
+}
+
+.motion-panel-enter,
+.motion-detail-swap {
+  animation: motion-panel-enter var(--duration-panel) var(--ease-out) both;
+}
+
+.motion-list > * {
+  animation: motion-panel-enter var(--duration-panel) var(--ease-out) both;
+}
+
+.motion-list > *:nth-child(2) {
+  animation-delay: var(--motion-stagger-step);
+}
+
+.motion-list > *:nth-child(3) {
+  animation-delay: calc(var(--motion-stagger-step) * 2);
+}
+
+.motion-list > *:nth-child(4) {
+  animation-delay: calc(var(--motion-stagger-step) * 3);
+}
+
+.motion-list > *:nth-child(5) {
+  animation-delay: calc(var(--motion-stagger-step) * 4);
+}
+
+.motion-list > *:nth-child(6) {
+  animation-delay: calc(var(--motion-stagger-step) * 5);
+}
+
+.motion-list > *:nth-child(7) {
+  animation-delay: calc(var(--motion-stagger-step) * 6);
+}
+
+.motion-list > *:nth-child(8) {
+  animation-delay: calc(var(--motion-stagger-step) * 7);
+}
+
+.motion-card,
+.motion-lens-choice,
+.motion-timeline-item,
+.motion-cta {
+  transition-duration: var(--duration-state);
+  transition-property: background, border-color, box-shadow, color, opacity,
+    transform;
+  transition-timing-function: var(--ease-standard);
+}
+
+.motion-card,
+.motion-case-card,
+.motion-lens-choice {
+  overflow: hidden;
+  position: relative;
+}
+
+.motion-card::after,
+.motion-case-card::after,
+.motion-lens-choice::after {
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--color-antique-gold) 62%, transparent),
+      transparent
+    );
+  content: "";
+  height: 1px;
+  inset: 0 0 auto;
+  opacity: 0.8;
+  pointer-events: none;
+  position: absolute;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-state) var(--ease-emphasized);
+}
+
+.motion-card[aria-pressed="true"]::after,
+.motion-card[data-selected="true"]::after,
+.motion-case-card:hover::after,
+.motion-lens-choice[aria-pressed="true"]::after,
+.motion-lens-choice[data-selected="true"]::after {
+  transform: scaleX(1);
+}
+
+.motion-thread-rail {
+  opacity: 0.74;
+  transform: scaleY(0.42);
+  transform-origin: top;
+  transition:
+    opacity var(--duration-state) var(--ease-standard),
+    transform var(--duration-panel) var(--ease-emphasized),
+    box-shadow var(--duration-state) var(--ease-standard);
+}
+
+.motion-case-card:hover .motion-thread-rail,
+.motion-case-card:focus-within .motion-thread-rail,
+.motion-case-card[aria-pressed="true"] .motion-thread-rail,
+.motion-case-card[data-selected="true"] .motion-thread-rail {
+  box-shadow: var(--gold-thread-glow);
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.motion-cta {
+  position: relative;
+}
+
+.motion-cta svg:last-child {
+  transition: transform var(--duration-feedback) var(--ease-standard);
+}
+
+.motion-cta:hover svg:last-child,
+.motion-cta:focus-visible svg:last-child {
+  transform: translateX(var(--motion-distance-sm));
+}
+
+.motion-lens-choice[aria-pressed="true"],
+.motion-lens-choice[data-selected="true"],
+.motion-timeline-item[aria-pressed="true"] {
+  box-shadow: var(--shadow-gold-trace);
+}
+
+.motion-proof-edge {
+  transition:
+    opacity var(--duration-state) var(--ease-standard),
+    stroke-width var(--duration-state) var(--ease-standard);
+}
+
+@media (hover: hover) {
+  .motion-card:hover,
+  .motion-lens-choice:hover,
+  .motion-timeline-item:hover,
+  .motion-cta:hover {
+    transform: translateY(calc(-1 * var(--motion-distance-xs)));
+  }
+}
+
+.motion-card:active,
+.motion-lens-choice:active,
+.motion-timeline-item:active,
+.motion-cta:active {
+  transform: translateY(0) scale(var(--motion-scale-press));
+}
+
+@supports (animation-timeline: view()) {
+  .motion-section {
+    animation-duration: 1ms;
+    animation-fill-mode: both;
+    animation-name: motion-section-reveal;
+    animation-range: entry 8% cover 28%;
+    animation-timeline: view();
+    animation-timing-function: var(--ease-out);
+    opacity: 0;
+    transform: translateY(var(--motion-distance-md));
+  }
+
+  .gold-thread-section::before {
+    animation-duration: 1ms;
+    animation-fill-mode: both;
+    animation-name: motion-thread-draw;
+    animation-range: entry 10% cover 34%;
+    animation-timeline: view();
+    animation-timing-function: var(--ease-emphasized);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 1ms;
+    --duration-feedback: 1ms;
+    --duration-state: 1ms;
+    --duration-panel: 1ms;
+    --duration-page: 1ms;
+    --duration-cinematic: 1ms;
+    --motion-distance-xs: 0px;
+    --motion-distance-sm: 0px;
+    --motion-distance-md: 0px;
+    --motion-distance-lg: 0px;
+    --motion-scale-press: 1;
+    --motion-scale-focus: 1;
+    --gold-thread-opacity: 0.34;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .motion-section,
+  .motion-panel-enter,
+  .motion-detail-swap,
+  .motion-list > * {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .gold-thread-section::before,
+  .motion-thread-rail {
+    opacity: var(--gold-thread-opacity);
+    transform: none !important;
+  }
+
+  .motion-card,
+  .motion-lens-choice,
+  .motion-timeline-item,
+  .motion-cta {
+    will-change: auto;
+  }
+}

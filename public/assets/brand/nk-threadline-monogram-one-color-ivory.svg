@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="nk-monogram-ivory-title nk-monogram-ivory-desc">
+  <title id="nk-monogram-ivory-title">NK Threadline Precision monogram, ivory one color</title>
+  <desc id="nk-monogram-ivory-desc">An ivory one-color NK monogram with a central vertical thread spine.</desc>
+  <g fill="none" stroke="#F4EFE4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M30 104V24" stroke-width="11"/>
+    <path d="M30 24L64 104" stroke-width="11"/>
+    <path d="M64 64L100 28" stroke-width="11"/>
+    <path d="M64 64L102 104" stroke-width="11"/>
+    <path d="M64 24V104" stroke-width="7"/>
+  </g>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="nk-avatar-title nk-avatar-desc">
+  <title id="nk-avatar-title">NK Threadline Precision social avatar</title>
+  <desc id="nk-avatar-desc">A circle-crop-safe NK Threadline Precision avatar on obsidian with ivory strokes and a restrained antique-gold thread.</desc>
+  <rect width="512" height="512" fill="#070707"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M171 356V156" stroke="#F4EFE4" stroke-width="27.5"/>
+    <path d="M171 156L256 356" stroke="#F4EFE4" stroke-width="27.5"/>
+    <path d="M256 256L346 166" stroke="#F4EFE4" stroke-width="27.5"/>
+    <path d="M256 256L351 356" stroke="#F4EFE4" stroke-width="27.5"/>
+    <path d="M256 156V356" stroke="#B9974A" stroke-width="17.5"/>
+  </g>
+</svg>

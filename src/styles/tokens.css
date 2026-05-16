@@ -1,0 +1,187 @@
+:root {
+  /* Core color palette */
+  --color-obsidian: #070707;
+  --color-carbon: #111111;
+  --color-charcoal: #181613;
+  --color-soft-black: var(--color-charcoal);
+  --color-ink: #25221d;
+  --color-ivory: #f4efe4;
+  --color-ivory-soft: #e8dfcf;
+  --color-ivory-muted: #cfc6b6;
+  --color-champagne: #d8c28a;
+  --color-muted-champagne: var(--color-champagne);
+  --color-antique-gold: #b9974a;
+  --color-old-gold: #755d2b;
+  --color-deep-emerald: #12372a;
+  --color-emerald-soft: #2c5946;
+  --color-warm-silver: #b8b6ad;
+  --color-steel: #85898c;
+  --color-signal-blue: #7ea7d8;
+  --color-success: #83b49a;
+  --color-warning: var(--color-champagne);
+  --color-danger: #d78370;
+  --color-info: var(--color-signal-blue);
+
+  /* Semantic colors */
+  --color-bg: var(--color-obsidian);
+  --color-bg-elevated: var(--color-carbon);
+  --color-bg-muted: var(--color-charcoal);
+  --color-bg-inverse: var(--color-ivory);
+  --color-text-primary: var(--color-ivory);
+  --color-text-secondary: var(--color-ivory-soft);
+  --color-text-muted: var(--color-warm-silver);
+  --color-text-subtle: var(--color-ivory-muted);
+  --color-text-inverse: var(--color-ink);
+  --color-accent-primary: var(--color-antique-gold);
+  --color-accent-primary-strong: var(--color-champagne);
+  --color-accent-primary-muted: var(--color-old-gold);
+  --color-accent-trust: var(--color-deep-emerald);
+  --color-accent-data: var(--color-signal-blue);
+
+  /* Typography */
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-editorial: "Cormorant Garamond", "New York", Georgia, serif;
+  --font-mono: "Geist Mono", "SF Mono", "Cascadia Code", Consolas, monospace;
+  --text-micro: 0.6875rem;
+  --text-caption: 0.75rem;
+  --text-small: 0.875rem;
+  --text-body: 1rem;
+  --text-body-large: 1.125rem;
+  --text-heading-small: 1.25rem;
+  --text-heading-medium: 1.5rem;
+  --text-heading-large: 2rem;
+  --text-display-small: 2.5rem;
+  --text-display-medium: 3.5rem;
+  --leading-tight: 1.08;
+  --leading-heading: 1.18;
+  --leading-body: 1.6;
+  --leading-caption: 1.45;
+  --leading-mono: 1.55;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --tracking-default: 0;
+  --tracking-label: 0;
+
+  /* Spacing and layout */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --layout-page-max: 1180px;
+  --layout-reading-max: 720px;
+  --layout-wide-max: 1440px;
+  --layout-gutter: clamp(20px, 4vw, 56px);
+  --layout-section-y: var(--space-24);
+  --site-header-offset: 74px;
+  --sticky-panel-max-height: calc(100svh - var(--site-header-offset) - var(--space-8));
+
+  /* Radius */
+  --radius-0: 0;
+  --radius-2: 2px;
+  --radius-4: 4px;
+  --radius-control: 6px;
+  --radius-console: 6px;
+  --radius-card: 8px;
+  --radius-panel: 8px;
+  --radius-case-file: 8px;
+  --radius-surface: var(--radius-panel);
+
+  /* Borders and focus */
+  --border-subtle: color-mix(in srgb, var(--color-warm-silver) 22%, transparent);
+  --border-strong: color-mix(in srgb, var(--color-ivory) 34%, transparent);
+  --border-gold: color-mix(in srgb, var(--color-antique-gold) 62%, transparent);
+  --border-cool: color-mix(in srgb, var(--color-signal-blue) 42%, transparent);
+  --focus-ring: 0 0 0 2px color-mix(in srgb, var(--color-antique-gold) 86%, transparent);
+  --focus-ring-offset: 0 0 0 4px var(--color-obsidian);
+
+  /* Surfaces */
+  --surface-page: var(--color-bg);
+  --surface-panel: color-mix(in srgb, var(--color-carbon) 92%, transparent);
+  --surface-panel-hover: color-mix(in srgb, var(--color-charcoal) 94%, transparent);
+  --surface-case-file: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-antique-gold) 12%, transparent),
+      transparent 18%
+    ),
+    color-mix(in srgb, var(--color-carbon) 94%, transparent);
+  --surface-console: color-mix(in srgb, var(--color-obsidian) 86%, var(--color-carbon));
+  --surface-ivory: var(--color-ivory);
+  --surface-glass: color-mix(in srgb, var(--color-carbon) 76%, transparent);
+
+  /* Shadows */
+  --shadow-hairline-inset: inset 0 0 0 1px var(--border-subtle);
+  --shadow-surface: 0 18px 48px color-mix(in srgb, black 34%, transparent);
+  --shadow-float: 0 24px 72px color-mix(in srgb, black 42%, transparent);
+  --shadow-gold-trace: 0 0 0 1px var(--border-gold),
+    0 10px 32px color-mix(in srgb, var(--color-antique-gold) 12%, transparent);
+
+  /* Buttons */
+  --button-height-small: 36px;
+  --button-height-medium: 40px;
+  --button-height-large: 48px;
+  --button-padding-x-small: var(--space-3);
+  --button-padding-x-medium: var(--space-4);
+  --button-padding-x-large: var(--space-5);
+  --button-gap: var(--space-2);
+  --button-primary-bg: color-mix(in srgb, var(--color-carbon) 88%, var(--color-antique-gold));
+  --button-primary-text: var(--color-ivory);
+  --button-primary-border: var(--border-gold);
+  --button-secondary-bg: color-mix(in srgb, var(--color-carbon) 70%, transparent);
+  --button-secondary-text: var(--color-ivory-soft);
+  --button-secondary-border: var(--border-subtle);
+  --button-quiet-text: var(--color-warm-silver);
+  --button-disabled-opacity: 0.46;
+
+  /* Cards and case files */
+  --card-padding: var(--space-6);
+  --card-gap: var(--space-4);
+  --card-bg: var(--surface-panel);
+  --card-bg-hover: var(--surface-panel-hover);
+  --card-border: var(--border-subtle);
+  --case-file-padding: var(--space-6);
+  --case-file-rail-width: 3px;
+  --case-file-stamp-size: 28px;
+  --case-file-meta-width: 180px;
+
+  /* Console */
+  --console-bg: var(--surface-console);
+  --console-border: color-mix(in srgb, var(--color-warm-silver) 18%, transparent);
+  --console-text: var(--color-ivory-soft);
+  --console-muted: color-mix(in srgb, var(--color-warm-silver) 78%, transparent);
+  --console-prompt: var(--color-antique-gold);
+  --console-active: var(--color-signal-blue);
+  --console-row-height: 40px;
+
+  /* Layering */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 20;
+  --z-overlay: 40;
+  --z-modal: 50;
+  --z-toast: 60;
+}
+
+@media (max-width: 1279px) {
+  :root {
+    --site-header-offset: 128px;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --site-header-offset: 142px;
+  }
+}
