@@ -1,0 +1,70 @@
+/* Rolling digits */
+
+.odometer {
+  display: inline-flex;
+  font-variant-numeric: tabular-nums;
+  font-weight: 200;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.odometerWindow {
+  display: inline-block;
+  height: 1em;
+  margin-right: -0.035em;
+  overflow: hidden;
+}
+
+.odometerStrip {
+  display: flex;
+  flex-direction: column;
+  transform: translateY(calc(var(--digit) * -10%));
+  transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1) var(--delay);
+}
+
+.odometerStrip span {
+  display: block;
+  height: 1em;
+  text-align: center;
+}
+
+/* "Learn more ›" links */
+
+.chevronLink {
+  align-items: center;
+  color: var(--accent, #9a5637);
+  display: inline-flex;
+  font-size: 15.5px;
+  font-weight: 500;
+  gap: 6px;
+  letter-spacing: -0.01em;
+}
+
+.chevronLink svg {
+  height: 15px;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 15px;
+}
+
+.chevronLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.chevronLink:hover svg {
+  transform: translateX(3px);
+}
+
+.chevronLinkOut:hover svg {
+  transform: translate(2px, -2px);
+}
+
+.chevronLinkDark {
+  color: #e2a57e;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .odometerStrip {
+    transition: none;
+  }
+}

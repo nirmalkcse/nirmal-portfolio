@@ -8,9 +8,9 @@ export const projects = [
     dates: "Jan 2026 - Present",
     type: "Data product / MDM / entity resolution / governance workflow",
     publicSensitivity:
-      "Confirm whether the iCORE name and implementation details can be public.",
+      "Client and implementation details anonymized until public assets are approved.",
     summary:
-      "Databricks-hosted MDM/entity-resolution product combining Next.js product workflows, Databricks orchestration, governance, stewardship, explainability, and auditability.",
+      "Databricks-hosted MDM/entity-resolution product combining Next.js workflows, Databricks orchestration, governed review, explainable decisions, and role-based controls.",
     problem:
       "Enterprise source data needs reusable connectors, mapped canonical entities, governed golden records, review workflows, and traceable entity-resolution decisions.",
     architecture:
@@ -33,15 +33,15 @@ export const projects = [
       "Modeled reusable connectors, source mappings, canonical attributes, golden records, golden-record history, and resolution templates."
     ],
     tradeoffs:
-      "Public case file may need sanitized architecture and anonymized data because the project is current and likely client/internal sensitive.",
+      "Public case study uses high-level architecture and anonymized data because the project is current and client-sensitive.",
     impact:
-      "Strongest product-engineering proof point; demonstrates ownership across APIs, orchestration, governance workflows, audit logging, RBAC, and explainable decisions.",
+      "Strongest product-engineering case: owned API workflows, Databricks orchestration, governance controls, audit logging, RBAC, and explainable decisions.",
     links: [
       {
         label: "Project link",
         url: null,
         status: "pending",
-        note: "Public-safe link pending."
+        note: "Public project link to add after approval."
       }
     ],
     media: [
@@ -62,6 +62,30 @@ export const projects = [
         type: "diagram",
         url: null,
         status: "pending"
+      }
+    ],
+    evidenceNotes: [
+      {
+        claim:
+          "Databricks-hosted MDM/entity-resolution product with governed review workflows.",
+        evidenceType: "project-detail",
+        source: "Current project inventory and implementation notes",
+        publicStatus: "summarized-from-internal-work",
+        confidence: "medium",
+        relatedProject: "icore-enterprise-mdm-entity-resolution",
+        confidentialityBoundary:
+          "Client context, implementation screenshots, and detailed architecture stay anonymized until public approval is confirmed."
+      },
+      {
+        claim:
+          "Demonstrates governed orchestration, audit logging, RBAC, stewardship, and explainable entity decisions.",
+        evidenceType: "project-detail",
+        source: "Feature inventory mapped to Databricks and product workflow implementation",
+        publicStatus: "sanitized-for-confidentiality",
+        confidence: "medium",
+        relatedProject: "icore-enterprise-mdm-entity-resolution",
+        confidentialityBoundary:
+          "Use public-safe workflow diagrams and high-level feature descriptions until detailed assets are approved."
       }
     ],
     relatedSkills: [
@@ -125,7 +149,7 @@ export const projects = [
       "Applied MD5 hash-based CDC, rec_start/rec_end validity windows, active/deleted tracking, schema correction, UTF-8 standardization, JSON flattening, and idempotent execution patterns."
     ],
     tradeoffs:
-      "Detailed source-system names may be acceptable from resume extraction but should still be reviewed before public launch.",
+      "Detailed source-system names should stay out of the public case study unless client permission is confirmed.",
     impact:
       "Supported 3 source systems and roughly 18-24 daily incremental tables; strongest scale and enterprise data-engineering credibility story.",
     links: [
@@ -133,7 +157,7 @@ export const projects = [
         label: "Project link",
         url: null,
         status: "pending",
-        note: "Public-safe artifact pending."
+        note: "Public architecture or validation example to add after approval."
       }
     ],
     media: [
@@ -154,6 +178,30 @@ export const projects = [
         type: "screenshot",
         url: null,
         status: "pending"
+      }
+    ],
+    evidenceNotes: [
+      {
+        claim:
+          "Supported 3 telecom source systems in a Microsoft Fabric migration PoC.",
+        evidenceType: "metric",
+        source: "Resume extraction and project inventory",
+        publicStatus: "summarized-from-internal-work",
+        confidence: "high",
+        relatedProject: "telecom-fabric-migration-poc",
+        confidentialityBoundary:
+          "Client identity remains anonymized as a Tier-1 European telecom provider unless permission is confirmed."
+      },
+      {
+        claim:
+          "Supported roughly 18-24 daily incremental source tables using metadata-driven ingestion and Delta processing.",
+        evidenceType: "metric",
+        source: "Resume extraction and project inventory",
+        publicStatus: "summarized-from-internal-work",
+        confidence: "high",
+        relatedProject: "telecom-fabric-migration-poc",
+        confidentialityBoundary:
+          "Keep source-system names and private pipeline details out of the public version."
       }
     ],
     relatedSkills: [
@@ -210,7 +258,7 @@ export const projects = [
       "Rebuilt semantic models, report layouts, and data parity checks with accessibility and usability review."
     ],
     tradeoffs:
-      "This is a bundled workstream rather than one single product; case file should group it as a migration and validation system to avoid looking scattered.",
+      "This workstream groups several BI migration and validation efforts into one case study so the public story stays coherent.",
     impact:
       "Validated 15+ reports, reduced validation discrepancies by 90%, and migrated 6 Tableau reports to Power BI.",
     links: [
@@ -218,7 +266,7 @@ export const projects = [
         label: "Project link",
         url: null,
         status: "pending",
-        note: "Anonymized proof pending."
+        note: "Anonymized reference to add after approval."
       }
     ],
     media: [
@@ -239,6 +287,41 @@ export const projects = [
         type: "diagram",
         url: null,
         status: "pending"
+      }
+    ],
+    evidenceNotes: [
+      {
+        claim:
+          "Validated 15+ migrated BI reports across MicroStrategy-to-Fabric and related migration work.",
+        evidenceType: "metric",
+        source: "Resume extraction and BI validation workstream inventory",
+        publicStatus: "summarized-from-internal-work",
+        confidence: "high",
+        relatedProject: "bi-migration-validation-analytics",
+        confidentialityBoundary:
+          "Report names, client identifiers, and screenshots stay anonymized unless public approval is confirmed."
+      },
+      {
+        claim:
+          "Reduced BI validation discrepancies by 90% through SQL-based reconciliation and report-level parity checks.",
+        evidenceType: "metric",
+        source: "Resume extraction and validation outcome notes",
+        publicStatus: "summarized-from-internal-work",
+        confidence: "high",
+        relatedProject: "bi-migration-validation-analytics",
+        confidentialityBoundary:
+          "Publish the metric with context; keep raw validation sheets and private report details internal."
+      },
+      {
+        claim:
+          "Migrated 6 Tableau reports to Power BI as part of BI modernization delivery.",
+        evidenceType: "metric",
+        source: "Resume extraction and project inventory",
+        publicStatus: "summarized-from-internal-work",
+        confidence: "high",
+        relatedProject: "bi-migration-validation-analytics",
+        confidentialityBoundary:
+          "Use anonymized report summaries or sanitized thumbnails only after review."
       }
     ],
     relatedSkills: [
@@ -281,14 +364,14 @@ export const projects = [
       "Use as a credibility artifact for architecture thinking, research discipline, and early Fabric/Power BI specialization."
     ],
     tradeoffs:
-      "Needs exact publication metadata and citation details before certification-console or publication-card polish.",
-    impact: "Public research signal and credible external proof point.",
+      "Needs a polished citation card before the research page can carry more visual weight.",
+    impact: "Public research credential and credible external reference.",
     links: [
       {
         label: "IEEE article",
         url: "https://ieeexplore.ieee.org/document/10544873",
         status: "verified",
-        note: "Exact publication metadata pending."
+        note: "Public IEEE article."
       }
     ],
     media: [
@@ -336,7 +419,7 @@ export const projects = [
     problem:
       "Show how business users can move from data questions to root-cause and incident context through Microsoft Fabric, Power BI, and agentic workflows.",
     architecture:
-      "Fabric Lakehouse and semantic model connected to Power BI conversational surfaces, Copilot Studio orchestration, data-agent RCA, and JIRA MCP incident context.",
+      "Fabric Lakehouse and semantic model connected to Power BI conversational analytics, Copilot Studio orchestration, data-agent RCA, and JIRA MCP incident context.",
     stack: [
       "Microsoft Fabric",
       "Power BI",
@@ -346,18 +429,18 @@ export const projects = [
       "JIRA MCP"
     ],
     decisions: [
-      "Position as a demo/proof moment rather than a standalone product until more public media is available."
+      "Position as a demo recognition moment rather than a standalone product until more public media is available."
     ],
     tradeoffs:
-      "High signal for AI/data agents, but needs evidence assets before it can carry major homepage weight.",
+      "Strong support for AI-assisted analytics, but public assets should be approved before it carries major homepage weight.",
     impact:
       "Team solution recognized by senior company and Microsoft leadership for applied Fabric, Power BI, Copilot, and data-agent capabilities.",
     links: [
       {
-        label: "Demo proof",
+        label: "Demo reference",
         url: null,
         status: "pending",
-        note: "Event or demo proof pending."
+        note: "Public event or demo reference to add after approval."
       }
     ],
     media: [
@@ -374,7 +457,7 @@ export const projects = [
         status: "pending"
       },
       {
-        label: "Event proof",
+        label: "Event reference",
         type: "document",
         url: null,
         status: "pending"
@@ -416,7 +499,7 @@ export const projects = [
       "Synthetic data feeding Power BI semantic models and report experiences, paired with prompt libraries, response verification, and parameterized SQL data-agent access.",
     stack: ["Power BI", "Power Query", "DAX", "SQL", "Copilot", "data agent patterns"],
     decisions: [
-      "Use as supporting proof for AI-assisted analytics and semantic-model craft."
+      "Use as supporting work for AI-assisted analytics and semantic-model craft."
     ],
     tradeoffs:
       "Keep below the top three project cards unless strong visuals or demo artifacts are collected.",
@@ -424,10 +507,11 @@ export const projects = [
       "Supports the hybrid story across BI, semantic modeling, and data-agent experimentation.",
     links: [
       {
-        label: "PoC proof",
+        label: "PoC reference",
         url: null,
         status: "pending",
-        note: "Screenshots, prompt examples, or response verification samples pending."
+        note:
+          "Screenshots, prompt examples, or response verification samples to add after approval."
       }
     ],
     media: [
@@ -475,7 +559,7 @@ export const projects = [
     title: "VITAC - Skincare Market Analysis",
     slug: "vitac-skincare-market-analysis",
     status: "complete",
-    dates: "Pending",
+    dates: "Date not shown",
     type: "Analytics project / market analysis",
     publicSensitivity:
       "Confirm source material and whether project assets can be public.",
@@ -487,16 +571,16 @@ export const projects = [
       "Data ingestion and analysis flow through Fabric/Azure Data Factory and Power BI.",
     stack: ["Microsoft Fabric", "Azure Data Factory", "Power BI"],
     decisions: [
-      "Use as a supporting project for business framing and analytics storytelling rather than a core data-engineering proof point."
+      "Use as a supporting project for business framing and analytics storytelling rather than a core data-engineering case."
     ],
-    tradeoffs: "Needs clearer artifacts and dates before promotion.",
+    tradeoffs: "Needs clearer public artifacts and dates before promotion.",
     impact: "Shows business communication and structured insight delivery.",
     links: [
       {
-        label: "Project proof",
+        label: "Project reference",
         url: null,
         status: "pending",
-        note: "Report screenshots or presentation excerpt pending."
+        note: "Report screenshots or presentation excerpt to add after approval."
       }
     ],
     media: [
@@ -540,22 +624,22 @@ export const projects = [
     title: "GitHub Align",
     slug: "align",
     status: "observed",
-    dates: "Pending review",
-    type: "Backlog candidate / public repository",
+    dates: "Under review",
+    type: "Repository note / public profile artifact",
     publicSensitivity:
-      "Keep as a GitHub profile artifact until the repository is reviewed and a case-file angle is defined.",
+      "Keep as a GitHub profile artifact until the repository is reviewed and a case-study angle is defined.",
     summary:
-      "Public repository observed, but not yet portfolio-ready based on the current inventory.",
+      "Public repository noted, but intentionally kept out of the main case-study set until its README, screenshots, architecture, and data-engineering relevance are reviewed.",
     problem:
       "The repository needs a clearer purpose, README quality review, screenshots, architecture, and relevance to Data Engineer positioning before promotion.",
-    architecture: "Pending review.",
+    architecture: "Repository needs review.",
     stack: [],
     decisions: [
       "Keep out of primary project cards until repository quality and positioning are reviewed."
     ],
     tradeoffs:
-      "Promoting weak public repositories would distract from stronger enterprise data-engineering proof.",
-    impact: "Potential future engineer-facing proof after curation.",
+      "Promoting weak public repositories would distract from stronger enterprise data-engineering work.",
+    impact: "Potential future engineer-facing example after curation.",
     links: [
       {
         label: "GitHub profile",

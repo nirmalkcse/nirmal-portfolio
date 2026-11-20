@@ -1,0 +1,44 @@
+.button {
+  align-items: center;
+  -webkit-backdrop-filter: blur(18px) saturate(1.14);
+  backdrop-filter: blur(18px) saturate(1.14);
+  background: color-mix(in srgb, var(--color-carbon) 76%, transparent);
+  border: 1px solid var(--border-subtle);
+  border-radius: 50%;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  box-shadow: var(--shadow-surface);
+  color: var(--color-ivory-soft);
+  cursor: pointer;
+  display: flex;
+  height: 2.85rem;
+  justify-content: center;
+  position: fixed;
+  right: clamp(1rem, 2.8vw, 2rem);
+  transition:
+    border-color var(--duration-state) var(--ease-out),
+    box-shadow var(--duration-state) var(--ease-out),
+    color var(--duration-state) var(--ease-out),
+    opacity var(--duration-state) var(--ease-out);
+  width: 2.85rem;
+  z-index: 50;
+}
+
+.button:hover {
+  border-color: var(--border-gold);
+  color: var(--color-ivory);
+}
+
+.button:focus-visible {
+  border-color: var(--border-gold);
+  box-shadow:
+    var(--shadow-surface),
+    0 0 0 3px color-mix(in srgb, var(--color-antique-gold) 24%, transparent);
+  color: var(--color-ivory);
+  outline: none;
+}
+
+@media (max-width: 700px) {
+  .button {
+    display: none;
+  }
+}

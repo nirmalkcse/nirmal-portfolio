@@ -16,7 +16,7 @@ export const socialLinks = [
     icon: "Linkedin",
     priority: 1,
     viewerRelevance: ["recruiter", "leader"],
-    publicUse: "Primary professional social link; manual profile verification pending.",
+    publicUse: "Primary professional social link.",
     status: "manual-verification-needed"
   },
   {
@@ -26,7 +26,7 @@ export const socialLinks = [
     icon: "Github",
     priority: 2,
     viewerRelevance: ["engineer", "explorer"],
-    publicUse: "Social/profile link only until repositories are curated.",
+    publicUse: "Engineering profile link with selected repository context.",
     status: "verified"
   },
   {
@@ -36,7 +36,7 @@ export const socialLinks = [
     icon: "Code2",
     priority: 3,
     viewerRelevance: ["engineer"],
-    publicUse: "Low-emphasis social link only; automated request returned 403, so browser/manual verification is still needed.",
+    publicUse: "Coding practice profile for supporting technical context.",
     status: "manual-verification-needed"
   },
   {
@@ -46,7 +46,7 @@ export const socialLinks = [
     icon: "FileText",
     priority: 2,
     viewerRelevance: ["engineer", "explorer"],
-    publicUse: "Publication proof link; exact publication metadata still pending.",
+    publicUse: "Publication reference link.",
     status: "verified"
   }
 ] satisfies readonly SocialLink[];
@@ -56,19 +56,19 @@ export const credentialLinks = [
     label: "Microsoft Learn credential candidate 1",
     url: microsoftCredentialCandidateUrls[0],
     status: "verified",
-    note: "Exact mapping to DP-700 or DP-600 still needs rendered-page verification."
+    note: "Confirm exact DP-700 or DP-600 mapping before using as a direct credential link."
   },
   {
     label: "Microsoft Learn credential candidate 2",
     url: microsoftCredentialCandidateUrls[1],
     status: "verified",
-    note: "Exact mapping to DP-700 or DP-600 still needs rendered-page verification."
+    note: "Confirm exact DP-700 or DP-600 mapping before using as a direct credential link."
   },
   {
     label: "Databricks credential candidate",
     url: databricksCredentialUrl,
     status: "verified",
-    note: "Captured credential URL; exact metadata still needs manual verification."
+    note: "Credential URL available; confirm exact issue and expiry dates on the public page."
   }
 ] satisfies readonly PortfolioLink[];
 
@@ -77,13 +77,13 @@ export const resumeLinks = [
     label: "One-page resume source",
     url: null,
     status: "pending",
-    note: "Source file captured locally; public hosting path is not decided yet."
+    note: "One-page resume download is available through the site document route."
   },
   {
     label: "Master resume source",
     url: null,
     status: "pending",
-    note: "Deep-dive source only; not the default public resume download."
+    note: "Expanded master resume; not the default public resume download."
   }
 ] satisfies readonly PortfolioLink[];
 
@@ -92,7 +92,7 @@ export const publicationLinks = [
     label: "IEEE article",
     url: "https://ieeexplore.ieee.org/document/10544873",
     status: "verified",
-    note: "Exact citation metadata pending."
+    note: "Public IEEE article."
   }
 ] satisfies readonly PortfolioLink[];
 

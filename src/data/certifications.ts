@@ -32,7 +32,7 @@ export const certifications = [
     ],
     group: "Microsoft Fabric",
     note:
-      "Microsoft Learn URLs are captured, but exact DP-700 versus DP-600 mapping needs rendered-page verification before assigning a public credential URL."
+      "Microsoft Learn links are available; exact DP-700 versus DP-600 mapping should be confirmed before assigning a direct credential link."
   },
   {
     title: "Microsoft Certified: Fabric Analytics Engineer Associate (DP-600)",
@@ -59,7 +59,7 @@ export const certifications = [
     ],
     group: "Microsoft Fabric",
     note:
-      "Microsoft Learn URLs are captured, but exact DP-700 versus DP-600 mapping needs rendered-page verification before assigning a public credential URL."
+      "Microsoft Learn links are available; exact DP-700 versus DP-600 mapping should be confirmed before assigning a direct credential link."
   },
   {
     title: "Databricks Certified Data Engineer Associate",
@@ -83,7 +83,7 @@ export const certifications = [
       "telecom-fabric-migration-poc"
     ],
     group: "Databricks",
-    note: "Credential URL captured; issue/expiry metadata still needs verification."
+    note: "Credential link available. Issue and expiry dates should be confirmed on the public credential page."
   },
   {
     title: "Databricks UC Upgrade Delivery Specialization",
@@ -103,7 +103,7 @@ export const certifications = [
     ],
     relatedProjects: ["icore-enterprise-mdm-entity-resolution"],
     group: "Databricks",
-    note: "Resume claimed; public verification URL pending."
+    note: "Public verification path to attach before promotion."
   },
   {
     title: "Databricks Accredited Databricks Fundamentals",
@@ -118,7 +118,7 @@ export const certifications = [
     relatedSkills: ["Databricks fundamentals", "lakehouse concepts"],
     relatedProjects: ["icore-enterprise-mdm-entity-resolution"],
     group: "Databricks",
-    note: "Resume claimed; public verification URL pending."
+    note: "Public verification path to attach before promotion."
   },
   {
     title: "Microsoft GitHub Copilot",
@@ -136,7 +136,7 @@ export const certifications = [
       "fabcon25-talk-to-your-data-demo"
     ],
     group: "Developer productivity",
-    note: "Resume claimed; public verification URL pending."
+    note: "Public verification path to attach before promotion."
   },
   {
     title: "Google Data Analytics Professional Certificate",
@@ -159,7 +159,7 @@ export const certifications = [
       "vitac-skincare-market-analysis"
     ],
     group: "Analytics and cloud",
-    note: "Resume claimed; public verification URL pending."
+    note: "Public verification path to attach before promotion."
   },
   {
     title: "Oracle Cloud Infrastructure Foundations Associate",
@@ -174,7 +174,7 @@ export const certifications = [
     relatedSkills: ["Cloud fundamentals"],
     relatedProjects: [],
     group: "Analytics and cloud",
-    note: "Resume claimed; public verification URL pending."
+    note: "Public verification path to attach before promotion."
   }
 ] satisfies readonly Certification[];
 

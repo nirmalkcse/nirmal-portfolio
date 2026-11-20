@@ -1,0 +1,1610 @@
+.header {
+  inset: 0 0 auto;
+  padding: clamp(10px, 1.45vw, 16px) var(--layout-gutter) 0;
+  pointer-events: none;
+  position: fixed;
+  z-index: var(--z-sticky);
+}
+
+.shell {
+  align-items: center;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #fffef9 92%, transparent),
+      color-mix(in srgb, var(--color-porcelain) 88%, transparent) 54%,
+      color-mix(in srgb, var(--color-silk) 74%, transparent)
+    ),
+    color-mix(in srgb, #fff8ee 90%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-brass) 32%, transparent);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    inset 0 -1px 0 color-mix(in srgb, var(--color-lacquer) 10%, transparent),
+    0 18px 58px -36px color-mix(in srgb, var(--color-lacquer) 46%, transparent),
+    0 8px 28px -24px color-mix(in srgb, var(--color-brass) 46%, transparent);
+  display: grid;
+  gap: clamp(6px, 1.3vw, 14px);
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  isolation: isolate;
+  margin: 0 auto;
+  max-width: var(--layout-page-max);
+  min-height: 58px;
+  overflow: hidden;
+  padding: 6px;
+  pointer-events: auto;
+  position: relative;
+  width: 100%;
+  -webkit-backdrop-filter: blur(30px) saturate(1.18);
+  backdrop-filter: blur(30px) saturate(1.18);
+}
+
+.shell::before,
+.shell::after {
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+}
+
+.shell::before {
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, #ffffff 34%, transparent),
+      transparent 22% 78%,
+      color-mix(in srgb, var(--color-brass) 10%, transparent)
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #ffffff 32%, transparent),
+      transparent 64%,
+      color-mix(in srgb, var(--color-lacquer) 5%, transparent)
+    );
+}
+
+.shell::after {
+  animation: nav-glass-sheen 14s var(--ease-out) infinite;
+  background:
+    linear-gradient(
+      108deg,
+      transparent 31%,
+      color-mix(in srgb, #ffffff 24%, transparent) 47%,
+      transparent 62%
+    );
+  opacity: 0.28;
+  transform: translateX(-72%) skewX(-16deg);
+}
+
+.shellBreath {
+  animation: nav-shell-breath 5.8s var(--ease-standard) infinite;
+  background:
+    radial-gradient(
+      circle at 10% 50%,
+      color-mix(in srgb, var(--color-antique-gold) 13%, transparent),
+      transparent 36%
+    ),
+    radial-gradient(
+      circle at 92% 42%,
+      color-mix(in srgb, var(--color-signal-blue) 9%, transparent),
+      transparent 34%
+    );
+  border-radius: inherit;
+  inset: 1px;
+  opacity: 0.36;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+.brandMark {
+  align-items: center;
+  background:
+    linear-gradient(
+      180deg,
+      #9c7b64,
+      #5c4232
+    );
+  border: 1px solid color-mix(in srgb, var(--color-brass-bright) 34%, transparent);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 10px 24px -18px rgba(36, 27, 19, 0.8);
+  display: inline-flex;
+  height: 46px;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  transition:
+    border-color var(--duration-state) var(--ease-standard),
+    box-shadow var(--duration-state) var(--ease-standard),
+    filter var(--duration-state) var(--ease-standard),
+    transform var(--duration-state) var(--ease-standard);
+  width: 46px;
+  z-index: 3;
+}
+
+.brandPulse {
+  animation: nav-brand-heartbeat 3.3s var(--ease-emphasized) infinite;
+  background: color-mix(in srgb, var(--color-champagne) 72%, #ffffff);
+  border-radius: 999px;
+  box-shadow:
+    0 0 12px color-mix(in srgb, var(--color-antique-gold) 34%, transparent),
+    0 0 22px color-mix(in srgb, var(--color-signal-blue) 14%, transparent);
+  height: 5px;
+  opacity: 0.72;
+  pointer-events: none;
+  position: absolute;
+  right: 9px;
+  top: 9px;
+  width: 5px;
+  z-index: 5;
+}
+
+.brandMark::before,
+.brandMark::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+}
+
+.brandMark::before {
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      color-mix(in srgb, #ffffff 30%, transparent),
+      transparent 38%
+    ),
+    conic-gradient(
+      from 160deg,
+      color-mix(in srgb, var(--color-signal-blue) 0%, transparent),
+      color-mix(in srgb, var(--color-signal-blue) 34%, transparent),
+      color-mix(in srgb, var(--color-champagne) 42%, transparent),
+      color-mix(in srgb, var(--color-signal-blue) 0%, transparent)
+    );
+  border-radius: inherit;
+  inset: 3px;
+  opacity: 0;
+  transform: scale(0.72) rotate(-18deg);
+  transition:
+    opacity 360ms var(--ease-out),
+    transform 520ms var(--ease-out);
+  z-index: 1;
+}
+
+.brandMark::after {
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--color-champagne) 52%, transparent),
+      transparent
+    );
+  bottom: 9px;
+  height: 1px;
+  left: 14px;
+  opacity: 0.58;
+  right: 14px;
+  transform: scaleX(0.5);
+  transform-origin: center;
+  transition:
+    opacity var(--duration-state) var(--ease-standard),
+    transform var(--duration-state) var(--ease-standard);
+  z-index: 3;
+}
+
+.brandMark:hover,
+.brandMark:focus-visible {
+  border-color: color-mix(in srgb, var(--color-ivory) 30%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--color-ivory) 18%, transparent),
+    0 14px 30px -20px color-mix(in srgb, #5c5144 30%, transparent);
+  transform: translateY(-1px);
+}
+
+.brandMark:hover::before,
+.brandMark:focus-visible::before,
+.brandMark[data-home-magnet="true"]::before,
+.brandMark[data-home-arrival="true"]::before {
+  opacity: 0.72;
+  transform: scale(1) rotate(0deg);
+}
+
+.brandMark:hover::after,
+.brandMark:focus-visible::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.brandMark[data-active="true"] {
+  pointer-events: none;
+}
+
+/* With the droplet resting on it, the button itself turns clear: the drop
+   is the only material, and NK reads through the water slightly magnified,
+   the way a bead of water lenses what is under it. */
+.brandMark[data-active="true"]:not([data-home-magnet="true"]) {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.brandMark[data-active="true"]:not([data-home-magnet="true"])::before,
+.brandMark[data-active="true"]:not([data-home-magnet="true"])::after,
+.brandMark[data-active="true"]:not([data-home-magnet="true"]) .brandPulse {
+  animation: none;
+  opacity: 0;
+}
+
+.brandMark .logoType {
+  transition: scale 420ms var(--ease-out), color 320ms var(--ease-out);
+}
+
+.brandMark[data-active="true"]:not([data-home-magnet="true"]) .logoType,
+.brandMark[data-active="true"]:not([data-home-magnet="true"]) .logoType span {
+  color: #3b2a1f;
+}
+
+.brandMark[data-active="true"] .logoType {
+  scale: 1.07;
+}
+
+.brandMark[data-home-magnet="true"] {
+  border-color: color-mix(in srgb, var(--color-signal-blue) 34%, var(--color-champagne));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--color-ivory) 20%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--color-signal-blue) 26%, transparent),
+    0 0 34px -12px color-mix(in srgb, var(--color-signal-blue) 52%, transparent),
+    0 16px 40px -18px color-mix(in srgb, var(--color-antique-gold) 34%, transparent);
+  filter: saturate(1.18) brightness(1.04);
+  transform: translateY(-1px) scale(1.045);
+}
+
+.brandMark[data-home-arrival="true"] {
+  animation: home-target-arrival 980ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.logoType span {
+  font-size: 0.98rem;
+  letter-spacing: 0.06em;
+  position: relative;
+  z-index: 4;
+}
+
+.brandMark .logoType,
+.brandMark .logoType span {
+  color: #fff8ee;
+  position: relative;
+  z-index: 4;
+}
+
+/* Optical centring: the period hangs outside the measure (its own width
+   plus one letter-space, 0.45em) so the button, and the droplet resting on
+   it, centre on "NK" itself rather than on "NK." */
+.brandMark .logoType > span > span {
+  margin-right: -0.45em;
+}
+
+/* All-caps sits high in a line box built for descenders; drop it 0.064em
+   (1px at this size) so the cap height, not the line box, is centred. */
+.brandMark .logoType > span {
+  display: inline-block;
+  translate: 0 0.064em;
+}
+
+.primaryNav {
+  align-items: center;
+  display: flex;
+  gap: 2px;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 0 2px;
+  pointer-events: none;
+  position: relative;
+  scrollbar-width: none;
+  z-index: auto;
+}
+
+.primaryNav::-webkit-scrollbar {
+  display: none;
+}
+
+.homeMagnetField {
+  height: 46px;
+  isolation: isolate;
+  left: 6px;
+  pointer-events: none;
+  position: absolute;
+  top: 6px;
+  width: 46px;
+  z-index: 3;
+}
+
+.homeMagnetField::before,
+.homeMagnetField::after,
+.homeMagnetRing,
+.homeMagnetBeam,
+.homeMagnetSpark {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+}
+
+.homeMagnetField::before {
+  animation: home-gravity-bloom 1.34s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  background:
+    radial-gradient(
+      circle,
+      color-mix(in srgb, var(--color-signal-blue) 24%, transparent) 0 22%,
+      color-mix(in srgb, var(--color-champagne) 20%, transparent) 35%,
+      transparent 68%
+    );
+  border-radius: 999px;
+  filter: blur(8px);
+  inset: -16px;
+  opacity: 0.78;
+  z-index: -1;
+}
+
+.homeMagnetField::after {
+  animation: home-gravity-orbit 1.7s linear infinite;
+  background:
+    conic-gradient(
+      from 0deg,
+      transparent 0 18%,
+      color-mix(in srgb, #ffffff 80%, transparent) 23%,
+      color-mix(in srgb, var(--color-signal-blue) 48%, transparent) 30%,
+      transparent 38% 62%,
+      color-mix(in srgb, var(--color-champagne) 46%, transparent) 70%,
+      transparent 78% 100%
+    );
+  border-radius: 999px;
+  inset: -9px;
+  -webkit-mask:
+    radial-gradient(circle, transparent 0 58%, #000 60% 69%, transparent 71%);
+  mask:
+    radial-gradient(circle, transparent 0 58%, #000 60% 69%, transparent 71%);
+  opacity: 0.86;
+}
+
+.homeMagnetRing {
+  border: 1px solid color-mix(in srgb, var(--color-signal-blue) 38%, transparent);
+  border-radius: 999px;
+  inset: -7px;
+  opacity: 0;
+}
+
+.homeMagnetRing:nth-child(1) {
+  animation: home-magnet-ring 1.08s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.homeMagnetRing:nth-child(2) {
+  animation: home-magnet-ring 1.08s cubic-bezier(0.16, 1, 0.3, 1) 160ms infinite;
+  border-color: color-mix(in srgb, var(--color-champagne) 42%, transparent);
+}
+
+.homeMagnetBeam {
+  animation: home-magnet-beam 1.15s ease-in-out infinite;
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-signal-blue) 0%, transparent),
+      color-mix(in srgb, var(--color-signal-blue) 36%, transparent) 16%,
+      color-mix(in srgb, var(--color-champagne) 32%, transparent) 46%,
+      transparent 100%
+    );
+  border-radius: 999px;
+  filter: blur(1px);
+  height: 2px;
+  left: 42px;
+  opacity: 0.74;
+  top: 22px;
+  transform-origin: left center;
+  width: clamp(110px, 14vw, 190px);
+}
+
+.homeMagnetSpark {
+  background: color-mix(in srgb, #ffffff 92%, var(--color-signal-blue));
+  border-radius: 999px;
+  box-shadow:
+    0 0 12px color-mix(in srgb, var(--color-signal-blue) 54%, transparent),
+    0 0 22px color-mix(in srgb, var(--color-champagne) 36%, transparent);
+  height: 3px;
+  opacity: 0;
+  right: -2px;
+  top: 12px;
+  width: 3px;
+}
+
+.homeMagnetSpark:nth-of-type(4) {
+  animation: home-magnet-spark-a 1.14s ease-in-out infinite;
+}
+
+.homeMagnetSpark:nth-of-type(5) {
+  animation: home-magnet-spark-b 1.28s ease-in-out 150ms infinite;
+  top: 28px;
+}
+
+.homeMagnetSpark:nth-of-type(6) {
+  animation: home-magnet-spark-c 1.4s ease-in-out 260ms infinite;
+  top: 21px;
+}
+
+.homeMagnetField[data-arrival="true"]::before {
+  animation: home-arrival-bloom 980ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.homeMagnetField[data-arrival="true"]::after {
+  animation: home-arrival-orbit 980ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.navLink {
+  align-items: center;
+  border-radius: 999px;
+  color: var(--color-ink-strong);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 0.82rem;
+  font-weight: 700;
+  justify-content: center;
+  min-height: 40px;
+  min-width: 62px;
+  overflow: hidden;
+  padding: 0 14px;
+  pointer-events: auto;
+  position: relative;
+  z-index: 5;
+  transition:
+    color var(--duration-state) var(--ease-standard),
+    text-shadow var(--duration-state) var(--ease-standard),
+    transform var(--duration-state) var(--ease-standard);
+}
+
+.navLink::before {
+  background: color-mix(in srgb, var(--color-antique-gold) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-antique-gold) 12%, transparent);
+  border-radius: inherit;
+  content: "";
+  inset: 3px;
+  opacity: 0;
+  position: absolute;
+  transition:
+    opacity var(--duration-state) var(--ease-standard),
+  transform var(--duration-state) var(--ease-standard);
+}
+
+.navLinkSweep {
+  background:
+    linear-gradient(
+      100deg,
+      transparent,
+      color-mix(in srgb, #ffffff 34%, transparent),
+      color-mix(in srgb, var(--color-antique-gold) 18%, transparent),
+      transparent
+    );
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  transform: translateX(-104%);
+  z-index: 2;
+}
+
+.navLink:hover,
+.navLink:focus-visible {
+  color: var(--color-ink);
+  transform: translateY(-1px);
+}
+
+.navLink:hover::before,
+.navLink:focus-visible::before {
+  opacity: 1;
+}
+
+.navLink:hover .navLinkSweep,
+.navLink:focus-visible .navLinkSweep {
+  animation: nav-current-sweep 780ms var(--ease-emphasized) both;
+}
+
+.navLinkActive {
+  color: var(--color-ink);
+  pointer-events: none;
+}
+
+.primaryNav[data-dragging="true"] .navLink {
+  pointer-events: none;
+}
+
+.activePill,
+.previewPill {
+  border-radius: 999px;
+  contain: layout paint style;
+  left: 0;
+  position: absolute;
+  top: 0;
+  transform-origin: center;
+}
+
+/* ─── The droplet ─────────────────────────────────────────────────────
+   A bead of clear water resting on the active item. It is transparent and
+   only very slightly magnifying (saturate/brightness, no blur), so what is
+   under it stays crisp. The material comes from how light behaves in a
+   drop: a crisp specular highlight up-left, a darker refracting band just
+   inside the upper rim, a bright caustic where light focuses along the
+   bottom, a hairline edge, and a soft contact shadow below it. */
+.activePill {
+  background:
+    /* caustic: light focused through the bead pools along its bottom */
+    radial-gradient(64% 34% at 50% 90%, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0) 72%),
+    /* refraction: the rim lenses the darker surroundings inward */
+    radial-gradient(closest-side, rgba(40, 58, 70, 0) 62%, rgba(40, 58, 70, 0.1) 80%, rgba(32, 48, 60, 0.26) 100%),
+    /* the body: clear, with the faintest cool cast of water */
+    rgba(214, 232, 240, 0.12);
+  backdrop-filter: saturate(1.5) contrast(1.06);
+  -webkit-backdrop-filter: saturate(1.5) contrast(1.06);
+  border: 0;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.9),
+    inset 0 0 0 0.5px rgba(36, 52, 64, 0.22),
+    inset 0 10px 12px -8px rgba(30, 46, 58, 0.3),
+    inset 0 -2px 3px -1px rgba(255, 255, 255, 0.85),
+    0 8px 12px -8px rgba(30, 42, 52, 0.42),
+    0 2px 3px -1px rgba(30, 42, 52, 0.16);
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: none;
+  transition:
+    box-shadow 420ms var(--ease-out),
+    filter 420ms var(--ease-out);
+  will-change: transform, opacity;
+  z-index: 4;
+}
+
+.activePill::before,
+.activePill::after {
+  border-radius: 999px;
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  z-index: 5;
+}
+
+/* Specular highlight: the window reflection, crisp at its core and sitting
+   in the darker rim zone, where a real bead shows it. */
+.activePill::before {
+  animation: droplet-glint 5.5s ease-in-out infinite alternate;
+  background: radial-gradient(
+    ellipse at 46% 46%,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.96) 34%,
+    rgba(255, 255, 255, 0.4) 54%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  filter: drop-shadow(0 0.5px 0.5px rgba(30, 46, 58, 0.18));
+  height: 26%;
+  left: 13%;
+  top: 9%;
+  transform: rotate(-24deg);
+  width: 38%;
+}
+
+/* A second, smaller glint diagonally opposite, as on a real bead. */
+.activePill::after {
+  animation: droplet-glint-soft 4.2s ease-in-out infinite alternate-reverse;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0.28) 46%,
+    rgba(255, 255, 255, 0) 72%
+  );
+  bottom: 15%;
+  height: 11%;
+  right: 20%;
+  transform: rotate(-22deg);
+  width: 14%;
+}
+
+@keyframes droplet-glint {
+  0% {
+    opacity: 0.86;
+    transform: rotate(-22deg) translate(0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-19deg) translate(1px, -0.5px);
+  }
+}
+
+@keyframes droplet-glint-soft {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0.85;
+  }
+}
+
+.previewPill {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.78),
+      color-mix(in srgb, var(--color-porcelain) 66%, transparent)
+    );
+  border: 1px solid color-mix(in srgb, var(--color-brass) 28%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    0 10px 24px -22px rgba(109, 75, 47, 0.28);
+  opacity: 0.82;
+  pointer-events: none;
+  will-change: transform, opacity;
+  z-index: 2;
+}
+
+.previewPill::after {
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--color-signal-blue) 16%, transparent),
+      color-mix(in srgb, var(--color-antique-gold) 14%, transparent),
+      transparent
+    );
+  border-radius: inherit;
+  content: "";
+  inset: 1px;
+  opacity: 0.52;
+  position: absolute;
+}
+
+.activePill:active {
+  cursor: grabbing;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.7),
+    inset 0 0 0 0.5px rgba(46, 62, 74, 0.24),
+    inset 0 8px 10px -6px rgba(38, 52, 64, 0.26),
+    inset 0 -8px 11px -5px rgba(255, 255, 255, 0.66),
+    0 10px 16px -9px rgba(32, 40, 46, 0.38),
+    0 3px 4px -1px rgba(32, 40, 46, 0.16);
+}
+
+.shell[data-home-magnet="true"] .activePill {
+  backdrop-filter: saturate(1.7) brightness(1.08) contrast(1.05);
+  -webkit-backdrop-filter: saturate(1.7) brightness(1.08) contrast(1.05);
+}
+
+.navLabel {
+  position: relative;
+  text-shadow: none;
+  transition: scale 420ms var(--ease-out);
+  z-index: 4;
+}
+
+/* The same lensing on whichever label the droplet rests on. */
+.navLinkActive .navLabel {
+  scale: 1.04;
+}
+
+.navLinkActive .navLabel {
+  text-shadow: 0 0 16px color-mix(in srgb, var(--color-brass) 18%, transparent);
+}
+
+.navLink::after {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-antique-gold) 0%, transparent),
+    color-mix(in srgb, var(--color-antique-gold) 72%, #fff8ee 28%),
+    color-mix(in srgb, var(--color-antique-gold) 0%, transparent)
+  );
+  border-radius: 999px;
+  bottom: 7px;
+  box-shadow: 0 3px 10px -5px color-mix(in srgb, var(--color-antique-gold) 70%, transparent);
+  content: "";
+  height: 2px;
+  left: 50%;
+  opacity: 0;
+  position: absolute;
+  transform: translateX(-50%) scaleX(0.38);
+  transform-origin: center;
+  transition:
+    opacity 220ms var(--ease-standard),
+    transform 340ms var(--ease-standard);
+  width: 22px;
+  z-index: 5;
+}
+
+.navLinkActive::after {
+  opacity: 0.92;
+  transform: translateX(-50%) scaleX(1);
+}
+
+.primaryNav[data-previewing="true"] .navLinkActive::after {
+  opacity: 1;
+  transform: translateX(-50%) scaleX(1.22);
+}
+
+.primaryNav[data-previewing="true"] .navLinkActive {
+  color: #2a2118;
+}
+
+.actionRail {
+  align-items: center;
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+  position: relative;
+  z-index: 5;
+}
+
+.resumeButton {
+  align-items: center;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-lacquer-soft) 94%, #ffffff 6%),
+      var(--color-lacquer)
+    ),
+    var(--color-ink);
+  border: 1px solid color-mix(in srgb, var(--color-brass-bright) 30%, transparent);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--color-ivory) 12%, transparent),
+    0 12px 28px -22px color-mix(in srgb, var(--color-lacquer) 38%, transparent);
+  color: #fff8ee;
+  display: inline-flex;
+  font-size: 0.73rem;
+  font-weight: 700;
+  gap: 7px;
+  height: 40px;
+  justify-content: center;
+  letter-spacing: 0;
+  min-width: 98px;
+  overflow: hidden;
+  padding: 0 14px;
+  position: relative;
+  transition:
+    background var(--duration-state) var(--ease-standard),
+    border-color var(--duration-state) var(--ease-standard),
+    box-shadow var(--duration-state) var(--ease-standard),
+    color var(--duration-state) var(--ease-standard),
+    transform var(--duration-state) var(--ease-standard);
+}
+
+.resumeButton::before {
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--color-champagne) 72%, transparent),
+      transparent
+    );
+  content: "";
+  height: 1px;
+  inset: auto 16px 7px;
+  opacity: 0.54;
+  position: absolute;
+  transform: scaleX(0.46);
+  transform-origin: center;
+  transition:
+    opacity var(--duration-state) var(--ease-standard),
+    transform var(--duration-state) var(--ease-standard);
+}
+
+.resumeButton::after {
+  background:
+    linear-gradient(
+      104deg,
+      transparent 30%,
+      color-mix(in srgb, var(--color-ivory) 18%, transparent) 48%,
+      transparent 64%
+    );
+  content: "";
+  inset: -24% -52%;
+  opacity: 0;
+  position: absolute;
+  transform: translateX(-68%) skewX(-18deg);
+  transition:
+    opacity var(--duration-state) var(--ease-standard),
+    transform 560ms var(--ease-out);
+}
+
+.resumeButton > * {
+  position: relative;
+  z-index: 1;
+}
+
+.resumeButton:hover,
+.resumeButton:focus-visible {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-lacquer-soft) 82%, var(--color-brass) 18%),
+      color-mix(in srgb, var(--color-lacquer) 84%, var(--color-brass-muted) 16%)
+    ),
+    var(--color-ink);
+  border-color: color-mix(in srgb, var(--color-brass-bright) 46%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--color-ivory) 16%, transparent),
+    0 16px 34px -24px color-mix(in srgb, var(--color-lacquer) 42%, transparent);
+  color: #fff8ee;
+  transform: translateY(-1px);
+}
+
+.resumeButton:hover::before,
+.resumeButton:focus-visible::before {
+  opacity: 0.9;
+  transform: scaleX(1);
+}
+
+.resumeButton:hover::after,
+.resumeButton:focus-visible::after {
+  opacity: 0.52;
+  transform: translateX(62%) skewX(-18deg);
+}
+
+.resumeSpark {
+  background:
+    linear-gradient(
+      100deg,
+      transparent,
+      color-mix(in srgb, #ffffff 32%, transparent),
+      color-mix(in srgb, var(--color-champagne) 28%, transparent),
+      transparent
+    );
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  transform: translateX(-104%);
+  z-index: 0;
+}
+
+.resumeButton:hover .resumeSpark,
+.resumeButton:focus-visible .resumeSpark,
+.mobileDropdownResume:hover .resumeSpark,
+.mobileDropdownResume:focus-visible .resumeSpark {
+  animation: nav-current-sweep 900ms var(--ease-emphasized) both;
+}
+
+@keyframes nav-glass-sheen {
+  0%,
+  42% {
+    transform: translateX(-72%) skewX(-16deg);
+  }
+
+  72%,
+  100% {
+    transform: translateX(72%) skewX(-16deg);
+  }
+}
+
+@keyframes nav-shell-breath {
+  0%,
+  100% {
+    opacity: 0.24;
+    transform: scale(0.985);
+  }
+
+  50% {
+    opacity: 0.48;
+    transform: scale(1.006);
+  }
+}
+
+@keyframes nav-soft-breath {
+  0%,
+  100% {
+    opacity: 0.34;
+    transform: scale(0.92);
+  }
+
+  50% {
+    opacity: 0.88;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes nav-brand-heartbeat {
+  0%,
+  100% {
+    opacity: 0.54;
+    transform: scale(0.9);
+  }
+
+  12% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+
+  24% {
+    transform: scale(0.94);
+  }
+
+  38% {
+    opacity: 0.9;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes nav-current-sweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-104%);
+  }
+
+  36% {
+    opacity: 0.66;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(104%);
+  }
+}
+
+@keyframes nav-panel-scan {
+  0% {
+    opacity: 0;
+    transform: translateY(-104%);
+  }
+
+  42% {
+    opacity: 0.5;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(104%);
+  }
+}
+
+@keyframes nav-water-current {
+  0%,
+  100% {
+    opacity: 0.22;
+    transform: translateX(-10%) skewX(-8deg) scaleX(0.99);
+  }
+
+  50% {
+    opacity: 0.42;
+    transform: translateX(10%) skewX(-8deg) scaleX(1.02);
+  }
+}
+
+@keyframes home-target-arrival {
+  0% {
+    filter: saturate(1.1);
+    transform: translateY(-1px) scale(1.03);
+  }
+
+  38% {
+    filter: saturate(1.34) brightness(1.08);
+    transform: translateY(-1px) scale(1.12);
+  }
+
+  62% {
+    filter: saturate(1.12) brightness(1.03);
+    transform: translateY(0) scale(0.98);
+  }
+
+  100% {
+    filter: saturate(1);
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes home-gravity-bloom {
+  0%,
+  100% {
+    opacity: 0.42;
+    transform: scale(0.78);
+  }
+
+  52% {
+    opacity: 0.88;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes home-gravity-orbit {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes home-magnet-ring {
+  0% {
+    opacity: 0.74;
+    transform: scale(0.78);
+  }
+
+  68%,
+  100% {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+
+@keyframes home-magnet-beam {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: scaleX(0.42) translateX(5px);
+  }
+
+  50% {
+    opacity: 0.72;
+    transform: scaleX(1) translateX(0);
+  }
+}
+
+@keyframes home-magnet-spark-a {
+  0% {
+    opacity: 0;
+    transform: translateX(56px) translateY(8px) scale(0.7);
+  }
+
+  35% {
+    opacity: 0.9;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(4px) translateY(0) scale(1);
+  }
+}
+
+@keyframes home-magnet-spark-b {
+  0% {
+    opacity: 0;
+    transform: translateX(78px) translateY(-10px) scale(0.7);
+  }
+
+  42% {
+    opacity: 0.82;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(6px) translateY(0) scale(1);
+  }
+}
+
+@keyframes home-magnet-spark-c {
+  0% {
+    opacity: 0;
+    transform: translateX(96px) translateY(0) scale(0.5);
+  }
+
+  46% {
+    opacity: 0.72;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(10px) translateY(0) scale(1);
+  }
+}
+
+@keyframes home-arrival-bloom {
+  0% {
+    opacity: 0.98;
+    transform: scale(0.82);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+}
+
+@keyframes home-arrival-orbit {
+  0% {
+    opacity: 1;
+    transform: rotate(-0.08turn) scale(0.86);
+  }
+
+  62% {
+    opacity: 0.86;
+    transform: rotate(0.55turn) scale(1.14);
+  }
+
+  100% {
+    opacity: 0;
+    transform: rotate(1turn) scale(1.46);
+  }
+}
+
+@media (max-width: 900px) {
+  .shell {
+    gap: 6px;
+    min-height: 58px;
+    padding: 6px;
+  }
+
+  .brandMark {
+    height: 44px;
+    width: 44px;
+  }
+
+  .homeMagnetField {
+    height: 44px;
+    width: 44px;
+  }
+
+  .navLink {
+    min-height: 38px;
+    min-width: 58px;
+    padding: 0 12px;
+  }
+
+  .resumeButton {
+    height: 42px;
+    min-width: 96px;
+    padding: 0 13px;
+  }
+}
+
+@media (max-width: 700px) {
+  .header {
+    padding-top: 8px;
+  }
+
+  .shell {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .actionRail {
+    display: none;
+  }
+
+  .hideOnCompact {
+    display: none;
+  }
+
+  .mobileMenuToggle {
+    display: flex;
+  }
+}
+
+@media (max-width: 430px) {
+  .header {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .shell {
+    border-radius: 28px;
+  }
+
+  .navLink {
+    font-size: 0.74rem;
+    min-width: auto;
+    padding: 0 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell::after,
+  .activePill::after,
+  .homeMagnetField::before,
+  .homeMagnetField::after,
+  .homeMagnetRing,
+  .homeMagnetBeam,
+  .homeMagnetSpark {
+    animation: none;
+    opacity: 0;
+  }
+
+  .brandMark[data-home-arrival="true"] {
+    animation: none;
+  }
+}
+
+
+
+.navRipple {
+  position: absolute;
+  inset: -4px;
+  border-radius: 999px;
+  /* A ripple on water: a pale ring with a faint shadow under it. */
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 1px 2px rgba(38, 52, 64, 0.12);
+  contain: paint;
+  opacity: 0;
+  pointer-events: none;
+  animation: liquid-pulse 3s infinite ease-out;
+  will-change: transform, opacity;
+}
+
+@keyframes liquid-pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.05);
+    opacity: 0;
+  }
+}
+
+.mobileMenuToggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--color-ink) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-antique-gold) 10%, transparent);
+  color: var(--color-ink-muted);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-left: auto;
+  overflow: hidden;
+  pointer-events: auto;
+  position: relative;
+  transition:
+    background var(--duration-state) var(--ease-standard),
+    border-color var(--duration-state) var(--ease-standard),
+    color var(--duration-state) var(--ease-standard),
+    transform var(--duration-state) var(--ease-standard);
+}
+
+.mobileMenuToggle > svg {
+  position: relative;
+  z-index: 2;
+}
+
+.mobileTogglePulse {
+  animation: nav-soft-breath 3.9s var(--ease-standard) infinite;
+  background: color-mix(in srgb, var(--color-antique-gold) 70%, var(--color-champagne));
+  border-radius: 999px;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--color-antique-gold) 34%, transparent);
+  height: 5px;
+  opacity: 0.74;
+  pointer-events: none;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 5px;
+  z-index: 1;
+}
+
+.mobileToggleSweep {
+  background:
+    linear-gradient(
+      100deg,
+      transparent,
+      color-mix(in srgb, #ffffff 36%, transparent),
+      color-mix(in srgb, var(--color-antique-gold) 20%, transparent),
+      transparent
+    );
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  transform: translateX(-104%);
+  z-index: 0;
+}
+
+.mobileMenuToggle:hover,
+.mobileMenuToggle:focus-visible {
+  background: color-mix(in srgb, var(--color-antique-gold) 9%, #fff8ee);
+  border-color: color-mix(in srgb, var(--color-antique-gold) 24%, transparent);
+  color: var(--color-ink);
+  transform: translateY(-1px);
+}
+
+.mobileMenuToggle:hover .mobileToggleSweep,
+.mobileMenuToggle:focus-visible .mobileToggleSweep {
+  animation: nav-current-sweep 760ms var(--ease-emphasized) both;
+}
+
+.mobileDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: var(--layout-gutter);
+  right: var(--layout-gutter);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #fffef9 86%, transparent),
+      color-mix(in srgb, #fff6e9 82%, transparent)
+    ),
+    color-mix(in srgb, var(--surface-panel) 84%, transparent);
+  -webkit-backdrop-filter: blur(28px) saturate(1.16);
+  backdrop-filter: blur(28px) saturate(1.16);
+  border: 1px solid color-mix(in srgb, var(--color-antique-gold) 18%, transparent);
+  border-radius: var(--radius-panel);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 24px 72px -44px color-mix(in srgb, #6d4b2f 36%, transparent);
+  pointer-events: auto;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.mobileDropdownGlow,
+.mobileDropdownScan {
+  pointer-events: none;
+  position: absolute;
+}
+
+.mobileDropdownGlow {
+  animation: nav-soft-breath 4.4s var(--ease-standard) infinite;
+  background:
+    radial-gradient(
+      circle,
+      color-mix(in srgb, var(--color-antique-gold) 18%, transparent),
+      color-mix(in srgb, var(--color-signal-blue) 8%, transparent) 42%,
+      transparent 72%
+    );
+  height: 14rem;
+  opacity: 0.46;
+  right: -5rem;
+  top: -6rem;
+  width: 14rem;
+  z-index: 0;
+}
+
+.mobileDropdownScan {
+  animation: nav-panel-scan 1.25s var(--ease-standard) 120ms both;
+  background:
+    linear-gradient(
+      180deg,
+      transparent,
+      color-mix(in srgb, #ffffff 20%, transparent),
+      color-mix(in srgb, var(--color-antique-gold) 12%, transparent),
+      transparent
+    );
+  inset: 0;
+  opacity: 0;
+  transform: translateY(-104%);
+  z-index: 0;
+}
+
+.mobileDropdownLink {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 68px;
+  padding: 12px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  color: var(--color-ink-base);
+  font-size: var(--text-small);
+  font-weight: 500;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  transition:
+    background var(--duration-state) var(--ease-standard),
+    border-color var(--duration-state) var(--ease-standard),
+    color var(--duration-state) var(--ease-standard),
+    transform var(--duration-state) var(--ease-standard);
+}
+
+.mobileDropdownLink > :not(.mobileDropdownCurrent),
+.mobileDropdownResume > :not(.resumeSpark) {
+  position: relative;
+  z-index: 1;
+}
+
+.mobileDropdownCurrent {
+  background:
+    linear-gradient(
+      100deg,
+      transparent,
+      color-mix(in srgb, #ffffff 34%, transparent),
+      color-mix(in srgb, var(--color-antique-gold) 18%, transparent),
+      transparent
+    );
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  transform: translateX(-104%);
+  z-index: 0;
+}
+
+.mobileDropdownLink svg {
+  color: color-mix(in srgb, var(--color-antique-gold) 64%, var(--color-warm-silver));
+  flex: 0 0 auto;
+  margin-top: 4px;
+  transition:
+    color var(--duration-state) var(--ease-standard),
+    transform var(--duration-state) var(--ease-standard);
+}
+
+.mobileDropdownText {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.mobileDropdownText > span {
+  color: var(--color-ink);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.mobileDropdownText small,
+.mobileDropdownResume small {
+  color: color-mix(in srgb, var(--color-ivory-muted) 88%, transparent);
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.mobileDropdownLink:hover,
+.mobileDropdownLink:focus-visible {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #fffaf2 94%, transparent),
+      color-mix(in srgb, var(--color-antique-gold) 8%, #fff8ee)
+    );
+  border-color: color-mix(in srgb, var(--color-antique-gold) 20%, transparent);
+  color: var(--color-ink);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.mobileDropdownLink:hover svg,
+.mobileDropdownLink:focus-visible svg {
+  color: var(--color-antique-gold);
+  transform: translateX(3px);
+}
+
+.mobileDropdownLink:hover .mobileDropdownCurrent,
+.mobileDropdownLink:focus-visible .mobileDropdownCurrent {
+  animation: nav-current-sweep 780ms var(--ease-emphasized) both;
+}
+
+.mobileDropdownLinkActive {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #fffaf2 92%, transparent),
+      color-mix(in srgb, var(--color-antique-gold) 10%, #fff8ee)
+    );
+  border: 1px solid color-mix(in srgb, var(--color-antique-gold) 24%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 10px 24px -20px color-mix(in srgb, #6d4b2f 24%, transparent);
+  color: var(--color-ink-strong);
+  font-weight: 600;
+}
+
+.mobileDropdownActiveIndicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-antique-gold);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-antique-gold) 12%, transparent);
+  animation: nav-brand-heartbeat 2.8s var(--ease-emphasized) infinite;
+}
+
+.mobileDropdownDivider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 4px 8px;
+}
+
+.mobileDropdownResume {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--color-champagne) 28%, transparent);
+  border-radius: var(--radius-control);
+  color: #fff8ee;
+  font-size: var(--text-small);
+  font-weight: 600;
+  text-decoration: none;
+  background:
+    linear-gradient(
+      180deg,
+      #2a2118,
+      #5b3b1d
+    );
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--color-ivory) 14%, transparent),
+    0 14px 34px -24px color-mix(in srgb, #5c5144 36%, transparent);
+  margin-top: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.mobileDropdownResume > svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.mobileDropdownResume > span {
+  display: grid;
+  gap: 4px;
+}
+
+.mobileDropdownResume strong {
+  font-size: 0.88rem;
+  line-height: 1.1;
+}
+
+.mobileDropdownResume small {
+  color: color-mix(in srgb, #fff8ee 66%, transparent);
+}
+
+@media (max-width: 700px) {
+  .mobileMenuToggle {
+    display: flex;
+  }
+}
+
+@media (max-width: 560px) {
+  .collapseOnNarrow {
+    display: none;
+  }
+
+  .primaryNav {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 430px) {
+  .navLink {
+    min-width: auto;
+    padding: 0 10px;
+  }
+
+  .mobileMenuToggle {
+    height: 38px;
+    width: 38px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell::after,
+  .shellBreath,
+  .brandPulse,
+  .navLinkSweep,
+  .resumeSpark,
+  .mobileTogglePulse,
+  .mobileToggleSweep,
+  .mobileDropdownGlow,
+  .mobileDropdownScan,
+  .mobileDropdownCurrent,
+  .mobileDropdownActiveIndicator,
+  .activePill::after,
+  .homeMagnetField::before,
+  .homeMagnetField::after,
+  .homeMagnetRing,
+  .homeMagnetBeam,
+  .homeMagnetSpark,
+  .navRipple {
+    animation: none;
+    opacity: 0;
+  }
+
+  .brandMark[data-home-arrival="true"] {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .activePill::before {
+    animation: none;
+  }
+}

@@ -75,14 +75,14 @@ const roleDefinitions = {
   recruiter: {
     label: "Recruiter",
     eyebrow: "Fast fit check",
-    title: "Hiring proof in the first pass.",
-    cardTitle: "Shortlist signal",
+    title: "Hiring signals in the first pass.",
+    cardTitle: "Shortlist clarity",
     cardSummary:
       "Credentials, current role context, quantified outcomes, and a clear resume route.",
-    cardProofLabel: "Primary proof",
+    cardProofLabel: "Primary signal",
     cardProofValue: "Fabric, Databricks, 15+ reports, 90% discrepancy reduction",
     nextStep:
-      "Prioritize resume, credentials, quantified outcomes, and the three strongest professional case files.",
+      "Prioritize resume, credentials, quantified outcomes, and the three strongest professional case studies.",
     ctas: [
       { label: "Download Resume", href: "/resume", emphasis: "primary" },
       { label: "View Credentials", href: "/certifications", emphasis: "secondary" },
@@ -92,21 +92,21 @@ const roleDefinitions = {
   engineer: {
     label: "Engineer",
     eyebrow: "Implementation depth",
-    title: "Architecture, tradeoffs, and proof you can inspect.",
-    cardTitle: "Technical proof path",
+    title: "Architecture, tradeoffs, and decisions you can inspect.",
+    cardTitle: "Technical review path",
     cardSummary:
-      "Data product architecture, SQL/Spark decisions, APIs, governance, and public-safe boundaries.",
-    cardProofLabel: "Primary proof",
+      "Data product architecture, SQL/Spark decisions, APIs, governance, and anonymized project context.",
+    cardProofLabel: "Primary signal",
     cardProofValue: "Databricks Apps, Fabric, CDC/SCD2, SQL Warehouse",
     nextStep:
-      "Move toward case files, architecture decisions, proof graph context, and technical implementation notes.",
+      "Move toward case studies, architecture decisions, the skill map, and technical implementation notes.",
     ctas: [
       {
         label: "Inspect Architecture",
         href: "/projects/icore-enterprise-mdm-entity-resolution",
         emphasis: "primary"
       },
-      { label: "View Case Files", href: "/projects", emphasis: "secondary" },
+      { label: "View Case Studies", href: "/projects", emphasis: "secondary" },
       { label: "Open Profile", href: "/profile", emphasis: "tertiary" }
     ]
   },
@@ -114,20 +114,20 @@ const roleDefinitions = {
     label: "Leader",
     eyebrow: "Ownership and trust",
     title: "Outcomes, governance, and delivery maturity.",
-    cardTitle: "Impact lens",
+    cardTitle: "Impact review",
     cardSummary:
       "Validation discipline, stewardship workflows, auditability, and business-facing modernization.",
-    cardProofLabel: "Primary proof",
+    cardProofLabel: "Primary signal",
     cardProofValue: "Governance, RBAC, audit logging, discrepancy reduction",
     nextStep:
-      "Emphasize business impact, reliability, governed workflows, and public-safe case summaries.",
+      "Emphasize business impact, reliability, governed workflows, and client-safe case summaries.",
     ctas: [
       {
         label: "View Impact",
         href: "/projects/bi-migration-validation-analytics",
         emphasis: "primary"
       },
-      { label: "Review Case Files", href: "/projects", emphasis: "secondary" },
+      { label: "Review Case Studies", href: "/projects", emphasis: "secondary" },
       { label: "Contact Nirmal", href: "/profile", emphasis: "tertiary" }
     ]
   },
@@ -138,18 +138,18 @@ const roleDefinitions = {
     cardTitle: "Curiosity trail",
     cardSummary:
       "Timeline, IEEE research, AI-assisted analytics demos, and currently exploring work.",
-    cardProofLabel: "Primary proof",
-    cardProofValue: "IEEE research, FabCon25 demo, future project observatory",
+    cardProofLabel: "Primary signal",
+    cardProofValue: "IEEE research, FabCon25 demo, current learning roadmap",
     nextStep:
-      "Open the broader timeline and future-facing proof without letting speculative work outrank built systems.",
+      "Open the broader timeline and current learning roadmap without letting speculative work outrank built systems.",
     ctas: [
       { label: "Explore Timeline", href: "/timeline", emphasis: "primary" },
       {
-        label: "Read Research Proof",
+        label: "Read Research",
         href: "/projects/ieee-semiconductor-chip-analysis-medallion",
         emphasis: "secondary"
       },
-      { label: "Open Future Projects", href: "/future-projects", emphasis: "tertiary" }
+      { label: "Open Current Learning", href: "/future-projects", emphasis: "tertiary" }
     ]
   }
 } satisfies Record<
@@ -275,9 +275,9 @@ export function getBalancedGatewayModel(): LensDisplayModel {
     summary:
       "No gate is applied. The page keeps the core data engineering story first while leaving recruiter, engineer, leader, and explorer paths available.",
     nextStep:
-      "Continue with the default proof order: data engineering credibility, project case files, skills by evidence, timeline, credentials, and resume/contact.",
+      "Continue with the default review order: data engineering credibility, project case studies, skill map, timeline, credentials, and resume/contact.",
     ctas: [
-      { label: "View Proof", href: "/proof", emphasis: "primary" },
+      { label: "View Skill Map", href: "/proof", emphasis: "primary" },
       { label: "Download Resume", href: "/resume", emphasis: "secondary" },
       { label: "Inspect Credentials", href: "/certifications", emphasis: "tertiary" }
     ],
@@ -337,9 +337,8 @@ function credentialToEvidence(credential: Certification): RoleEvidence {
   return {
     kind: "Credential",
     label: credential.title,
-    detail: `${credential.issuer} - ${credential.verificationStatus.replaceAll(
-      "-",
-      " "
+    detail: `${credential.issuer} - ${credentialStatusLabel(
+      credential.verificationStatus
     )}`,
     href: "/certifications"
   };
@@ -373,5 +372,16 @@ function importanceScore(importance: TimelineEvent["importance"]) {
       return 2;
     case "low":
       return 1;
+  }
+}
+
+function credentialStatusLabel(status: Certification["verificationStatus"]) {
+  switch (status) {
+    case "verified":
+      return "verified";
+    case "link-captured":
+      return "public link available";
+    case "resume-claimed":
+      return "public link to add";
   }
 }

@@ -1,7 +1,7 @@
 .shell {
   position: fixed;
   top: 50%;
-  right: var(--space-5);
+  right: clamp(12px, 2vw, 24px);
   bottom: auto;
   left: auto;
   z-index: var(--z-sticky);
@@ -13,160 +13,303 @@
 }
 
 .rail {
-  display: flex;
-  width: auto;
-  max-height: calc(100vh - var(--space-10));
-  align-items: center;
-  flex-direction: column;
-  gap: var(--space-2);
+  position: relative;
+  display: grid;
+  width: 48px;
+  justify-items: center;
+  gap: 10px;
   overflow: visible;
-  border: 1px solid color-mix(in srgb, var(--color-ivory) 16%, transparent);
-  border-radius: var(--radius-panel);
+  border: 1px solid color-mix(in srgb, var(--color-brass) 30%, transparent);
+  border-radius: 999px;
   background:
     linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-antique-gold) 12%, transparent),
-      transparent 34%
-    ),
-    color-mix(in srgb, var(--color-carbon) 86%, transparent);
+      180deg,
+      color-mix(in srgb, #ffffff 65%, transparent) 0%,
+      color-mix(in srgb, #fdfbf7 55%, transparent) 100%
+    );
   box-shadow:
-    0 18px 56px color-mix(in srgb, black 48%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--color-ivory) 10%, transparent);
-  padding: var(--space-2);
+    0 24px 48px -12px color-mix(in srgb, var(--color-lacquer) 15%, transparent),
+    0 8px 16px -8px color-mix(in srgb, var(--color-lacquer) 10%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 80%, transparent),
+    inset 0 0 12px color-mix(in srgb, var(--color-champagne) 10%, transparent);
+  opacity: 0.9;
+  padding: 10px 6px;
   pointer-events: auto;
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
+  transition:
+    opacity var(--duration-state) var(--ease-out),
+    transform var(--duration-state) var(--ease-out),
+    box-shadow var(--duration-state) var(--ease-out);
+  animation: dock-enter 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.2s backwards;
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  backdrop-filter: blur(24px) saturate(1.2);
+}
+
+.shell:hover .rail,
+.shell:focus-within .rail {
+  opacity: 1;
+  box-shadow:
+    0 32px 64px -12px color-mix(in srgb, var(--color-lacquer) 25%, transparent),
+    0 12px 24px -8px color-mix(in srgb, var(--color-lacquer) 15%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 100%, transparent),
+    inset 0 0 16px color-mix(in srgb, var(--color-brass) 12%, transparent);
+}
+
+.rail::before {
+  display: none;
 }
 
 .brandMark {
+  position: relative;
   display: grid;
-  width: 52px;
-  min-width: 52px;
-  height: 52px;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  isolation: isolate;
+  overflow: hidden;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--color-antique-gold) 34%, transparent);
-  border-radius: var(--radius-control);
+  border: 1px solid color-mix(in srgb, var(--color-brass) 40%, transparent);
+  border-radius: 50%;
   background:
-    radial-gradient(
-      circle at 50% 18%,
-      color-mix(in srgb, var(--color-antique-gold) 22%, transparent),
-      transparent 54%
-    ),
-    color-mix(in srgb, var(--color-obsidian) 72%, transparent);
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, #fffaf2 96%, transparent),
+      color-mix(in srgb, #fdf4e3 94%, transparent)
+    );
+  box-shadow:
+    inset 0 1px 2px color-mix(in srgb, #ffffff 95%, transparent),
+    0 6px 12px -4px color-mix(in srgb, var(--color-brass) 20%, transparent);
 }
 
-.brandMark img {
-  width: 28px;
-  height: 28px;
+.brandMark > :not(.brandPulse) {
+  position: relative;
+  z-index: 1;
+  color: var(--color-ink);
+}
+
+.brandMark > :not(.brandPulse) span {
+  color: inherit;
+  font-size: 0.75rem;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.brandMark > :not(.brandPulse) span span {
+  color: var(--color-brass);
+}
+
+.brandPulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-brass) 15%, transparent) 0%, transparent 70%);
+  box-shadow: inset 0 0 12px color-mix(in srgb, var(--color-brass) 25%, transparent);
+  pointer-events: none;
+  z-index: 0;
+  animation: dock-brand-pulse 3s var(--ease-standard) infinite alternate;
 }
 
 .list {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: var(--space-2);
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 8px;
   margin: 0;
-  overflow-x: visible;
-  overflow-y: auto;
-  overscroll-behavior-x: contain;
   padding: 0;
-  scrollbar-width: none;
-}
-
-.list::-webkit-scrollbar {
-  display: none;
 }
 
 .item {
   position: relative;
   display: block;
-  flex: 0 0 auto;
   list-style: none;
 }
 
 .control {
   position: relative;
   display: grid;
-  width: 52px;
-  height: 52px;
-  grid-template-rows: 1fr;
+  width: 36px;
+  height: 36px;
   place-items: center;
-  gap: 0;
-  border: 1px solid color-mix(in srgb, var(--color-warm-silver) 18%, transparent);
-  border-radius: var(--radius-control);
-  background: color-mix(in srgb, var(--color-obsidian) 54%, transparent);
-  color: var(--color-ivory-soft);
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  color: color-mix(in srgb, var(--color-ink) 74%, var(--color-warm-silver));
   isolation: isolate;
   overflow: visible;
-  padding: var(--space-2);
+  padding: 0;
   transition:
-    border-color var(--duration-state) var(--ease-out),
     background var(--duration-state) var(--ease-out),
+    border-color var(--duration-state) var(--ease-out),
     box-shadow var(--duration-state) var(--ease-out),
     color var(--duration-state) var(--ease-out),
-    transform var(--duration-feedback) var(--ease-out);
+    transform 160ms var(--ease-out);
 }
 
-.control::before {
+.controlSheen {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   border-radius: inherit;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--color-ivory) 8%, transparent),
-    transparent
-  );
-  content: "";
+  background:
+    radial-gradient(
+      circle at top,
+      color-mix(in srgb, #ffffff 60%, transparent),
+      transparent 70%
+    );
   opacity: 0;
-  transition: opacity var(--duration-state) var(--ease-out);
+  pointer-events: none;
+  transition: opacity 220ms var(--ease-out);
 }
 
+.control > :not(.controlSheen):not(.tooltip) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Hover marker: an embossing pulled out of the rail's fabric — the same
+   material bulging toward you. Top edge catches light, the underside falls
+   into shade, and a tight contact shadow grounds the bump. */
 .control:hover,
 .control:focus-visible {
-  border-color: color-mix(in srgb, var(--color-antique-gold) 68%, transparent);
-  background: color-mix(in srgb, var(--color-charcoal) 92%, transparent);
-  box-shadow: var(--shadow-gold-trace);
-  color: var(--color-ivory);
-  transform: translateY(-2px);
-}
-
-.control:hover::before,
-.control:focus-visible::before {
-  opacity: 1;
-}
-
-.control[data-emphasis="true"] {
-  border-color: color-mix(in srgb, var(--color-antique-gold) 58%, transparent);
+  border-color: transparent;
   background:
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--color-antique-gold) 13%, transparent),
-      transparent
-    ),
-    color-mix(in srgb, var(--color-carbon) 82%, transparent);
+      color-mix(in srgb, #ffffff 52%, transparent),
+      color-mix(in srgb, #efe5d6 30%, transparent)
+    );
+  box-shadow:
+    inset 0 1px 1px color-mix(in srgb, #ffffff 90%, transparent),
+    inset 0 -1px 1px color-mix(in srgb, var(--color-lacquer) 10%, transparent),
+    0 2px 3px color-mix(in srgb, var(--color-lacquer) 9%, transparent),
+    0 7px 12px -7px color-mix(in srgb, var(--color-lacquer) 20%, transparent);
+  color: var(--color-ink);
+  outline: none;
+  transform: none;
+}
+
+/* The icon itself rises out of the emboss. */
+.iconFrame {
+  transition: transform 260ms var(--ease-out);
+}
+
+.control:hover .iconFrame,
+.control:focus-visible .iconFrame {
+  transform: translateY(-0.5px) scale(1.06);
+}
+
+.control:active {
+  box-shadow:
+    inset 0 1px 2px color-mix(in srgb, var(--color-lacquer) 12%, transparent);
+  transform: scale(0.96);
+}
+
+.control:active .iconFrame {
+  transform: scale(0.98);
+}
+
+.control[data-emphasis="true"] {
+  color: color-mix(in srgb, var(--color-ink) 86%, var(--color-brass));
 }
 
 .iconFrame {
   display: grid;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   place-items: center;
 }
 
 .icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
+}
+
+.iconImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.control[data-id="leetcode"] .iconFrame,
+.control[data-id="ieee"] .iconFrame,
+.control[data-id="databricks"] .iconFrame {
+  width: 28px;
+  height: 28px;
+}
+
+.control[data-id="github"] .iconFrame {
+  width: 25px;
+  height: 25px;
+}
+
+/* The GitHub and LeetCode marks are near-black by default; over dark page
+   sections the dock's glass goes dark too, so they flip to stay visible.
+   Driven by data-on-dark on the shell (live background-luminance sampling).
+   GitHub is monochrome → plain invert. LeetCode's orange and grey must stay
+   exactly as they are, so it cross-fades to a second image in which only the
+   black bracket is white. */
+.control[data-id="github"] .iconImage {
+  transition: filter 320ms var(--ease-out);
+}
+
+.shell[data-on-dark="true"] .control[data-id="github"] .iconImage {
+  filter: invert(1) brightness(1.7);
+}
+
+.swapIcon {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+}
+
+.swapIcon > .iconImage {
+  grid-area: 1 / 1;
+  transition: opacity 320ms var(--ease-out);
+}
+
+.swapIconAlt {
+  opacity: 0;
+}
+
+.shell[data-on-dark="true"] .control[data-id="leetcode"] .swapIconBase {
+  opacity: 0;
+}
+
+.shell[data-on-dark="true"] .control[data-id="leetcode"] .swapIconAlt {
+  opacity: 1;
+}
+
+/* The hover/focus emboss is light in the default scheme — flip back to the
+   dark marks there so they stay visible on the raised bump. */
+.shell[data-on-dark="true"] .control[data-id="github"]:hover .iconImage,
+.shell[data-on-dark="true"] .control[data-id="github"]:focus-visible .iconImage {
+  filter: none;
+}
+
+.shell[data-on-dark="true"] .control[data-id="leetcode"]:hover .swapIconBase,
+.shell[data-on-dark="true"] .control[data-id="leetcode"]:focus-visible .swapIconBase {
+  opacity: 1;
+}
+
+.shell[data-on-dark="true"] .control[data-id="leetcode"]:hover .swapIconAlt,
+.shell[data-on-dark="true"] .control[data-id="leetcode"]:focus-visible .swapIconAlt {
+  opacity: 0;
 }
 
 .iconGlyph {
   display: grid;
   place-items: center;
   font-family: var(--font-mono);
-  font-size: 0.64rem;
+  font-size: 0.54rem;
   font-weight: var(--weight-semibold);
+  letter-spacing: 0;
   line-height: 1;
+  white-space: nowrap;
+}
+
+.control[data-id="ieee"] .iconGlyph {
+  font-size: 0.43rem;
 }
 
 .label {
@@ -185,73 +328,67 @@
 }
 
 .count {
-  position: absolute;
-  top: 5px;
-  left: 6px;
-  display: grid;
-  min-width: 15px;
-  height: 15px;
-  place-items: center;
-  border: 1px solid color-mix(in srgb, var(--color-signal-blue) 52%, transparent);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--color-signal-blue) 22%, var(--color-obsidian));
-  color: var(--color-ivory);
-  font-family: var(--font-mono);
-  font-size: 9px;
-  line-height: 1;
+  display: none;
+}
+
+.control:hover .count,
+.control:focus-visible .count {
+  display: none;
 }
 
 .statusDot {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--color-warning);
-  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 10%, transparent);
+  right: auto;
+  bottom: 2px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-warm-silver) 62%, transparent);
+  box-shadow: none;
+  opacity: 0.72;
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: dock-soft-breath 4.8s var(--ease-standard) infinite;
 }
 
 .control[data-status="verified"] .statusDot {
   background: var(--color-success);
+  box-shadow: 0 0 6px var(--color-success);
 }
 
 .control[data-status="manual-verification-needed"] .statusDot {
   background: var(--color-warning);
+  box-shadow: 0 0 6px var(--color-warning);
 }
 
 .control[data-status="pending"] .statusDot {
   background: var(--color-steel);
+  animation-duration: 5.4s;
 }
 
 .externalIcon {
-  position: absolute;
-  right: 7px;
-  bottom: 7px;
-  width: 11px;
-  height: 11px;
-  color: color-mix(in srgb, var(--color-ivory) 72%, transparent);
-  opacity: 0;
-  transition: opacity var(--duration-feedback) var(--ease-out);
+  display: none;
 }
 
 .control:hover .externalIcon,
 .control:focus-visible .externalIcon {
-  opacity: 1;
+  display: none;
 }
 
 .slot {
   cursor: default;
-  opacity: 0.62;
+  opacity: 0.36;
 }
 
 .slot:hover,
 .slot:focus-visible {
-  border-color: color-mix(in srgb, var(--color-signal-blue) 42%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-signal-blue) 20%, transparent);
+  border-color: transparent;
+  box-shadow: none;
   transform: none;
 }
 
+/* Minimal name-only pill — no arrow, no status copy, just the label. */
 .tooltip {
   position: absolute;
   top: 50%;
@@ -259,57 +396,32 @@
   bottom: auto;
   left: auto;
   z-index: var(--z-overlay);
-  display: grid;
-  width: min(250px, calc(100vw - 32px));
-  gap: var(--space-1);
-  border: 1px solid color-mix(in srgb, var(--color-ivory) 18%, transparent);
-  border-radius: var(--radius-panel);
-  background: color-mix(in srgb, var(--color-carbon) 96%, black);
-  box-shadow: var(--shadow-float);
-  color: var(--color-ivory-soft);
-  font-size: var(--text-caption);
-  line-height: var(--leading-caption);
+  display: inline-flex;
+  width: max-content;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--color-brass) 22%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, #16110d 94%, transparent);
+  box-shadow: 0 12px 28px -16px color-mix(in srgb, black 55%, transparent);
+  color: #fff8ea;
   opacity: 0;
-  padding: var(--space-3);
+  padding: 6px 12px;
   pointer-events: none;
-  text-align: left;
-  transform: translate(6px, -50%);
+  transform: translate(8px, -50%);
   transition:
-    opacity var(--duration-feedback) var(--ease-out),
-    transform var(--duration-feedback) var(--ease-out);
-}
-
-.tooltip::after {
-  position: absolute;
-  top: calc(50% - 5px);
-  right: -5px;
-  bottom: auto;
-  left: auto;
-  width: 10px;
-  height: 10px;
-  border-right: 1px solid color-mix(in srgb, var(--color-ivory) 18%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-ivory) 18%, transparent);
-  background: color-mix(in srgb, var(--color-carbon) 96%, black);
-  content: "";
-  transform: rotate(-45deg);
-}
-
-.tooltip strong,
-.tooltip em {
-  font-style: normal;
-  line-height: 1.25;
+    opacity 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
 }
 
 .tooltip strong {
-  color: var(--color-ivory);
-  font-size: var(--text-small);
-  font-weight: var(--weight-semibold);
-}
-
-.tooltip em {
-  color: var(--color-antique-gold);
-  font-family: var(--font-mono);
-  font-size: var(--text-micro);
+  color: #fff8ea;
+  font-size: 0.72rem;
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .control:hover .tooltip,
@@ -318,74 +430,212 @@
   transform: translate(0, -50%);
 }
 
+@keyframes dock-soft-breath {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: translateX(-50%) scale(0.8);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: translateX(-50%) scale(1.1);
+  }
+}
+
+@keyframes dock-brand-pulse {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.9);
+  }
+
+  100% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes dock-enter {
+  0% {
+    opacity: 0;
+    transform: translateX(16px) scale(0.95);
+  }
+  100% {
+    opacity: 0.9;
+    transform: translateX(0) scale(1);
+  }
+}
+
 @media (max-width: 900px) {
   .shell {
-    inset-inline: 0;
-    top: auto;
-    right: auto;
-    bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
-    padding-inline: var(--space-3);
-    transform: none;
+    display: none;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1500px) {
+  .shell {
+    right: 8px;
   }
 
   .rail {
-    width: 100%;
-    flex-direction: row;
-    max-height: none;
+    width: 44px;
+    gap: 8px;
+    padding: 8px 6px;
   }
 
-  .brandMark {
-    display: none;
-  }
-
+  .brandMark,
   .control {
-    width: 72px;
-    height: 54px;
-    grid-template-rows: 24px 1fr;
-    gap: 2px;
-    padding: 7px 7px 6px;
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
   }
 
-  .list {
-    flex-direction: row;
-    overflow-x: auto;
-    overflow-y: visible;
+  .brandMark > :not(.brandPulse) span {
+    font-size: 0.65rem;
+  }
+
+  .iconFrame {
+    width: 24px;
+    height: 24px;
+  }
+
+  .icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .iconGlyph {
+    font-size: 0.5rem;
+  }
+
+  .control[data-id="ieee"] .iconGlyph {
+    font-size: 0.4rem;
   }
 
   .tooltip {
-    display: none;
-  }
-
-  .label {
-    position: static;
-    display: block;
-    width: 100%;
-    height: auto;
-    clip: auto;
-    line-height: 1.05;
-    overflow-wrap: anywhere;
-    text-overflow: clip;
-    white-space: normal;
+    right: calc(100% + 12px);
+    max-width: min(200px, calc(100vw - 32px));
   }
 }
 
-@media (max-width: 420px) {
+@media (prefers-color-scheme: dark) {
+  .rail {
+    border-color: color-mix(in srgb, var(--color-brass) 20%, transparent);
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, #2a2522 55%, transparent) 0%,
+        color-mix(in srgb, #1a1512 45%, transparent) 100%
+      );
+    box-shadow:
+      0 24px 48px -12px color-mix(in srgb, black 50%, transparent),
+      0 8px 16px -8px color-mix(in srgb, black 30%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--color-brass) 12%, transparent),
+      inset 0 0 12px color-mix(in srgb, var(--color-brass) 8%, transparent);
+  }
+
+  .shell:hover .rail,
+  .shell:focus-within .rail {
+    box-shadow:
+      0 32px 64px -12px color-mix(in srgb, black 60%, transparent),
+      0 12px 24px -8px color-mix(in srgb, black 40%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--color-brass) 18%, transparent),
+      inset 0 0 16px color-mix(in srgb, var(--color-brass) 15%, transparent);
+  }
+
+  .brandMark {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-brass) 12%, transparent),
+        color-mix(in srgb, #000000 20%, transparent)
+      );
+    color: var(--color-ivory);
+    border-color: color-mix(in srgb, var(--color-brass) 25%, transparent);
+    box-shadow:
+      0 8px 16px -6px color-mix(in srgb, black 50%, transparent),
+      inset 0 1px 1px color-mix(in srgb, var(--color-brass) 15%, transparent);
+  }
+
+  /* Same fabric-emboss as the light scheme, tuned for dark glass: a faint
+     top light-catch and deeper under-shade on the raised bump. */
+  .control:hover,
+  .control:focus-visible {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, #ffffff 10%, transparent),
+        color-mix(in srgb, #000000 14%, transparent)
+      );
+    border-color: transparent;
+    box-shadow:
+      inset 0 1px 1px color-mix(in srgb, #fff8ea 14%, transparent),
+      inset 0 -1px 1px color-mix(in srgb, black 35%, transparent),
+      0 2px 3px color-mix(in srgb, black 30%, transparent),
+      0 7px 12px -7px color-mix(in srgb, black 45%, transparent);
+    color: var(--color-ivory);
+  }
+
+  .brandMark > :not(.brandPulse) {
+    color: var(--color-ivory);
+  }
+
   .control {
-    width: 68px;
+    color: color-mix(in srgb, var(--color-ivory) 70%, var(--color-warm-silver));
   }
 
-  .label {
-    font-size: 10px;
+  .tooltip {
+    border-color: color-mix(in srgb, var(--color-brass) 20%, transparent);
+    background: color-mix(in srgb, #14100d 94%, transparent);
+  }
+
+  .tooltip strong {
+    color: var(--color-ivory);
+  }
+
+  /* In the dark scheme the hover emboss is dark too, so keep the marks
+     flipped while hovering on a dark surface (the light-scheme rule would
+     flip them back to dark, which would vanish on the dark bump). */
+  .shell[data-on-dark="true"] .control[data-id="github"]:hover .iconImage,
+  .shell[data-on-dark="true"] .control[data-id="github"]:focus-visible .iconImage {
+    filter: invert(1) brightness(1.7);
+  }
+
+  .shell[data-on-dark="true"] .control[data-id="leetcode"]:hover .swapIconBase,
+  .shell[data-on-dark="true"] .control[data-id="leetcode"]:focus-visible .swapIconBase {
+    opacity: 0;
+  }
+
+  .shell[data-on-dark="true"] .control[data-id="leetcode"]:hover .swapIconAlt,
+  .shell[data-on-dark="true"] .control[data-id="leetcode"]:focus-visible .swapIconAlt {
+    opacity: 1;
   }
 }
 
-@media (max-width: 900px) and (max-height: 520px) {
-  .shell {
-    position: static;
-    inset: auto;
-    max-width: var(--layout-page-max);
-    margin: calc(-1 * var(--space-16)) auto var(--space-8);
-    padding-inline: var(--layout-gutter);
+@media (prefers-reduced-motion: reduce) {
+  .rail {
+    animation: none !important;
+  }
+  .brandPulse,
+  .controlSheen,
+  .statusDot {
+    animation: none;
+  }
+
+  .brandPulse,
+  .controlSheen {
+    opacity: 0;
+  }
+
+  .control,
+  .count,
+  .tooltip {
+    transition-duration: 1ms;
+  }
+
+  .control:hover,
+  .control:focus-visible {
     transform: none;
   }
 }
+

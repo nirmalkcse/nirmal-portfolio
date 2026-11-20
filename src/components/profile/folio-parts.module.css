@@ -1,0 +1,418 @@
+/* ------------------------------------------------------------------------- */
+/*  Folio parts: magnetic controls, counting metrics, scroll frame, signature */
+/* ------------------------------------------------------------------------- */
+
+.magnetic {
+  display: inline-flex;
+  margin: -6px;
+  padding: 6px;
+  will-change: transform;
+}
+
+/* Metrics ----------------------------------------------------------------- */
+
+.metrics {
+  border-bottom: 1px solid rgba(63, 44, 30, 0.16);
+  border-top: 1px solid rgba(63, 44, 30, 0.16);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  list-style: none;
+  margin: 30px 0 0;
+  padding: 0;
+}
+
+.metrics > li {
+  min-width: 0;
+}
+
+.metrics > li + li .metric {
+  border-left: 1px solid rgba(63, 44, 30, 0.13);
+}
+
+.metric {
+  color: inherit;
+  display: grid;
+  gap: 7px;
+  grid-template-rows: auto auto;
+  min-height: 108px;
+  outline: 0;
+  overflow: hidden;
+  padding: 18px clamp(14px, 2vw, 26px) 16px;
+  position: relative;
+  text-decoration: none;
+  transition: background-color var(--duration-state) var(--ease-standard);
+}
+
+.metrics > li:first-child .metric {
+  padding-left: 0;
+}
+
+/* Brass hairline that draws in from the left on hover */
+.metric::after {
+  background: linear-gradient(90deg, #9a6a35, rgba(154, 106, 53, 0.1));
+  bottom: 0;
+  content: "";
+  height: 1px;
+  left: 0;
+  position: absolute;
+  right: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 520ms var(--ease-out);
+}
+
+.metric:hover,
+.metric:focus-visible {
+  background: rgba(255, 253, 248, 0.42);
+}
+
+.metric:hover::after,
+.metric:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.metric:focus-visible {
+  box-shadow: inset 0 0 0 2px rgba(116, 76, 40, 0.34);
+}
+
+.metricValue {
+  align-self: end;
+  color: #582a20;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 630;
+  letter-spacing: -0.055em;
+  line-height: 0.9;
+  transition: transform 520ms var(--ease-out);
+}
+
+.metric:hover .metricValue,
+.metric:focus-visible .metricValue {
+  transform: translateY(-2px);
+}
+
+.metricLabel {
+  color: rgba(69, 49, 36, 0.62);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  transition:
+    opacity 320ms var(--ease-standard),
+    transform 420ms var(--ease-out);
+}
+
+/* The case-study hint slides up over the label while hovered */
+.metricHint {
+  align-items: center;
+  bottom: 16px;
+  color: #7d542c;
+  display: inline-flex;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  gap: 6px;
+  left: clamp(14px, 2vw, 26px);
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  opacity: 0;
+  position: absolute;
+  text-transform: uppercase;
+  transform: translateY(8px);
+  transition:
+    opacity 320ms var(--ease-standard),
+    transform 420ms var(--ease-out);
+  white-space: nowrap;
+}
+
+.metrics > li:first-child .metricHint {
+  left: 0;
+}
+
+.metricHint svg {
+  height: 12px;
+  width: 12px;
+}
+
+.metric:hover .metricLabel,
+.metric:focus-visible .metricLabel {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.metric:hover .metricHint,
+.metric:focus-visible .metricHint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Scroll frame ------------------------------------------------------------ */
+
+.scrollFrame {
+  --folio-scroll: 0;
+  --folio-thumb: 1;
+  display: grid;
+  min-height: 0;
+  position: relative;
+}
+
+.scroll {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 32px clamp(28px, 3.2vw, 46px) 28px;
+  scrollbar-width: none;
+}
+
+.scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll:focus-visible {
+  box-shadow: inset 0 0 0 2px rgba(116, 76, 40, 0.34);
+  outline: 0;
+}
+
+.fade {
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  transition: opacity 360ms var(--ease-standard);
+  z-index: 2;
+}
+
+.fadeTop {
+  background: linear-gradient(180deg, rgba(232, 228, 221, 0.96), rgba(232, 228, 221, 0));
+  height: 40px;
+  top: 0;
+}
+
+.fadeBottom {
+  background: linear-gradient(0deg, rgba(232, 228, 221, 0.96), rgba(232, 228, 221, 0));
+  bottom: 0;
+  height: 56px;
+}
+
+.scrollFrame[data-at-top="true"] .fadeTop,
+.scrollFrame[data-at-end="true"] .fadeBottom {
+  opacity: 0;
+}
+
+/* Hairline progress track replacing the native scrollbar */
+.track {
+  background: rgba(63, 44, 30, 0.1);
+  bottom: 18px;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 11px;
+  top: 18px;
+  transition: opacity 360ms var(--ease-standard);
+  width: 1px;
+  z-index: 3;
+}
+
+.scrollFrame[data-scrollable="true"] .track {
+  opacity: 1;
+}
+
+.thumb {
+  background: linear-gradient(180deg, #b98a50, #7d542c);
+  border-radius: 999px;
+  height: calc(var(--folio-thumb) * 100%);
+  left: -1px;
+  position: absolute;
+  top: calc(var(--folio-scroll) * (100% - var(--folio-thumb) * 100%));
+  width: 3px;
+}
+
+/* "Scroll" cue, sitting on the footer's top edge until the reader moves */
+.scrollCue {
+  align-items: center;
+  background: rgba(255, 253, 249, 0.9);
+  border: 1px solid rgba(63, 44, 30, 0.16);
+  border-radius: 999px;
+  bottom: -14px;
+  box-shadow: 0 8px 18px -12px rgba(30, 20, 12, 0.5);
+  color: rgba(69, 49, 36, 0.78);
+  display: inline-flex;
+  font-family: var(--font-mono);
+  font-size: 0.54rem;
+  font-weight: 700;
+  gap: 6px;
+  left: 50%;
+  letter-spacing: 0.1em;
+  opacity: 0;
+  padding: 6px 10px 6px 8px;
+  pointer-events: none;
+  position: absolute;
+  text-transform: uppercase;
+  transform: translate(-50%, 6px);
+  transition:
+    opacity 420ms var(--ease-standard),
+    transform 520ms var(--ease-out);
+  z-index: 4;
+}
+
+.scrollCue svg {
+  animation: folio-cue-bob 2.2s ease-in-out infinite;
+  height: 11px;
+  width: 11px;
+}
+
+.scrollFrame[data-scrollable="true"][data-at-top="true"] .scrollCue {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  transition-delay: 1.4s, 1.4s;
+}
+
+@keyframes folio-cue-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(2px);
+  }
+}
+
+/* Signature panel --------------------------------------------------------- */
+
+.signature {
+  align-items: center;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(90, 60, 30, 0.07) 0px,
+      rgba(90, 60, 30, 0.07) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    #f7f2e9;
+  border: 1px solid rgba(63, 44, 30, 0.14);
+  border-radius: 6px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(63, 44, 30, 0.06);
+  display: flex;
+  gap: 18px;
+  min-height: 46px;
+  padding: 5px 16px 5px 14px;
+  position: relative;
+}
+
+.signatureInk {
+  color: #2f2219;
+  display: inline-block;
+  font-family: var(--font-editorial), ui-serif, Georgia, serif;
+  font-size: 1.4rem;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  transform: rotate(-3deg) translateY(1px);
+  white-space: nowrap;
+}
+
+.signatureSerial {
+  border-left: 1px solid rgba(63, 44, 30, 0.14);
+  color: rgba(76, 52, 35, 0.6);
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  padding-left: 14px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Responsive -------------------------------------------------------------- */
+
+@media (max-width: 860px) {
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .metrics > li:first-child .metric {
+    padding-left: clamp(14px, 2vw, 26px);
+  }
+
+  .metrics > li:first-child .metricHint {
+    left: clamp(14px, 2vw, 26px);
+  }
+
+  .metrics > li:nth-child(3) .metric {
+    border-left: 0;
+  }
+
+  .metrics > li:nth-child(n + 3) .metric {
+    border-top: 1px solid rgba(63, 44, 30, 0.13);
+  }
+
+  .signatureSerial {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .metrics {
+    margin-top: 22px;
+  }
+
+  .metric {
+    min-height: 84px;
+    padding: 13px 12px;
+  }
+
+  .metrics > li:first-child .metric {
+    padding-left: 12px;
+  }
+
+  .metrics > li:first-child .metricHint,
+  .metricHint {
+    left: 12px;
+    bottom: 13px;
+  }
+
+  .metricValue {
+    font-size: 1.8rem;
+  }
+
+  .scroll {
+    padding: 22px 16px 20px;
+  }
+
+  .track {
+    right: 6px;
+  }
+
+  .signature {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .magnetic {
+    transform: none !important;
+  }
+
+  .metric::after,
+  .metricValue,
+  .metricLabel,
+  .metricHint,
+  .fade,
+  .track,
+  .scrollCue {
+    transition-duration: 1ms !important;
+  }
+
+  .scrollCue svg {
+    animation: none;
+  }
+}

@@ -180,6 +180,148 @@ This file stores cross-session learnings that future sessions must preserve.
 - Future performance reviews should parse `.next/server/app/**/page_client-reference-manifest.js`
   when the Next route table omits byte sizes.
 
+## Premium V2 UI/UX Refinement: 2026-06-05
+
+- First-viewport content must not server-render as hidden. Header, hero identity,
+  route headline, primary CTA, and proof metrics should be visible before motion
+  finishes.
+- Use `initial={false}` or route-specific alternatives for top-level Framer
+  elements that would otherwise create a blank page before hydration.
+- Keep the light theme from becoming one-note cream by pairing warm porcelain
+  with cool sage, emerald, or signal-blue undertones.
+- Repeated proof, metric, and case-file cards benefit from one faint shared
+  Gold Thread edge; avoid adding new badges, chips, or decorative objects to
+  solve a material problem.
+- Profile/contact pages should not bottom-align the main identity beside a tall
+  side card. The visitor should see the name, role, and best contact path
+  immediately.
+- Dramatic display type should use stable rem sizing plus breakpoint tuning,
+  not viewport-width font scaling; keep letter spacing at zero.
+- Premium surface detail should compound through shared card highlights,
+  scrollbars, and thread rails before adding new visible widgets.
+- Remove old decorative experiments such as orb/blob layers when they no longer
+  match the art direction; restraint is part of the craftsmanship.
+- Long-form case studies need information scent in the left scan zone on
+  desktop: section names, proof counts, and a calm return route help visitors
+  understand the narrative without reading every paragraph.
+- Scroll-linked reveal CSS must never hide `:target` sections. Any page that
+  supports anchors or shared URLs needs a target override before deeper motion
+  polish is considered complete.
+- Premium CTAs inside dark/gold surfaces should use the shared
+  `primary-action-link` treatment or explicit label/icon colors; inherited
+  motion styles can make local contrast look softer than intended.
+- Measure fixed-header spacing after the current navigation shell is designed.
+  A stale mobile offset can create a large blank band above the first headline,
+  which weakens scan flow even when the page content itself is strong.
+- Credential and proof pages should surface confidence policy before dense
+  evidence lists. Separating current verification, historical support, and
+  missing public links makes the page feel more honest and premium than simply
+  mixing every badge with the same weight.
+- Credential detail panels should lead with a proof receipt before link lists
+  and tags. Method, public-link state, validity, and caveat belong beside the
+  selected claim so trust can be scanned without hunting through metadata.
+- Document hubs and audit-style pages should not hide lower policy or route
+  sections behind scroll-reveal opacity. Full-page capture, print, and review
+  workflows need the same visible continuity as normal browsing.
+- Document/download hubs benefit from a review-order rail before the card grid.
+  PDF first, role packet second, and proof depth third gives visitors a calm
+  path while keeping the richer document system available.
+- Contact pages should visually rank public links according to outreach policy.
+  LinkedIn can be the primary route, while GitHub, LeetCode, and publication
+  links remain supporting proof rather than equal contact actions.
+- Contact CTAs feel calmer when they are paired with an ordered review protocol.
+  LinkedIn, one-page resume, and work proof can become a deliberate scan path
+  instead of three unrelated buttons.
+- Resume pages should use empty space beside a download rail intentionally.
+  Compact handoff sequences can preserve a fast first action while making
+  credentials and case studies feel close, ordered, and premium.
+- Resume hero chips should earn their place. If metadata competes with the
+  visitor's next decision, replace it with a review-order rail and move file
+  freshness into the CTA or recommendation surface.
+- Future roadmap pages should expose governance, not just ambition. Use source
+  counts, proof-packet counts, scope signals, and a promotion gate to show how
+  an exploration earns public visibility.
+- Sticky detail panels need an early next action. If the panel has internal
+  scroll, move the most important route into the header area and leave deeper
+  proof lists below.
+- Optional floating controls should be suppressed on compact touch layouts when
+  they obscure reading or evidence review.
+- Timeline and chronology pages should provide a short narrative spine before
+  dense controls. This supports scan behavior by giving visitors the arc before
+  they choose filters or read the full list.
+- When a timeline collapses to one column, selected milestone detail should
+  appear before the long navigator so mobile readers can understand the active
+  story while the heading context is still fresh.
+- Timeline inspectors need a receipt pattern too. Date, track, current lens fit,
+  and proof density should sit beside the active milestone before metadata and
+  stepper controls.
+- Proof and evidence pages should keep source, relationship map, review route,
+  and proof state close to the selected claim. This makes credibility scannable
+  instead of asking visitors to infer it from the graph.
+- When a proof graph collapses into stacked cards, selected detail should appear
+  before the full evidence chain so mobile visitors do not have to remember
+  which node is active.
+- Project index cards need early route and proof cues. Case versus Review state,
+  proof-note count, verified-link count, and skill/credential depth should sit
+  near the card summary, not only near the footer action.
+- Project cards should not repeat proof-count grids after an early evidence
+  profile. Concentrate first-scan cues near the summary, then let the footer
+  emphasize claim quality, public-safety boundary, and the case-study action.
+- Project-detail pages need their own closing handoff before the global footer.
+  Close the case with proof counts, the work index, proof/skills, resume, and
+  adjacent case-study routes so the visitor has a guided next move.
+- Long proof pages should render core sections during full-page screenshots and
+  review workflows. Scroll-timeline reveal is acceptable polish only when it
+  cannot create invisible reserved space.
+- Homepage scroll-staged sections need URL-target reveal guards too. Direct
+  anchors for selected work, skills, credentials, or future homepage sections
+  should show the headline and first proof surface immediately, even when normal
+  browsing uses reveal or sticky motion.
+- Hidden compact navigation needs more scent than visible desktop navigation.
+  Add one-line destination context in drawers so menu choices remain
+  self-explanatory when surrounding page context is reduced.
+- Global orientation cues should be extremely quiet. A top-edge Gold Thread
+  scroll indicator helps long proof pages communicate position without adding
+  another decision point or crowding the header.
+- Footer systems should close the portfolio narrative with identity, a few proof
+  signals, primary routes, and a clear resume/contact handoff; a footer that only
+  repeats links wastes the final scan moment.
+- Not-found and empty states should recover the visitor into the portfolio
+  narrative. Pair the error with route scent, a primary action, and proof-led
+  alternatives rather than a generic stop message.
+- Dark console panels need inverse text treatment in the warm-light design
+  system; light-surface text tokens can become too quiet once placed on ink.
+- Social preview images are part of the UI/UX. Treat `/opengraph-image` and
+  `/twitter-image` as compressed portfolio covers with dominant identity,
+  proof metrics, route scent, and strict 1200x630 fit checks.
+- Keyboard access details should use the same care as visible route chrome. A
+  skip-to-content link belongs before fixed navigation, should clear the header
+  when revealed, and needs one consistent `main-content` landmark on every page.
+- Browser and saved-app chrome are part of the first impression. Favicon,
+  high-resolution app icon, Apple touch icon, theme color, mask icon, and
+  manifest metadata should carry the simplified NK Gold Thread identity and be
+  checked at their native rendered sizes.
+- Immersive landing-page 3D should act as a proof artifact and spatial anchor,
+  not as generic decoration. Keep it full-bleed, behind the core message, and
+  verify it with screenshots and a nonblank/detail check.
+- The homepage hero's right-side proof card is a core orientation object, not
+  disposable decoration. Keep it breathable and present before adding identity
+  marks or abstract 3D, because it gives visitors immediate review routes and
+  proof context.
+- Direction-aware navigation chrome should seed its scroll position on mount or
+  route change so the first downward gesture hides the selector immediately and
+  the first upward gesture restores it with a high-opacity active state.
+- Scroll-story text should not be crossed by obvious shine/wipe lines. Premium
+  transitions should use ambient bloom, opacity, blur, and slight depth movement
+  so text changes feel seamless instead of visibly swept.
+- If a scroll-story bloom feels like it is loading, shorten the pulse and bind
+  the ambient layer to a faster scroll spring so it reacts to the visitor's
+  gesture and settles immediately after the content change.
+- The warm-light luxury direction should use a small material set across pages:
+  porcelain paper, brass hairlines, lacquered primary controls, and soft glass
+  cards. Reusing those materials makes the portfolio feel designed over time
+  without adding visual noise.
+
 ## Standing Learnings
 
 - The public site should feel premium and professional before it feels playful.

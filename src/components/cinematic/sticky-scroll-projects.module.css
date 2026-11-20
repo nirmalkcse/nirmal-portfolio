@@ -1,0 +1,507 @@
+.track {
+  position: relative;
+  width: 100%;
+  height: 460vh; /* 4 sections + 20vh top offset + 40vh bottom padding for clip-path */
+  background-color: #0f0c0a;
+  color: #fff;
+  z-index: 20; /* Must be higher than hero's z-index: 10 */
+}
+
+.backgroundPanels {
+  position: absolute;
+  top: 20vh; /* Match the 20vh leftColumn padding so the background swiping lines sync perfectly with the TV */
+  left: 0;
+  right: 0;
+  height: calc(100% - 20vh); /* Prevent the panels from extending past the track */
+  z-index: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.bgPanel {
+  width: 100%;
+  height: 100vh; /* Exactly match viewport height */
+  flex-shrink: 0;
+  position: relative;
+}
+
+.bgPanel:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  z-index: 5;
+}
+
+.contentWrapper {
+  display: flex;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 10; /* above the curtain clip path from previous section */
+}
+
+/* Left column scrolls naturally with the document */
+.leftColumn {
+  width: 45%;
+  padding-left: 8%;
+  padding-right: 5%;
+  padding-top: 20vh; /* Allow user to scroll 20vh before first project appears, giving time for header to hide */
+}
+
+.projectBlock {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 4rem 0 10%;
+}
+
+.contentPadding {
+  height: 100vh;
+}
+
+.textSection {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.sectionEyebrow {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  /* Editorial title system: light serif, tight tracking (see globals.css) */
+  font-family: var(--font-serif);
+  font-size: clamp(3rem, 5vw, 4.5rem);
+  font-weight: 600;
+  letter-spacing: -0.026em;
+  color: #e6dcc6;
+  line-height: 1.02;
+  margin: 0 0 1.5rem 0;
+}
+
+.sectionSummary {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 400px;
+}
+
+.projectEyebrow {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 1rem;
+}
+
+.projectTitle {
+  font-size: 3rem;
+  font-weight: 600;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.03em;
+}
+
+.projectSummary {
+  font-size: 1.25rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 2rem;
+}
+
+.projectStack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.stackBadge {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Right column is sticky */
+.rightColumn {
+  width: 55%;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-right: 5%;
+  perspective: 1000px;
+}
+
+.tvBezel {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #0d0d0d;
+  border-radius: 8px; /* sharp corners like a real 4K TV */
+  padding: 4px; /* Thin bezel */
+  box-shadow: 
+    0 50px 100px -20px rgba(0,0,0,0.8), /* Deep ambient shadow */
+    0 0 0 1px rgba(255,255,255,0.08) inset, /* Inner metallic rim */
+    0 0 0 2px #111; /* Outer dark rim */
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.tvScreen {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px; /* Inner screen corners */
+  overflow: hidden;
+  position: relative;
+  background: rgba(0, 0, 0, 0.2); /* Slight darkening for realism */
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.9);
+}
+
+/* Simulated screen glare/glass effect */
+.tvGlass {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 100%);
+  border-radius: 4px;
+}
+
+/* Track for sliding content inside TV */
+.tvContentTrack {
+  position: absolute;
+  top: calc(-50vh + 50%); /* Align exactly with Viewport Y=0 instead of an arbitrary -3rem */
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  will-change: transform;
+}
+
+.sceneImage {
+  width: 100%;
+  height: 100vh; /* Match the text projectBlock exactly for 1:1 parallax */
+  position: relative;
+  overflow: hidden;
+}
+
+.sceneImage:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  z-index: 20; /* above the background gradients */
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .contentWrapper {
+    flex-direction: column;
+  }
+  
+  .leftColumn {
+    width: 100%;
+    padding: 2rem;
+  }
+  
+  .rightColumn {
+    width: 100%;
+    height: auto;
+    position: relative;
+    padding: 2rem;
+  }
+  
+  .textSection {
+    height: auto;
+    min-height: 50vh;
+    padding: 4rem 0;
+  }
+    .sceneImage {
+    height: 25%; /* Revert to percentage for mobile */
+  }
+}
+
+/* ------------------------------------- */
+/* Live Animated Background Components   */
+/* ------------------------------------- */
+
+.liveBg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.perspectiveGrid {
+  position: absolute;
+  inset: -20%;
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  transform: scale(1.5);
+}
+
+.radarSweep {
+  position: absolute;
+  top: -100%;
+  left: -100%;
+  width: 300%;
+  height: 300%;
+  background: conic-gradient(from 0deg at 50% 50%, transparent 0%, rgba(255,255,255,0.05) 15%, rgba(255,255,255,0.2) 20%, transparent 21%);
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 30%, #050505 90%);
+}
+
+.liquidContainer {
+  position: absolute;
+  inset: 0;
+}
+
+.mdmBlob1 {
+  position: absolute; top: 10%; left: 20%; width: 100%; height: 100%;
+  background: radial-gradient(circle, rgba(14,165,233,0.3) 0%, transparent 60%);
+}
+.mdmBlob2 {
+  position: absolute; top: -10%; left: -20%; width: 100%; height: 100%;
+  background: radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 60%);
+}
+
+.fabricBlob1 {
+  position: absolute; top: -20%; left: -20%; width: 120%; height: 120%;
+  background: radial-gradient(circle, rgba(190,24,93,0.4) 0%, transparent 70%);
+}
+.fabricBlob2 {
+  position: absolute; top: 10%; left: 10%; width: 120%; height: 120%;
+  background: radial-gradient(circle, rgba(126,34,206,0.5) 0%, transparent 70%);
+}
+.fabricBlob3 {
+  position: absolute; top: 30%; left: -30%; width: 120%; height: 120%;
+  background: radial-gradient(circle, rgba(225,29,72,0.4) 0%, transparent 70%);
+}
+
+.dataRing {
+  position: absolute;
+  border-radius: 50%;
+}
+
+/* ------------------------------------- */
+/* Premium Cinematic Animations          */
+/* ------------------------------------- */
+
+/* Animated Mesh Gradient Background */
+.meshGradientBg {
+  position: absolute;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(circle at 50% 50%, var(--aurora-1, rgba(29, 78, 216, 0.15)), transparent 50%),
+    radial-gradient(circle at 100% 50%, var(--aurora-2, rgba(147, 51, 234, 0.15)), transparent 50%),
+    radial-gradient(circle at 0% 100%, var(--aurora-3, rgba(225, 29, 72, 0.15)), transparent 50%);
+  filter: blur(80px);
+  animation: meshRotate 20s infinite linear;
+  opacity: 0.8;
+  z-index: 0;
+}
+
+@keyframes meshRotate {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+/* Glassmorphism Panel */
+.glassPanel {
+  background: rgba(15, 23, 42, 0.3);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer overlay for Glass Panel */
+.glassPanel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.05),
+    transparent
+  );
+  transform: skewX(-20deg);
+  animation: shimmer 6s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  20% { left: 200%; }
+  100% { left: 200%; }
+}
+
+/* Flowing Data Lines */
+.dataStreamContainer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.dataLine {
+  position: absolute;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, var(--stream-color, rgba(255,255,255,0.8)), transparent);
+  animation: streamFall linear infinite;
+  opacity: 0;
+}
+
+@keyframes streamFall {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+/* Glowing Nodes */
+.glowingNode {
+  border-radius: 50%;
+  background: var(--node-color, #fff);
+  box-shadow: 0 0 20px 2px var(--node-color, #fff);
+  position: relative;
+}
+.glowingNode::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid var(--node-color, #fff);
+  animation: pulseNode 2s infinite ease-out;
+}
+
+@keyframes pulseNode {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* Floating Animation */
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+.floatingElement {
+  animation: float 6s ease-in-out infinite;
+}
+
+
+/* ─── Case link ────────────────────────────────────────────────────────
+   Each chapter ends on a way in. An index, a label and an arrow on one
+   hairline that draws across on hover. */
+.caseLink {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-top: 2.25rem;
+  padding: 0 0 12px;
+  color: rgba(255, 248, 238, 0.92);
+  text-decoration: none;
+}
+
+.caseLink::before,
+.caseLink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+}
+
+.caseLink::before {
+  background: rgba(255, 248, 238, 0.18);
+}
+
+.caseLink::after {
+  background: linear-gradient(90deg, #d9ad73, #f3dcb6);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.caseLink:hover::after,
+.caseLink:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.caseLinkIndex {
+  color: #d9ad73;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+}
+
+.caseLinkLabel {
+  font-family: var(--font-ui);
+  font-size: 1.0625rem;
+  font-weight: 500;
+  letter-spacing: -0.012em;
+}
+
+.caseLinkArrow {
+  font-size: 1.1rem;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.caseLink:hover .caseLinkArrow,
+.caseLink:focus-visible .caseLinkArrow {
+  transform: translateX(6px);
+}
+
+.caseLink:focus-visible {
+  outline: 2px solid #d9ad73;
+  outline-offset: 6px;
+  border-radius: 2px;
+}
+
+/* The monitor diagrams were set in -apple-system, which is Arial off Apple. */
+.liveBg svg text {
+  font-family: var(--font-display);
+}

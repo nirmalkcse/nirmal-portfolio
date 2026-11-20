@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { FutureProjectsObservatory } from "@/components/future-projects";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Future Projects",
+export const metadata: Metadata = createPageMetadata({
+  title: "Learning Roadmap",
   description:
-    "Currently-exploring roadmap for public-safe future portfolio artifacts, grounded in existing case files and proof signals."
-};
+    "Learning roadmap for future public demos grounded in Nirmal Kumar's existing Fabric, Databricks, BI, and data-agent work.",
+  path: "/future-projects"
+});
 
 export default function FutureProjectsPage() {
   return <FutureProjectsObservatory />;

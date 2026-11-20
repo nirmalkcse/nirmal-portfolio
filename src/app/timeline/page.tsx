@@ -1,17 +1,15 @@
 import type { Metadata } from "next";
-import { CareerTimeline } from "@/components/timeline";
-import { RoleLensProvider } from "@/context/role-lens-context";
+import { TimelineStory } from "@/components/timeline";
+import { storyMono, storySans } from "@/components/story/story-fonts";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPageMetadata({
   title: "Timeline",
   description:
-    "Scroll-driven career timeline for Nirmal Kumar's education, work, credentials, projects, and current exploration."
-};
+    "Career timeline for Nirmal Kumar covering education, BI validation, Fabric migration, Databricks work, credentials, and projects.",
+  path: "/timeline"
+});
 
 export default function TimelinePage() {
-  return (
-    <RoleLensProvider>
-      <CareerTimeline />
-    </RoleLensProvider>
-  );
+  return <TimelineStory className={`${storySans.variable} ${storyMono.variable}`} />;
 }

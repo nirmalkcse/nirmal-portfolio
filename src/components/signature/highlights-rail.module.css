@@ -1,0 +1,256 @@
+/* Sits in the light middle of the home page, between the disciplines
+   ribbon and Credentials, on the page's own ground. */
+.section {
+  --rail-max: var(--layout-page-max);
+  --rail-inset: max(var(--layout-gutter), calc((100% - var(--rail-max)) / 2 + var(--layout-gutter)));
+  position: relative;
+  padding: clamp(24px, 3vw, 48px) 0 clamp(64px, 7vw, 104px);
+}
+
+.head {
+  padding-inline: var(--rail-inset);
+}
+
+.title {
+  max-width: 22ch;
+  margin: 0 0 clamp(28px, 3.4vw, 44px);
+  color: #1d1915;
+  font-family: var(--font-display);
+  font-size: clamp(2.3rem, 4.2vw, 3.75rem);
+  font-weight: 600;
+  letter-spacing: -0.032em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.tail {
+  color: #a39383;
+}
+
+/* ─── Track ─────────────────────────────────────────────────────────────── */
+.track {
+  display: grid;
+  grid-auto-columns: clamp(286px, 28vw, 372px);
+  grid-auto-flow: column;
+  gap: 20px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding: 10px var(--rail-inset) 34px;
+  scroll-padding-inline: var(--rail-inset);
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .track {
+    cursor: grab;
+  }
+}
+
+/* While dragging, the track follows the hand exactly; snapping resumes
+   when the drag ends. */
+.track[data-dragging="true"] {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  user-select: none;
+}
+
+.track[data-dragging="true"] .card {
+  pointer-events: none;
+}
+
+.cardSlot {
+  display: flex;
+  scroll-snap-align: start;
+}
+
+/* ─── Cards ─────────────────────────────────────────────────────────────── */
+.card {
+  --seal-fill: #9a5637;
+  --seal-check: #fbf6ee;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: clamp(400px, 33vw, 468px);
+  padding: 30px 30px 28px;
+  border: 1px solid rgba(154, 86, 55, 0.12);
+  border-radius: 28px;
+  background: linear-gradient(180deg, #ffffff, #fbf5ec);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 24px 50px -38px rgba(70, 45, 30, 0.4);
+  color: #1d1915;
+  text-decoration: none;
+  transition:
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    scale 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.card:hover,
+.card:focus-visible {
+  transform: translateY(-4px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 34px 64px -40px rgba(70, 45, 30, 0.5);
+}
+
+.card:focus-visible {
+  border-radius: 28px;
+  box-shadow:
+    0 0 0 2px #fbf8f2,
+    0 0 0 4px rgba(154, 86, 55, 0.7);
+}
+
+.cardLacquer {
+  --seal-fill: #d9ad73;
+  --seal-check: #1f1712;
+  border-color: rgba(217, 173, 115, 0.18);
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(150, 96, 56, 0.34), transparent 60%),
+    linear-gradient(180deg, #2c211a, #1c1511);
+  color: #f6eee3;
+  box-shadow: 0 28px 60px -36px rgba(30, 20, 12, 0.7);
+}
+
+.cardLacquer:hover,
+.cardLacquer:focus-visible {
+  box-shadow: 0 38px 72px -38px rgba(30, 20, 12, 0.78);
+}
+
+.figure {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(4.25rem, 6.4vw, 6rem);
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+}
+
+.figure .figureSeal {
+  width: 64px;
+  height: 64px;
+}
+
+.copy {
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 32px;
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.cardDetail {
+  color: #6d6056;
+  font-size: 0.98rem;
+  letter-spacing: -0.006em;
+  line-height: 1.5;
+}
+
+.cardLacquer .cardDetail {
+  color: rgba(246, 238, 227, 0.68);
+}
+
+.cardLink {
+  margin-top: 22px;
+  color: #9a5637;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.cardLacquer .cardLink {
+  color: #d9ad73;
+}
+
+.cardLink span {
+  display: inline-block;
+  transition: transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.card:hover .cardLink span {
+  transform: translateX(3px);
+}
+
+/* ─── Arrows ────────────────────────────────────────────────────────────── */
+.controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-inline: var(--rail-inset);
+}
+
+.control {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(29, 25, 21, 0.07);
+  color: #1d1915;
+  transition:
+    background-color 0.25s ease,
+    opacity 0.25s ease,
+    scale 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.control svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.control:hover:not(:disabled) {
+  background: rgba(29, 25, 21, 0.12);
+}
+
+.control:disabled {
+  cursor: default;
+  opacity: 0.32;
+}
+
+@media (max-width: 720px) {
+  .track {
+    grid-auto-columns: 82%;
+    gap: 14px;
+  }
+
+  .card {
+    min-height: 420px;
+    padding: 26px 24px 24px;
+  }
+
+  .controls {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .cardLink span {
+    transition: none;
+  }
+
+  .card:hover,
+  .card:focus-visible {
+    transform: none;
+  }
+}

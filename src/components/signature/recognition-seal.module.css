@@ -1,0 +1,185 @@
+/* ─── Seal mark ─────────────────────────────────────────────────────────── */
+.mark {
+  flex: none;
+  width: 1.15em;
+  height: 1.15em;
+  overflow: visible;
+}
+
+.markFill {
+  fill: var(--seal-fill, #9a5637);
+  stroke: var(--seal-fill, #9a5637);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+
+.markCheck {
+  fill: none;
+  stroke: var(--seal-check, #fbf6ee);
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ─── One-line seal ─────────────────────────────────────────────────────── */
+.seal {
+  --seal-fill: #9a5637;
+  --seal-check: #fbf6ee;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45em;
+  margin: 0;
+  color: #1d1915;
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.seal[data-tone="dark"] {
+  --seal-fill: #d9ad73;
+  --seal-check: #1f1712;
+  color: #f6eee3;
+}
+
+.sealName {
+  white-space: nowrap;
+}
+
+.sealDot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.38;
+}
+
+.sealRole {
+  color: #8a7a6b;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.seal[data-tone="dark"] .sealRole {
+  color: rgba(246, 238, 227, 0.62);
+}
+
+/* ─── Full statement ────────────────────────────────────────────────────── */
+.panel {
+  --seal-fill: #9a5637;
+  --seal-check: #fbf6ee;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 18px 22px;
+  padding: clamp(22px, 2.6vw, 30px) clamp(22px, 3vw, 34px);
+  border: 1px solid rgba(154, 86, 55, 0.16);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 250, 243, 0.62));
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 18px 50px -34px rgba(70, 45, 30, 0.35);
+  color: #1d1915;
+}
+
+.panel[data-tone="dark"] {
+  --seal-fill: #d9ad73;
+  --seal-check: #1f1712;
+  border-color: rgba(217, 173, 115, 0.2);
+  background: linear-gradient(180deg, rgba(48, 36, 28, 0.96), rgba(32, 24, 19, 0.96));
+  box-shadow: 0 18px 50px -30px rgba(0, 0, 0, 0.6);
+  color: #f6eee3;
+}
+
+.panelMark {
+  width: 40px;
+  height: 40px;
+  margin-top: 2px;
+}
+
+.panelCopy {
+  min-width: 0;
+}
+
+.panelEyebrow {
+  margin: 0 0 6px;
+  color: #9a5637;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+.panel[data-tone="dark"] .panelEyebrow {
+  color: #d9ad73;
+}
+
+.panelTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: -0.024em;
+  line-height: 1.15;
+}
+
+.panelLine {
+  max-width: 44rem;
+  margin: 10px 0 0;
+  color: #5f5248;
+  font-size: 1rem;
+  letter-spacing: -0.008em;
+  line-height: 1.55;
+}
+
+.panel[data-tone="dark"] .panelLine {
+  color: rgba(246, 238, 227, 0.72);
+}
+
+.panelScope {
+  margin: 10px 0 0;
+  color: #8a7a6b;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.panelLink {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  color: #9a5637;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.panelLink span {
+  transition: transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.panelLink:hover span,
+.panelLink:focus-visible span {
+  transform: translateX(3px);
+}
+
+.panelLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (max-width: 720px) {
+  .panel {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .panelLink {
+    grid-column: 2;
+    justify-self: start;
+  }
+}

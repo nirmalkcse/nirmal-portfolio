@@ -16,6 +16,37 @@ export type MediaStatus = "pending" | "available";
 
 export type ProjectStatus = "current" | "complete" | "published" | "observed";
 
+export type EvidenceType =
+  | "metric"
+  | "project-detail"
+  | "credential-url"
+  | "publication-link"
+  | "code-or-demo-link"
+  | "sanitized-diagram"
+  | "screenshot"
+  | "testimonial-or-recommendation"
+  | "learning-or-reflection";
+
+export type EvidencePublicStatus =
+  | "publicly-verifiable"
+  | "sanitized-for-confidentiality"
+  | "summarized-from-internal-work"
+  | "credential-verified"
+  | "evidence-still-being-collected"
+  | "planned-public-artifact";
+
+export type EvidenceConfidence = "high" | "medium" | "needs-review";
+
+export type EvidenceNote = {
+  claim: string;
+  evidenceType: EvidenceType;
+  source: string;
+  publicStatus: EvidencePublicStatus;
+  confidence: EvidenceConfidence;
+  relatedProject: string;
+  confidentialityBoundary: string;
+};
+
 export type TimelineCategory =
   | "education"
   | "publication"
@@ -111,6 +142,7 @@ export type Project = {
   impact: string;
   links: readonly PortfolioLink[];
   media: readonly MediaAsset[];
+  evidenceNotes?: readonly EvidenceNote[];
   relatedSkills: readonly string[];
   relatedCredentials: readonly string[];
   timelineDate: string | null;

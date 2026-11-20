@@ -1,0 +1,154 @@
+.revealedBg {
+  position: absolute;
+  inset: 0;
+  background-color: #fdfbf7; /* Rich alabaster/ivory base */
+  background-image:
+    radial-gradient(112% 78% at 14% 8%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 58%),
+    radial-gradient(96% 72% at 88% 26%, rgba(235, 210, 180, 0.34) 0%, rgba(235, 210, 180, 0) 66%),
+    radial-gradient(86% 70% at 74% 92%, rgba(245, 225, 210, 0.40) 0%, rgba(245, 225, 210, 0) 68%),
+    radial-gradient(100% 84% at 24% 88%, rgba(215, 200, 190, 0.30) 0%, rgba(215, 200, 190, 0) 70%);
+  z-index: 1;
+  overflow: hidden;
+  perspective: 1000px;
+}
+
+.meshGradients {
+  position: absolute;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  animation: slowSpin 96s linear infinite;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.gradient1 {
+  position: absolute;
+  top: 20%;
+  left: 30%;
+  width: 50vw;
+  height: 50vw;
+  /* Warm champagne/gold */
+  background: radial-gradient(circle, rgba(235, 210, 180, 0.6) 0%, transparent 60%);
+  border-radius: 50%;
+  animation: float1 15s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+  will-change: transform;
+}
+
+.gradient2 {
+  position: absolute;
+  top: 60%;
+  right: 20%;
+  width: 40vw;
+  height: 40vw;
+  /* Sheer peach / rose-gold */
+  background: radial-gradient(circle, rgba(245, 225, 210, 0.7) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float2 20s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+  will-change: transform;
+}
+
+.gradient3 {
+  position: absolute;
+  bottom: 20%;
+  left: 40%;
+  width: 60vw;
+  height: 60vw;
+  /* Icy pearl / light taupe */
+  background: radial-gradient(circle, rgba(215, 200, 190, 0.5) 0%, transparent 65%);
+  border-radius: 50%;
+  animation: float3 18s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+  will-change: transform;
+}
+
+/* The silk warp — a long satin highlight travelling with the weave, plus the
+   softer band that trails it. Every stop is a gentle alpha falloff, so it needs
+   no blur to look smooth, and it moves on transform rather than the old
+   background-position sweep, which repainted the whole viewport every frame. */
+.livelyElement {
+  position: absolute;
+  inset: -40%;
+  background:
+    linear-gradient(104deg,
+      rgba(255, 255, 255, 0) 26%,
+      rgba(255, 255, 255, 0.55) 39%,
+      rgba(255, 255, 255, 0.14) 46%,
+      rgba(255, 255, 255, 0) 58%),
+    linear-gradient(104deg,
+      rgba(215, 200, 190, 0) 50%,
+      rgba(215, 200, 190, 0.26) 64%,
+      rgba(215, 200, 190, 0) 79%);
+  pointer-events: none;
+  z-index: 1;
+  will-change: transform;
+  animation: silkSweep 30s cubic-bezier(0.45, 0.05, 0.25, 0.95) infinite alternate;
+}
+
+/* The weft — the cross-thread, drifting the other way on a longer cycle so the
+   two never come back into phase and the canvas never looks like it loops. */
+.silkCross {
+  position: absolute;
+  inset: -40%;
+  background:
+    linear-gradient(-72deg,
+      rgba(235, 210, 180, 0) 30%,
+      rgba(235, 210, 180, 0.30) 47%,
+      rgba(235, 210, 180, 0) 64%);
+  pointer-events: none;
+  z-index: 1;
+  will-change: transform;
+  animation: silkCrossDrift 44s cubic-bezier(0.45, 0.05, 0.25, 0.95) infinite alternate;
+}
+
+.spotlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes slowSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes float1 {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(15%, 20%, 0) scale(1.18); }
+}
+
+@keyframes float2 {
+  0% { transform: translate3d(0, 0, 0) scale(1.18); }
+  100% { transform: translate3d(-20%, 10%, 0) scale(0.94); }
+}
+
+@keyframes float3 {
+  0% { transform: translate3d(0, 0, 0) scale(0.94); }
+  100% { transform: translate3d(10%, -20%, 0) scale(1.1); }
+}
+
+@keyframes silkSweep {
+  0%   { transform: translate3d(-14%, 8%, 0); }
+  100% { transform: translate3d(13%, -9%, 0); }
+}
+
+@keyframes silkCrossDrift {
+  0%   { transform: translate3d(10%, -7%, 0); }
+  100% { transform: translate3d(-11%, 8%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meshGradients,
+  .gradient1,
+  .gradient2,
+  .gradient3,
+  .livelyElement,
+  .silkCross {
+    animation: none;
+  }
+}

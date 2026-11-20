@@ -1,718 +1,1910 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import Link from "next/link";
 import {
+  ArrowDownToLine,
   ArrowRight,
-  BadgeCheck,
-  BookOpenCheck,
+  ArrowUpRight,
+  BookOpen,
   BriefcaseBusiness,
-  CheckCircle2,
   Code2,
-  Compass,
-  Download,
-  ExternalLink,
+  FileText,
   GraduationCap,
   Layers3,
   MapPin,
-  Network,
-  ShieldCheck,
-  Sparkles,
-  UserRound,
-  Users,
-  type LucideIcon
+  Maximize2,
+  X
 } from "lucide-react";
-import type { ReactNode } from "react";
-import { useRoleLens } from "@/context/role-lens-context";
+import { FaGithub, FaLinkedinIn } from "react-icons/fa";
 import {
-  certifications,
-  featuredProjectSlugs,
-  profile,
-  projects,
-  skillClusters,
-  type SocialLink,
-  type Viewer
-} from "@/data";
+  AnimatePresence,
+  LayoutGroup,
+  motion,
+  useMotionValue,
+  useMotionValueEvent,
+  useScroll,
+  useSpring,
+  useTransform,
+  type MotionValue
+} from "framer-motion";
 import {
-  getBalancedGatewayModel,
-  getProjectsForRole,
-  getRoleGatewayModel,
-  getSkillClustersForRole,
-  roleOrder,
-  type RoleCta,
-  type RoleEvidence
-} from "@/lib/role-lens";
-
-type ProfileLens = Viewer | "balanced";
-
-type ProfileRoute = {
-  href: string;
-  label: string;
-  detail: string;
-  Icon: LucideIcon;
-};
-
-const PROFILE_LENS_PANEL_ID = "profile-lens-panel";
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type PointerEvent,
+  type ReactNode,
+  type RefObject
+} from "react";
+import { DownloadLink } from "@/components/ui/download-link";
+import { profile, type SocialLink } from "@/data";
+import styles from "./professional-profile.module.css";
 
 const onePageResume = {
-  href: "/resume/nirmal-kumar-data-engineer-one-page-resume.docx",
-  fileName: "nirmal-kumar-data-engineer-one-page-resume.docx"
+  href: "/resume/nirmal-kumar-data-engineer-one-page-resume.pdf",
+  fileName: "nirmal-kumar-data-engineer-one-page-resume.pdf"
 } as const;
 
-const lensMeta = {
-  balanced: { label: "Balanced", Icon: Sparkles },
-  recruiter: { label: "Recruiter", Icon: Users },
-  engineer: { label: "Engineer", Icon: Code2 },
-  leader: { label: "Leader", Icon: ShieldCheck },
-  explorer: { label: "Explorer", Icon: Compass }
-} satisfies Record<ProfileLens, { label: string; Icon: LucideIcon }>;
-
-const roleDisciplineLabels = [
-  "Data Engineering",
-  "Analytics Engineering",
-  "BI Modernization",
-  "Data Product Engineering"
-] as const;
-
-const proofRoutes = [
-  {
-    href: "/proof",
-    label: "Proof graph",
-    detail: "Skills, projects, credentials, metrics, and proof gaps connected as evidence.",
-    Icon: Network
-  },
-  {
-    href: "/projects",
-    label: "Case files",
-    detail: "Public-safe project stories for Fabric, Databricks, BI, research, and demos.",
-    Icon: Layers3
-  },
-  {
-    href: "/certifications",
-    label: "Credentials",
-    detail: "Fabric, Databricks, analytics, cloud, and supporting credentials with verification state.",
-    Icon: BadgeCheck
-  },
-  {
-    href: "/timeline",
-    label: "Timeline",
-    detail: "Education, work, project, publication, credential, and exploration momentum.",
-    Icon: BriefcaseBusiness
-  }
-] as const satisfies readonly ProfileRoute[];
-
-const contactBoundaries = [
-  "LinkedIn is the primary public contact path.",
-  "Email can be added after confirmation.",
-  "Phone remains unpublished on the public site."
-] as const;
+const masterResume = {
+  href: "/resume/nirmal-kumar-data-engineer-master-resume.pdf",
+  fileName: "nirmal-kumar-data-engineer-master-resume.pdf"
+} as const;
 
 const currentRole = profile.roles[0];
-const featuredProjects = featuredProjectSlugs
-  .map((slug) => projects.find((project) => project.slug === slug))
-  .filter((project): project is (typeof projects)[number] => Boolean(project));
+const contactHeadline =
+  "Data Engineer shaping Microsoft Fabric, Databricks, SQL, PySpark, and Power BI systems for migration, validation, and modern reporting.";
+const folioSummary =
+  "Nirmal Kumar builds data systems that bring clarity to migration, reporting, and validation. His strongest work spans telecom migration assets for 3 source systems and 18–24 daily incremental tables, BI validation that reduced report discrepancies by 90%, Tableau-to-Power BI migrations, and a Databricks-hosted MDM/entity-resolution product with governed orchestration, reviewable decisions, and role-based controls.";
+const primaryContact =
+  profile.socialLinks.find((link) => link.label === "LinkedIn") ??
+  profile.socialLinks[0];
+const github =
+  profile.socialLinks.find((link) => link.label === "GitHub") ??
+  profile.socialLinks[1];
+const quietEase = [0.16, 1, 0.3, 1] as const;
+const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
 
-function profileMetricCards() {
-  return [
-    {
-      label: "Enterprise scale",
-      value: "3 systems",
-      detail: "Telecom Fabric migration PoC"
-    },
-    {
-      label: "Daily tables",
-      value: "18-24",
-      detail: "Incremental source tables supported"
-    },
-    {
-      label: "Validation",
-      value: "15+ reports",
-      detail: "MicroStrategy-to-Fabric checks"
-    },
-    {
-      label: "Quality gain",
-      value: "90%",
-      detail: "Validation discrepancy reduction"
+function subscribeToReducedMotion(onStoreChange: () => void) {
+  const mediaQuery = window.matchMedia(reducedMotionQuery);
+  mediaQuery.addEventListener("change", onStoreChange);
+
+  return () => mediaQuery.removeEventListener("change", onStoreChange);
+}
+
+function getReducedMotionSnapshot() {
+  return window.matchMedia(reducedMotionQuery).matches;
+}
+
+function getReducedMotionServerSnapshot() {
+  return false;
+}
+
+function useStableReducedMotion() {
+  return useSyncExternalStore(
+    subscribeToReducedMotion,
+    getReducedMotionSnapshot,
+    getReducedMotionServerSnapshot
+  );
+}
+
+const outcomes = [
+  {
+    value: "90%",
+    numericValue: 90,
+    suffix: "%",
+    label: "fewer validation discrepancies",
+    detail: "SQL reconciliation across migrated BI reporting.",
+    href: "/projects/bi-migration-validation-analytics"
+  },
+  {
+    value: "15+",
+    numericValue: 15,
+    suffix: "+",
+    label: "reports brought through validation",
+    detail: "MicroStrategy-to-Fabric and related migration work.",
+    href: "/projects/bi-migration-validation-analytics"
+  },
+  {
+    value: "3",
+    numericValue: 3,
+    suffix: "",
+    label: "source systems shaped for migration",
+    detail: "Alongside 18–24 daily incremental source tables.",
+    href: "/projects/telecom-fabric-migration-poc"
+  }
+] as const;
+
+const presenceLinks = profile.socialLinks.filter(
+  (link) => link.label !== "LinkedIn" && link.label !== "GitHub"
+);
+
+const folioMetrics = [
+  { value: "3", label: "source systems" },
+  { value: "18–24", label: "daily source tables" },
+  { value: "15+", label: "reports validated" },
+  { value: "90%", label: "fewer discrepancies" }
+] as const;
+
+const folioDisciplines = [
+  {
+    label: "Data systems",
+    value: "Microsoft Fabric · Databricks · Delta Lake · PySpark · SQL"
+  },
+  {
+    label: "Analytics",
+    value: "Power BI · DAX · Power Query · semantic models"
+  },
+  {
+    label: "Governance",
+    value: "Unity Catalog · RBAC · audit logging · orchestration"
+  }
+] as const;
+
+const folioWork = [
+  {
+    href: "/projects/telecom-fabric-migration-poc",
+    label: "Fabric migration",
+    detail: "3 source systems · 18–24 incremental tables"
+  },
+  {
+    href: "/projects/bi-migration-validation-analytics",
+    label: "BI validation",
+    detail: "15+ reports · 90% fewer discrepancies"
+  },
+  {
+    href: "/projects/icore-enterprise-mdm-entity-resolution",
+    label: "Governed MDM product",
+    detail: "Entity resolution · reviewable decisions · role controls"
+  }
+] as const;
+
+const folioContentVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      delayChildren: 0.74,
+      staggerChildren: 0.055
     }
-  ] as const;
-}
-
-function statusLabel(status: SocialLink["status"]) {
-  return status.replaceAll("-", " ");
-}
-
-function ctaClasses(emphasis: RoleCta["emphasis"]) {
-  if (emphasis === "primary") {
-    return "border-[var(--border-gold)] bg-[var(--button-primary-bg)] text-[var(--button-primary-text)] hover:border-[var(--color-champagne)]";
   }
+} as const;
 
-  if (emphasis === "secondary") {
-    return "border-[var(--border-subtle)] bg-[var(--button-secondary-bg)] text-[var(--button-secondary-text)] hover:border-[var(--border-gold)] hover:text-[var(--color-ivory)]";
+const folioItemVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.52, ease: quietEase }
   }
+} as const;
 
-  return "border-transparent text-[var(--color-warm-silver)] hover:border-[var(--border-subtle)] hover:bg-[color-mix(in_srgb,var(--color-carbon)_74%,transparent)] hover:text-[var(--color-ivory-soft)]";
+function PlatformIcon({ label }: { label: string }) {
+  const iconProps = {
+    "aria-hidden": true,
+    strokeWidth: 1.7
+  } as const;
+
+  switch (label) {
+    case "LinkedIn":
+      return <FaLinkedinIn aria-hidden="true" />;
+    case "GitHub":
+      return <FaGithub aria-hidden="true" />;
+    case "IEEE":
+      return <BookOpen {...iconProps} />;
+    case "LeetCode":
+      return <Code2 {...iconProps} />;
+    default:
+      return <ArrowUpRight {...iconProps} />;
+  }
 }
 
-function ProfileLensButton({
-  active,
-  lens,
-  onSelect
+function SectionSweep({
+  progress,
+  reduced
 }: {
-  active: boolean;
-  lens: ProfileLens;
-  onSelect: () => void;
+  progress?: MotionValue<number>;
+  reduced: boolean;
 }) {
-  const { Icon, label } = lensMeta[lens];
+  if (progress) {
+    return (
+      <motion.span
+        aria-hidden="true"
+        className={styles.sectionSweep}
+        style={{ opacity: 1, scaleX: reduced ? 1 : progress }}
+      />
+    );
+  }
 
   return (
-    <button
-      aria-controls={PROFILE_LENS_PANEL_ID}
-      aria-pressed={active}
-      className={`motion-lens-choice inline-flex min-h-10 items-center gap-2 rounded-[var(--radius-control)] border px-3 text-sm transition duration-[var(--duration-feedback)] hover:-translate-y-[var(--motion-distance-xs)] ${
-        active
-          ? "border-[var(--border-cool)] bg-[color-mix(in_srgb,var(--color-signal-blue)_14%,transparent)] text-[var(--color-ivory)]"
-          : "border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-carbon)_72%,transparent)] text-[var(--color-warm-silver)] hover:border-[var(--border-strong)] hover:text-[var(--color-ivory-soft)]"
-      }`}
-      onClick={onSelect}
-      type="button"
-    >
-      <Icon aria-hidden="true" className="h-4 w-4" />
-      {label}
-    </button>
+    <motion.span
+      aria-hidden="true"
+      className={styles.sectionSweep}
+      initial={reduced ? false : { opacity: 0, scaleX: 0 }}
+      transition={{ duration: 0.9, ease: quietEase }}
+      viewport={{ once: true, amount: 0.4 }}
+      whileInView={{ opacity: 1, scaleX: 1 }}
+    />
   );
 }
 
-function ResumeDownloadLink({
-  children,
-  primary = false
+function CardFace({
+  interactive,
+  secretActive
 }: {
-  children: ReactNode;
-  primary?: boolean;
+  interactive: boolean;
+  secretActive: boolean;
 }) {
-  return (
-    <a
-      aria-label={`Download one-page resume DOCX file: ${onePageResume.fileName}`}
-      className={`motion-cta inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--radius-control)] border px-4 text-sm font-semibold transition duration-[var(--duration-feedback)] hover:-translate-y-[var(--motion-distance-xs)] ${
-        primary
-          ? "border-[var(--border-gold)] bg-[var(--button-primary-bg)] text-[var(--button-primary-text)] hover:border-[var(--color-champagne)]"
-          : "border-[var(--border-subtle)] bg-[var(--button-secondary-bg)] text-[var(--button-secondary-text)] hover:border-[var(--border-gold)] hover:text-[var(--color-ivory)]"
-      }`}
-      download={onePageResume.fileName}
-      href={onePageResume.href}
+  const credentialControl = interactive ? (
+    <Link
+      aria-label="View credentials"
+      className={styles.cardChip}
+      href="/certifications"
     >
-      <Download aria-hidden="true" className="h-4 w-4" />
-      {children}
-    </a>
+      <span className={styles.cardControlLabel}>Credentials</span>
+    </Link>
+  ) : (
+    <span aria-hidden="true" className={styles.cardChip} />
   );
-}
+  const workControl = interactive ? (
+    <Link
+      aria-label="View selected work"
+      className={styles.cardOpenIcon}
+      href="/projects"
+    >
+      <ArrowUpRight aria-hidden="true" strokeWidth={1.6} />
+      <span className={styles.cardControlLabel}>Selected work</span>
+    </Link>
+  ) : (
+    <span aria-hidden="true" className={styles.cardOpenIcon}>
+      <ArrowUpRight aria-hidden="true" strokeWidth={1.6} />
+    </span>
+  );
 
-function HeroProfileCard() {
   return (
-    <aside className="motion-panel-enter rounded-[var(--radius-panel)] border border-[var(--console-border)] bg-[var(--surface-console)] p-5 shadow-[var(--shadow-surface)]">
-      <div className="flex items-start gap-4">
-        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-[var(--radius-control)] border border-[var(--border-gold)] bg-[color-mix(in_srgb,var(--color-antique-gold)_12%,transparent)]">
-          <img
-            alt=""
-            height={36}
-            loading="lazy"
-            src="/assets/brand/nk-threadline-monogram-one-color-ivory.svg"
-            width={36}
-          />
+    <>
+      <span aria-hidden="true" className={styles.cardPearl} />
+      <span aria-hidden="true" className={styles.cardTexture} />
+      <span aria-hidden="true" className={styles.cardFoilSweep} />
+
+      <span className={styles.cardTopline}>
+        {credentialControl}
+        <span className={styles.cardEdition}>
+          <span>
+            {secretActive ? "After hours · Chennai" : "Professional profile"}
+          </span>
+          <span>{secretActive ? "13° N · 80° E" : "Edition 01"}</span>
         </span>
-        <div>
-          <p className="font-mono text-xs uppercase text-[var(--color-champagne)]">
-            Canonical profile
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold leading-[1.16] text-[var(--color-ivory)]">
-            {profile.displayName}
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-[var(--color-warm-silver)]">
-            {profile.alternateHeadline}
-          </p>
-        </div>
-      </div>
+      </span>
 
-      <dl className="mt-6 grid gap-4 border-t border-[var(--border-subtle)] pt-5">
-        <div className="grid gap-1">
-          <dt className="inline-flex items-center gap-2 font-mono text-[0.6875rem] uppercase text-[var(--color-steel)]">
-            <BriefcaseBusiness aria-hidden="true" className="h-3.5 w-3.5" />
-            Current role
-          </dt>
-          <dd className="text-sm leading-6 text-[var(--color-ivory-soft)]">
-            {currentRole.title}, {currentRole.discipline}
-          </dd>
-          <dd className="text-sm leading-6 text-[var(--color-warm-silver)]">
-            {currentRole.organization} / {currentRole.startDate} -{" "}
-            {currentRole.endDate}
-          </dd>
-        </div>
+      <span className={styles.cardCenter}>
+        <strong>Nirmal Kumar</strong>
+        <span className={styles.cardRole}>Data Engineer</span>
+      </span>
 
-        <div className="grid gap-1">
-          <dt className="inline-flex items-center gap-2 font-mono text-[0.6875rem] uppercase text-[var(--color-steel)]">
-            <GraduationCap aria-hidden="true" className="h-3.5 w-3.5" />
-            Education
-          </dt>
-          <dd className="text-sm leading-6 text-[var(--color-ivory-soft)]">
-            {profile.education.degree}
-          </dd>
-          <dd className="text-sm leading-6 text-[var(--color-warm-silver)]">
-            {profile.education.institution} / {profile.education.completionYear} /{" "}
-            CGPA {profile.education.cgpa}
-          </dd>
-        </div>
-
-        <div className="grid gap-1">
-          <dt className="inline-flex items-center gap-2 font-mono text-[0.6875rem] uppercase text-[var(--color-steel)]">
-            <MapPin aria-hidden="true" className="h-3.5 w-3.5" />
-            Location
-          </dt>
-          <dd className="text-sm leading-6 text-[var(--color-ivory-soft)]">
-            {profile.location}
-          </dd>
-        </div>
-      </dl>
-    </aside>
+      <span className={styles.cardBottomline}>
+        <span>
+          <span className={styles.cardMicroLabel}>Current chapter</span>
+          <span>{currentRole.organization}</span>
+        </span>
+        <span>
+          <span className={styles.cardMicroLabel}>Base</span>
+          <span>Chennai · India</span>
+        </span>
+        {workControl}
+      </span>
+    </>
   );
 }
 
-function LensPanel({
-  activeLens,
-  evidence,
-  model
+function CardIdentity({
+  onExpand,
+  secretActive,
+  triggerRef
 }: {
-  activeLens: ProfileLens;
-  evidence: readonly RoleEvidence[];
-  model: ReturnType<typeof getBalancedGatewayModel> | ReturnType<typeof getRoleGatewayModel>;
+  onExpand: () => void;
+  secretActive: boolean;
+  triggerRef: RefObject<HTMLButtonElement | null>;
 }) {
+  const prefersReducedMotion = useStableReducedMotion();
+  const rotateXSource = useMotionValue(0);
+  const rotateYSource = useMotionValue(0);
+  const rotateX = useSpring(rotateXSource, {
+    stiffness: 170,
+    damping: 24,
+    mass: 0.7
+  });
+  const rotateY = useSpring(rotateYSource, {
+    stiffness: 170,
+    damping: 24,
+    mass: 0.7
+  });
+  function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
+    if (prefersReducedMotion || event.pointerType === "touch") {
+      return;
+    }
+
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) / bounds.width;
+    const y = (event.clientY - bounds.top) / bounds.height;
+
+    rotateXSource.set((0.5 - y) * 2.4);
+    rotateYSource.set((x - 0.5) * 2.8);
+    event.currentTarget.style.setProperty("--card-light-x", `${x * 100}%`);
+    event.currentTarget.style.setProperty("--card-light-y", `${y * 100}%`);
+  }
+
+  function resetCard(event: PointerEvent<HTMLDivElement>) {
+    rotateXSource.set(0);
+    rotateYSource.set(0);
+    event.currentTarget.style.removeProperty("--card-light-x");
+    event.currentTarget.style.removeProperty("--card-light-y");
+  }
+
   return (
-    <section
-      aria-labelledby="profile-role-title"
-      className="motion-panel-enter rounded-[var(--radius-panel)] border border-[var(--console-border)] bg-[var(--surface-console)] p-5 shadow-[var(--shadow-surface)]"
-      id={PROFILE_LENS_PANEL_ID}
+    <motion.div
+      className={styles.identityCard}
+      data-secret={secretActive ? "true" : undefined}
+      layoutId="profile-card-shell"
+      onPointerMove={handlePointerMove}
+      onPointerLeave={resetCard}
+      onPointerCancel={resetCard}
+      style={
+        prefersReducedMotion
+          ? undefined
+          : { rotateX, rotateY, transformPerspective: 1500 }
+      }
     >
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
-        <div>
-          <p className="font-mono text-xs uppercase text-[var(--color-champagne)]">
-            {lensMeta[activeLens].label} lens
-          </p>
-          <h2
-            className="mt-3 text-3xl font-semibold leading-[1.14] text-[var(--color-ivory)]"
-            id="profile-role-title"
+      <CardFace interactive secretActive={secretActive} />
+      <button
+        aria-haspopup="dialog"
+        aria-label="Open Nirmal Kumar's expanded profile folio"
+        className={styles.cardExpandButton}
+        onClick={onExpand}
+        ref={triggerRef}
+        type="button"
+      />
+    </motion.div>
+  );
+}
+
+function ProfileFolio({
+  onClose,
+  secretActive
+}: {
+  onClose: () => void;
+  secretActive: boolean;
+}) {
+  const prefersReducedMotion = useStableReducedMotion();
+  const [closing, setClosing] = useState(false);
+  const [settled, setSettled] = useState(Boolean(prefersReducedMotion));
+  const closeTimerRef = useRef<number | null>(null);
+  const closingRef = useRef(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const handleClose = useCallback(() => {
+    if (closingRef.current) {
+      return;
+    }
+
+    closingRef.current = true;
+    setClosing(true);
+    setSettled(false);
+
+    if (prefersReducedMotion) {
+      window.requestAnimationFrame(onClose);
+      return;
+    }
+
+    closeTimerRef.current = window.setTimeout(onClose, 880);
+  }, [onClose, prefersReducedMotion]);
+
+  useEffect(() => {
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const focusTimer = window.setTimeout(
+      () => closeRef.current?.focus({ preventScroll: true }),
+      prefersReducedMotion ? 30 : 780
+    );
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    dialogRef.current?.focus({ preventScroll: true });
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        handleClose();
+        return;
+      }
+
+      if (event.key !== "Tab" || !dialogRef.current) {
+        return;
+      }
+
+      const focusable = Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((element) => !element.hasAttribute("hidden"));
+
+      if (!focusable.length) {
+        event.preventDefault();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const activeElement = document.activeElement;
+
+      if (
+        activeElement === dialogRef.current ||
+        !dialogRef.current.contains(activeElement)
+      ) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+        return;
+      }
+
+      if (event.shiftKey && activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      if (closeTimerRef.current !== null) {
+        window.clearTimeout(closeTimerRef.current);
+      }
+      window.clearTimeout(focusTimer);
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [handleClose, prefersReducedMotion]);
+
+  return (
+    <motion.div
+      animate={{ opacity: 1 }}
+      aria-describedby="profile-folio-summary"
+      aria-labelledby="profile-folio-title"
+      aria-modal="true"
+      className={styles.folioOverlay}
+      data-motion={settled ? "settled" : "flipping"}
+      data-lenis-prevent=""
+      data-lenis-prevent-touch=""
+      data-lenis-prevent-wheel=""
+      exit={
+        prefersReducedMotion
+          ? { opacity: 0 }
+          : closing
+            ? { opacity: [1, 1, 0.9, 0] }
+            : { opacity: 0 }
+      }
+      initial={{ opacity: 0 }}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) {
+          handleClose();
+        }
+      }}
+      ref={dialogRef}
+      role="dialog"
+      tabIndex={-1}
+      transition={{
+        duration: prefersReducedMotion ? 0.01 : closing ? 0.72 : 0.34,
+        ease: quietEase,
+        times: closing ? [0, 0.48, 0.78, 1] : undefined
+      }}
+    >
+      <span aria-hidden="true" className={styles.folioHalo} />
+      <motion.div
+        className={styles.folioCard}
+        data-closing={closing ? "true" : undefined}
+        data-settled={settled ? "true" : undefined}
+        layoutId="profile-card-shell"
+        onClick={(event) => event.stopPropagation()}
+        transition={
+          prefersReducedMotion
+            ? { duration: 0.01 }
+            : closing
+              ? {
+                  layout: {
+                    delay: 0,
+                    duration: 0.58,
+                    ease: quietEase
+                  }
+                }
+              : {
+                  layout: {
+                    delay: 0.5,
+                    duration: 0.68,
+                    ease: quietEase
+                  }
+                }
+        }
+      >
+        <motion.span
+          animate={
+            prefersReducedMotion
+              ? { opacity: 0.38, scaleX: 0.9, scaleY: 1, y: 0 }
+              : {
+                  opacity: [0.42, 0.6, 0.34, 0.2, 0.48, 0.52],
+                  scaleX: [0.82, 1.01, 0.58, 0.24, 0.86, 0.92],
+                  scaleY: [0.9, 1, 1.12, 1.28, 0.98, 0.94],
+                  y: [4, 7, 13, 18, 4, 2]
+                }
+          }
+          aria-hidden="true"
+          className={styles.folioGroundShadow}
+          exit={
+            prefersReducedMotion
+              ? { opacity: 0 }
+              : {
+                  opacity: [0.52, 0.48, 0.2, 0.34, 0.42, 0.38],
+                  scaleX: [0.92, 0.86, 0.24, 0.58, 0.78, 0.76],
+                  scaleY: [0.94, 0.98, 1.28, 1.12, 0.98, 0.96],
+                  y: [2, 4, 18, 13, 6, 4]
+                }
+          }
+          initial={
+            prefersReducedMotion
+              ? false
+              : { opacity: 0.42, scaleX: 0.82, scaleY: 0.9, y: 4 }
+          }
+          transition={
+            prefersReducedMotion
+              ? { duration: 0.01 }
+              : closing
+                ? {
+                    duration: 0.72,
+                    ease: "linear",
+                    times: [0, 0.12, 0.42, 0.57, 0.9, 1]
+                  }
+                : {
+                    delay: 0.03,
+                    duration: 1.2,
+                    ease: "linear",
+                    times: [0, 0.1, 0.43, 0.58, 0.88, 1]
+                  }
+          }
+        />
+
+        <span aria-hidden="true" className={styles.folioEdgeSpine} />
+
+        <div
+          className={styles.folioRotator}
+          onAnimationEnd={(event) => {
+            if (
+              event.target === event.currentTarget &&
+              !closingRef.current
+            ) {
+              setSettled(true);
+            }
+          }}
+        >
+          <span
+            aria-hidden="true"
+            className={`${styles.folioEdge} ${styles.folioEdgeLeft}`}
+          />
+          <span
+            aria-hidden="true"
+            className={`${styles.folioEdge} ${styles.folioEdgeRight}`}
+          />
+          <span
+            aria-hidden="true"
+            className={`${styles.folioEdge} ${styles.folioEdgeTop}`}
+          />
+          <span
+            aria-hidden="true"
+            className={`${styles.folioEdge} ${styles.folioEdgeBottom}`}
+          />
+
+          <span
+            aria-hidden="true"
+            className={`${styles.folioFlipPlane} ${styles.folioFlipPlaneFront}`}
           >
-            {model.title}
-          </h2>
-          <p className="mt-4 text-sm leading-6 text-[var(--color-warm-silver)]">
-            {model.summary}
-          </p>
-          <p className="mt-3 text-sm leading-6 text-[var(--color-ivory-soft)]">
-            {model.nextStep}
-          </p>
-          <div className="mt-5 flex flex-wrap gap-2">
-            {model.ctas.map((cta) => (
-              <Link
-                className={`motion-cta inline-flex min-h-10 items-center justify-center gap-2 rounded-[var(--radius-control)] border px-3 text-sm font-medium transition duration-[var(--duration-feedback)] hover:-translate-y-[var(--motion-distance-xs)] ${ctaClasses(
-                  cta.emphasis
-                )}`}
-                href={cta.href}
-                key={cta.label}
+            <motion.span
+              animate={
+                prefersReducedMotion
+                  ? { opacity: 0 }
+                  : {
+                      opacity: [0, 0.46, 0, 0],
+                      x: ["-210%", "260%", "650%", "650%"]
+                    }
+              }
+              className={styles.folioFlipGlint}
+              exit={{ opacity: 0 }}
+              transition={{
+                delay: 0.03,
+                duration: prefersReducedMotion ? 0.01 : 1.08,
+                ease: "linear",
+                times: [0, 0.34, 0.58, 1]
+              }}
+            />
+          </span>
+
+          <div
+            aria-hidden="true"
+            className={`${styles.folioFace} ${styles.folioFront}`}
+            data-secret={secretActive ? "true" : undefined}
+          >
+            <CardFace interactive={false} secretActive={secretActive} />
+          </div>
+
+          <div className={`${styles.folioFace} ${styles.folioBack}`}>
+          <span aria-hidden="true" className={styles.folioBackPearl} />
+          <span aria-hidden="true" className={styles.folioBackTexture} />
+
+          <motion.div
+            animate="visible"
+            className={styles.folioBackInner}
+            initial={prefersReducedMotion ? false : "hidden"}
+            variants={folioContentVariants}
+          >
+            <motion.header className={styles.folioHeader} variants={folioItemVariants}>
+              <div>
+                <p>Private profile folio · reverse side</p>
+                <h2 id="profile-folio-title">Nirmal Kumar</h2>
+                <span>
+                  Data Engineer · {currentRole.organization} · Chennai
+                </span>
+              </div>
+              <button
+                aria-label="Close expanded profile folio"
+                className={styles.folioClose}
+                onClick={handleClose}
+                ref={closeRef}
+                type="button"
               >
-                {cta.label}
-                <ArrowRight aria-hidden="true" className="h-4 w-4" />
-              </Link>
-            ))}
+                <X aria-hidden="true" strokeWidth={1.5} />
+                <span>Close</span>
+              </button>
+            </motion.header>
+
+            <div
+              aria-label="Profile folio details"
+              className={styles.folioScroll}
+              data-lenis-prevent=""
+              data-lenis-prevent-touch=""
+              data-lenis-prevent-wheel=""
+              role="region"
+              tabIndex={0}
+            >
+              <motion.section className={styles.folioIntroduction} variants={folioItemVariants}>
+                <p className={styles.folioSectionLabel}>Profile / 01</p>
+                <p className={styles.folioBio} id="profile-folio-summary">
+                  {folioSummary}
+                </p>
+              </motion.section>
+
+              <motion.dl className={styles.folioMetrics} variants={folioItemVariants}>
+                {folioMetrics.map((metric) => (
+                  <div key={metric.label}>
+                    <dt>{metric.label}</dt>
+                    <dd>{metric.value}</dd>
+                  </div>
+                ))}
+              </motion.dl>
+
+              <div className={styles.folioDetails}>
+                <motion.div className={styles.folioPrimaryColumn} variants={folioItemVariants}>
+                  <section className={styles.folioSection}>
+                    <div className={styles.folioSectionHeading}>
+                      <span>02</span>
+                      <h3>Experience</h3>
+                    </div>
+                    <div className={styles.folioRoleRow}>
+                      <div>
+                        <strong>{currentRole.title}</strong>
+                        <span>{currentRole.organization}</span>
+                      </div>
+                      <span>Sep 2024 — Present</span>
+                    </div>
+                    <p className={styles.folioDiscipline}>{currentRole.discipline}</p>
+                    <ul className={styles.folioAchievementList}>
+                      {profile.achievements.slice(0, 4).map((achievement) => (
+                        <li key={achievement}>{achievement}</li>
+                      ))}
+                    </ul>
+                  </section>
+
+                  <section className={styles.folioSection}>
+                    <div className={styles.folioSectionHeading}>
+                      <span>03</span>
+                      <h3>Selected work</h3>
+                    </div>
+                    <div className={styles.folioWorkList}>
+                      {folioWork.map((work, index) => (
+                        <Link href={work.href} key={work.href}>
+                          <span>0{index + 1}</span>
+                          <strong>{work.label}</strong>
+                          <small>{work.detail}</small>
+                          <ArrowUpRight aria-hidden="true" strokeWidth={1.5} />
+                        </Link>
+                      ))}
+                    </div>
+                  </section>
+                </motion.div>
+
+                <motion.aside className={styles.folioSecondaryColumn} variants={folioItemVariants}>
+                  <section className={styles.folioSection}>
+                    <div className={styles.folioSectionHeading}>
+                      <span>04</span>
+                      <h3>Education</h3>
+                    </div>
+                    <strong className={styles.folioEducationDegree}>
+                      {profile.education.degree}
+                    </strong>
+                    <p>{profile.education.institution}</p>
+                    <div className={styles.folioEducationMeta}>
+                      <span>{profile.education.completionYear}</span>
+                      <span>{profile.education.cgpa} CGPA</span>
+                    </div>
+                  </section>
+
+                  <section className={styles.folioSection}>
+                    <div className={styles.folioSectionHeading}>
+                      <span>05</span>
+                      <h3>Practice</h3>
+                    </div>
+                    <dl className={styles.folioDisciplineList}>
+                      {folioDisciplines.map((discipline) => (
+                        <div key={discipline.label}>
+                          <dt>{discipline.label}</dt>
+                          <dd>{discipline.value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </section>
+                </motion.aside>
+              </div>
+            </div>
+
+            <motion.footer className={styles.folioFooter} variants={folioItemVariants}>
+              <span className={styles.folioSerial}>NK · 13.0827 N · 80.2707 E</span>
+              <div>
+                <Link className={styles.folioQuietAction} href="/projects">
+                  Selected work
+                  <ArrowUpRight aria-hidden="true" strokeWidth={1.5} />
+                </Link>
+                <a
+                  aria-label="Open Nirmal Kumar's LinkedIn profile in a new tab"
+                  className={styles.folioQuietAction}
+                  href={primaryContact.url}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <FaLinkedinIn aria-hidden="true" />
+                  LinkedIn
+                </a>
+                <DownloadLink
+                  ariaLabel="Download Nirmal Kumar's master resume"
+                  className={styles.folioResumeAction}
+                  download={masterResume.fileName}
+                  href={masterResume.href}
+                >
+                  <FileText aria-hidden="true" strokeWidth={1.55} />
+                  Master résumé
+                  <ArrowDownToLine aria-hidden="true" strokeWidth={1.55} />
+                </DownloadLink>
+              </div>
+            </motion.footer>
+          </motion.div>
           </div>
         </div>
-
-        <div className="grid gap-3">
-          {evidence.map((item) => (
-            <Link
-              className="motion-card group rounded-[var(--radius-control)] border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-carbon)_64%,transparent)] p-4 transition duration-[var(--duration-feedback)] hover:-translate-y-[var(--motion-distance-xs)] hover:border-[var(--border-gold)]"
-              href={item.href}
-              key={`${item.kind}-${item.label}`}
-            >
-              <span className="font-mono text-[0.6875rem] uppercase text-[var(--color-antique-gold)]">
-                {item.kind}
-              </span>
-              <strong className="mt-2 flex items-start justify-between gap-3 text-sm font-semibold leading-5 text-[var(--color-ivory-soft)]">
-                {item.label}
-                <ArrowRight
-                  aria-hidden="true"
-                  className="mt-0.5 h-4 w-4 shrink-0 transition group-hover:translate-x-1"
-                />
-              </strong>
-              <span className="mt-2 block text-xs leading-5 text-[var(--color-warm-silver)]">
-                {item.detail}
-              </span>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
+      </motion.div>
+    </motion.div>
   );
 }
 
-function ProofRouteCard({ route }: { route: ProfileRoute }) {
-  const Icon = route.Icon;
-
+function ChannelContent({
+  description,
+  icon,
+  index,
+  meta,
+  title,
+  trailing
+}: {
+  description: string;
+  icon: ReactNode;
+  index: string;
+  meta: string;
+  title: string;
+  trailing: ReactNode;
+}) {
   return (
-    <Link
-      className="motion-card group flex min-h-[214px] flex-col rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--surface-panel)] p-5 transition duration-[var(--duration-feedback)] hover:-translate-y-[var(--motion-distance-xs)] hover:border-[var(--border-gold)] hover:bg-[var(--surface-panel-hover)]"
-      href={route.href}
-    >
-      <span className="inline-flex h-10 w-10 items-center justify-center rounded-[var(--radius-control)] border border-[var(--border-gold)] bg-[color-mix(in_srgb,var(--color-antique-gold)_12%,transparent)] text-[var(--color-champagne)]">
-        <Icon aria-hidden="true" className="h-5 w-5" />
+    <>
+      <span className={styles.channelIndex}>{index}</span>
+      <span className={styles.channelTitle}>
+        <span className={styles.channelIcon}>{icon}</span>
+        <span>
+          <strong>{title}</strong>
+          <small>{meta}</small>
+        </span>
       </span>
-      <strong className="mt-5 block text-xl font-semibold leading-[1.18] text-[var(--color-ivory)]">
-        {route.label}
-      </strong>
-      <span className="mt-3 block text-sm leading-6 text-[var(--color-warm-silver)]">
-        {route.detail}
-      </span>
-      <span className="mt-auto flex items-center gap-2 pt-5 text-sm font-semibold text-[var(--color-ivory-soft)]">
-        Open
-        <ArrowRight
-          aria-hidden="true"
-          className="h-4 w-4 transition group-hover:translate-x-1"
-        />
-      </span>
-    </Link>
+      <span className={styles.channelDescription}>{description}</span>
+      <span className={styles.channelTrailing}>{trailing}</span>
+    </>
   );
 }
 
-function SocialLinkCard({ link }: { link: SocialLink }) {
+function ExternalChannel({
+  description,
+  index,
+  link,
+  meta
+}: {
+  description: string;
+  index: string;
+  link: SocialLink;
+  meta: string;
+}) {
   return (
     <a
-      aria-label={`${link.label}. ${link.publicUse} Opens in a new tab.`}
-      className="motion-card group rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--surface-panel)] p-4 transition duration-[var(--duration-feedback)] hover:-translate-y-[var(--motion-distance-xs)] hover:border-[var(--border-gold)]"
+      aria-label={`${link.label}. ${description} Opens in a new tab.`}
+      className={styles.channel}
       href={link.url}
       rel="noreferrer"
       target="_blank"
     >
-      <span className="flex items-start justify-between gap-3">
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-[var(--radius-control)] border border-[var(--border-subtle)] text-[var(--color-champagne)]">
-          <SocialLinkIcon label={link.label} />
-        </span>
-        <ExternalLink
-          aria-hidden="true"
-          className="h-4 w-4 text-[var(--color-warm-silver)] transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-        />
-      </span>
-      <strong className="mt-4 block text-base font-semibold text-[var(--color-ivory)]">
-        {link.label}
-      </strong>
-      <span className="mt-2 block text-sm leading-6 text-[var(--color-warm-silver)]">
-        {link.publicUse}
-      </span>
-      <span className="mt-4 inline-flex rounded-[var(--radius-control)] border border-[var(--border-subtle)] px-2.5 py-1 font-mono text-[0.6875rem] uppercase text-[var(--color-ivory-muted)]">
-        {statusLabel(link.status)}
-      </span>
+      <ChannelContent
+        description={description}
+        icon={<PlatformIcon label={link.label} />}
+        index={index}
+        meta={meta}
+        title={link.label}
+        trailing={<ArrowUpRight aria-hidden="true" strokeWidth={1.6} />}
+      />
     </a>
   );
 }
 
-function SocialLinkIcon({ label }: { label: string }) {
-  switch (label) {
-    case "LinkedIn":
-      return <SocialGlyph label="in" />;
-    case "GitHub":
-      return <SocialGlyph label="GH" />;
-    case "IEEE":
-      return <SocialGlyph label="IEEE" />;
-    case "LeetCode":
-      return <SocialGlyph label="LC" />;
-    default:
-      return <ExternalLink aria-hidden="true" className="h-5 w-5" />;
-  }
+function StoryOutcome({
+  index,
+  outcome,
+  progress,
+  reduced
+}: {
+  index: number;
+  outcome: (typeof outcomes)[number];
+  progress: MotionValue<number>;
+  reduced: boolean;
+}) {
+  const enterStart = 0.018 + index * 0.03;
+  const enterEnd = enterStart + 0.072;
+  const opacity = useTransform(
+    progress,
+    [enterStart, enterEnd, 0.34, 0.415],
+    [0, 1, 1, 0]
+  );
+  const y = useTransform(
+    progress,
+    [enterStart, enterEnd, 0.34, 0.415],
+    [42, 0, 0, -24]
+  );
+  const scale = useTransform(
+    progress,
+    [enterStart, enterEnd, 0.34, 0.415],
+    [0.985, 1, 1, 0.992]
+  );
+
+  return (
+    <motion.div
+      className={styles.outcomeCell}
+      style={reduced ? undefined : { opacity, scale, y }}
+    >
+      <Link href={outcome.href}>
+        <StoryMetric
+          index={index}
+          outcome={outcome}
+          progress={progress}
+          reduced={reduced}
+        />
+        <strong>{outcome.label}</strong>
+        <span>{outcome.detail}</span>
+        <ArrowRight aria-hidden="true" strokeWidth={1.5} />
+      </Link>
+    </motion.div>
+  );
 }
 
-function SocialGlyph({ label }: { label: string }) {
+function StoryMetric({
+  index,
+  outcome,
+  progress,
+  reduced
+}: {
+  index: number;
+  outcome: (typeof outcomes)[number];
+  progress: MotionValue<number>;
+  reduced: boolean;
+}) {
+  const valueRef = useRef<HTMLSpanElement>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const hasPlayedRef = useRef(false);
+  const renderedValueRef = useRef<number | null>(null);
+  const trigger = 0.018 + index * 0.03;
+  const formatValue = useCallback(
+    (latest: number) => {
+      const rounded = Math.round(latest);
+      const suffix =
+        rounded === 0 && outcome.suffix === "+" ? "" : outcome.suffix;
+      return `${rounded}${suffix}`;
+    },
+    [outcome.suffix]
+  );
+  const cancelAnimation = useCallback(() => {
+    if (animationFrameRef.current !== null) {
+      window.cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+  }, []);
+  const renderValue = useCallback(
+    (latest: number) => {
+      const rounded = Math.round(latest);
+
+      if (renderedValueRef.current === rounded || !valueRef.current) {
+        return;
+      }
+
+      renderedValueRef.current = rounded;
+      valueRef.current.textContent = formatValue(rounded);
+    },
+    [formatValue]
+  );
+  const playCounter = useCallback(() => {
+    if (hasPlayedRef.current || !valueRef.current) {
+      return;
+    }
+
+    hasPlayedRef.current = true;
+    cancelAnimation();
+    const duration = 1120 - index * 90;
+    let startedAt: number | null = null;
+
+    const tick = (timestamp: number) => {
+      startedAt ??= timestamp;
+      const elapsed = timestamp - startedAt;
+      const position = Math.min(1, elapsed / duration);
+      const eased =
+        position < 0.5
+          ? 4 * position * position * position
+          : 1 - Math.pow(-2 * position + 2, 3) / 2;
+
+      renderValue(outcome.numericValue * eased);
+
+      if (position < 1) {
+        animationFrameRef.current = window.requestAnimationFrame(tick);
+      } else {
+        animationFrameRef.current = null;
+      }
+    };
+
+    animationFrameRef.current = window.requestAnimationFrame(tick);
+  }, [cancelAnimation, index, outcome.numericValue, renderValue]);
+
+  useMotionValueEvent(progress, "change", (latest) => {
+    if (reduced) {
+      return;
+    }
+
+    if (latest <= 0.002) {
+      cancelAnimation();
+      hasPlayedRef.current = false;
+      renderValue(0);
+      return;
+    }
+
+    if (latest >= trigger) {
+      playCounter();
+    }
+  });
+
+  useEffect(() => {
+    cancelAnimation();
+    hasPlayedRef.current = false;
+
+    if (reduced) {
+      renderValue(outcome.numericValue);
+      return cancelAnimation;
+    }
+
+    renderValue(0);
+    if (progress.get() >= trigger) {
+      playCounter();
+    }
+
+    return cancelAnimation;
+  }, [
+    cancelAnimation,
+    outcome.numericValue,
+    playCounter,
+    progress,
+    reduced,
+    renderValue,
+    trigger
+  ]);
+
   return (
-    <span
-      aria-hidden="true"
-      className="grid h-5 w-5 place-items-center font-mono text-[0.64rem] font-semibold leading-none"
-    >
-      {label}
+    <span className={styles.outcomeValue}>
+      <span aria-hidden="true" ref={valueRef}>
+        {reduced ? outcome.value : formatValue(0)}
+      </span>
+      <span className={styles.srOnly}>{outcome.value}</span>
     </span>
   );
 }
 
-export function ProfessionalProfile() {
-  const { clearRole, role, setRole } = useRoleLens();
-  const activeLens: ProfileLens = role ?? "balanced";
-  const activeViewer: Viewer = role ?? "recruiter";
-  const model = role ? getRoleGatewayModel(role) : getBalancedGatewayModel();
-  const highlightedProjects = role ? getProjectsForRole(role, 3) : featuredProjects;
-  const highlightedSkills = role
-    ? getSkillClustersForRole(role, 3)
-    : skillClusters.slice(0, 3);
-  const credentialCount = certifications.filter((credential) =>
-    credential.relatedProjects.some((slug) =>
-      highlightedProjects.some((project) => project.slug === slug)
-    )
-  ).length;
+function WatermarkLetter({
+  index,
+  letter,
+  line,
+  progress,
+  reduced
+}: {
+  index: number;
+  letter: string;
+  line: number;
+  progress: MotionValue<number>;
+  reduced: boolean;
+}) {
+  const enterStart = 0.725 + index * 0.013;
+  const enterEnd = enterStart + 0.075;
+  const x = useTransform(
+    progress,
+    [enterStart, enterEnd],
+    [line === 0 ? 24 : -20, 0]
+  );
+  const y = useTransform(
+    progress,
+    [enterStart, enterEnd],
+    [line === 0 ? 34 : 42, 0]
+  );
+  const opacity = useTransform(
+    progress,
+    [enterStart, enterStart + 0.014],
+    [0, 1]
+  );
+  const rotate = useTransform(
+    progress,
+    [enterStart, enterEnd],
+    [line === 0 ? 2.2 : -2.2, 0]
+  );
+  const scaleY = useTransform(progress, [enterStart, enterEnd], [0.94, 1]);
 
-  function handleLensSelect(nextLens: ProfileLens) {
-    if (nextLens === "balanced") {
-      clearRole();
+  return (
+    <span className={styles.finalWatermarkGlyph}>
+      <motion.span
+        className={styles.finalWatermarkGlyphInner}
+        style={reduced ? undefined : { opacity, rotate, scaleY, x, y }}
+      >
+        {letter}
+      </motion.span>
+    </span>
+  );
+}
+
+function StoryWatermark({
+  progress,
+  reduced
+}: {
+  progress: MotionValue<number>;
+  reduced: boolean;
+}) {
+  const lines = [
+    { offset: 0, word: "Nirmal" },
+    { offset: 6, word: "Kumar" }
+  ] as const;
+
+  return (
+    <span aria-hidden="true" className={styles.finalWatermark}>
+      {lines.map(({ offset, word }, line) => (
+        <span className={styles.finalWatermarkLine} key={word}>
+          {Array.from(word).map((letter, index) => (
+            <WatermarkLetter
+              index={offset + index}
+              key={`${word}-${letter}-${index}`}
+              letter={letter}
+              line={line}
+              progress={progress}
+              reduced={reduced}
+            />
+          ))}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function StoryChannel({
+  children,
+  index,
+  progress,
+  reduced
+}: {
+  children: ReactNode;
+  index: number;
+  progress: MotionValue<number>;
+  reduced: boolean;
+}) {
+  const enterStart = 0.39 + index * 0.055;
+  const enterEnd = enterStart + 0.075;
+  const opacity = useTransform(
+    progress,
+    [enterStart, enterEnd, 0.71, 0.79],
+    [0, 1, 1, 0]
+  );
+  const x = useTransform(
+    progress,
+    [enterStart, enterEnd, 0.71, 0.79],
+    [34, 0, 0, -18]
+  );
+  const scale = useTransform(
+    progress,
+    [enterStart, enterEnd, 0.71, 0.79],
+    [0.99, 1, 1, 0.995]
+  );
+
+  return (
+    <motion.div
+      className={styles.storyChannel}
+      style={reduced ? undefined : { opacity, scale, x }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+export function ProfessionalProfile() {
+  const prefersReducedMotion = useStableReducedMotion();
+  const [editionPresses, setEditionPresses] = useState(0);
+  const [folioOpen, setFolioOpen] = useState(false);
+  const [storyMode, setStoryMode] = useState(false);
+  const [activeStoryChapter, setActiveStoryChapter] = useState<0 | 1 | 2>(0);
+  const [secretActive, setSecretActive] = useState(false);
+  const [showCoordinates, setShowCoordinates] = useState(false);
+  const folioCaptionRef = useRef<HTMLButtonElement>(null);
+  const folioOpenerRef = useRef<"card" | "caption" | null>(null);
+  const folioTriggerRef = useRef<HTMLButtonElement>(null);
+  const storyRef = useRef<HTMLDivElement>(null);
+  const activeStoryChapterRef = useRef<0 | 1 | 2>(0);
+  const { scrollYProgress: storyRawProgress } = useScroll({
+    target: storyRef,
+    offset: ["start start", "end end"]
+  });
+  const { scrollYProgress: storyEntryProgress } = useScroll({
+    target: storyRef,
+    offset: ["start end", "start start"]
+  });
+  const cardY = useTransform(storyEntryProgress, [0, 1], [0, -12]);
+  const cardScale = useTransform(storyEntryProgress, [0, 1], [1, 0.988]);
+  const cardOpacity = useTransform(
+    storyEntryProgress,
+    [0, 0.58, 0.9, 1],
+    [1, 1, 0.5, 0]
+  );
+  const copyY = useTransform(storyEntryProgress, [0, 0.58, 1], [0, -8, -38]);
+  const copyOpacity = useTransform(
+    storyEntryProgress,
+    [0, 0.52, 0.88, 1],
+    [1, 1, 0.42, 0]
+  );
+  const storyProgress = storyRawProgress;
+  const surfaceY = useTransform(
+    storyEntryProgress,
+    [0, 0.24, 0.88, 1],
+    [18, 0, 0, -44]
+  );
+  const rimOpacity = useTransform(
+    storyEntryProgress,
+    [0, 0.08, 0.56, 0.9, 1],
+    [0, 0.65, 1, 0.24, 0]
+  );
+  const rimGlintX = useTransform(
+    storyEntryProgress,
+    [0.1, 0.76],
+    ["-36vw", "112vw"]
+  );
+  const rimGlintOpacity = useTransform(
+    storyEntryProgress,
+    [0.08, 0.22, 0.58, 0.82],
+    [0, 1, 0.55, 0]
+  );
+  const nameEtchOpacity = useTransform(
+    storyEntryProgress,
+    [0.46, 0.62, 0.8],
+    [0, 0.78, 0]
+  );
+  const nameEtchX = useTransform(
+    storyEntryProgress,
+    [0.46, 0.8],
+    [12, -12]
+  );
+  const outcomesLabelOpacity = useTransform(
+    storyEntryProgress,
+    [0.3, 0.56, 0.78],
+    [0, 0.82, 1]
+  );
+  const outcomesLabelY = useTransform(
+    storyEntryProgress,
+    [0.3, 0.62, 0.78],
+    [14, 0, 0]
+  );
+  const outcomesHeadingOpacity = useTransform(
+    storyEntryProgress,
+    [0.42, 0.72, 0.96],
+    [0, 0.84, 1]
+  );
+  const outcomesHeadingY = useTransform(
+    storyEntryProgress,
+    [0.42, 0.76, 0.96],
+    [28, 5, 0]
+  );
+  const outcomesOpacity = useTransform(
+    storyProgress,
+    [0, 0.34, 0.425],
+    [1, 1, 0]
+  );
+  const outcomesY = useTransform(
+    storyProgress,
+    [0, 0.34, 0.425],
+    [0, 0, -58]
+  );
+  const outcomesScale = useTransform(
+    storyProgress,
+    [0, 0.34, 0.425],
+    [1, 1, 0.992]
+  );
+  const contactOpacity = useTransform(
+    storyProgress,
+    [0.32, 0.42, 0.71, 0.805],
+    [0, 1, 1, 0]
+  );
+  const contactY = useTransform(
+    storyProgress,
+    [0.32, 0.42, 0.71, 0.805],
+    [58, 0, 0, -46]
+  );
+  const contactScale = useTransform(
+    storyProgress,
+    [0.32, 0.42, 0.71, 0.805],
+    [0.985, 1, 1, 0.994]
+  );
+  const finalOpacity = useTransform(
+    storyProgress,
+    [0.72, 0.84, 1],
+    [0, 1, 1]
+  );
+  const finalY = useTransform(
+    storyProgress,
+    [0.72, 0.84, 1],
+    [64, 0, 0]
+  );
+  const finalScale = useTransform(
+    storyProgress,
+    [0.72, 0.84, 1],
+    [0.985, 1, 1]
+  );
+  const outcomesSweep = useTransform(storyProgress, [0, 0.08], [0, 1]);
+  const contactSweep = useTransform(storyProgress, [0.34, 0.49], [0, 1]);
+  const finalSweep = useTransform(storyProgress, [0.74, 0.88], [0, 1]);
+  const ledgerOpacity = useTransform(
+    storyProgress,
+    [0.11, 0.19, 0.34, 0.405],
+    [0, 1, 1, 0]
+  );
+  const ledgerY = useTransform(
+    storyProgress,
+    [0.11, 0.19, 0.34, 0.405],
+    [24, 0, 0, -16]
+  );
+  const contactIntroX = useTransform(
+    storyProgress,
+    [0.34, 0.44, 0.71, 0.79],
+    [-26, 0, 0, -18]
+  );
+  const contactRailProgress = useTransform(
+    storyProgress,
+    [0.4, 0.68],
+    [0, 1]
+  );
+  const storyGlowOpacity = useTransform(
+    storyProgress,
+    [0, 0.1, 0.35, 0.72, 1],
+    [0, 0.24, 0.54, 0.42, 0.28]
+  );
+  const editionEtchOpacity = useTransform(
+    storyProgress,
+    [0.11, 0.17, 0.26],
+    [0, 0.62, 0]
+  );
+  const editionEtchY = useTransform(storyProgress, [0.11, 0.26], [8, -6]);
+
+  useMotionValueEvent(storyProgress, "change", (latest) => {
+    const nextChapter: 0 | 1 | 2 = latest < 0.38 ? 0 : latest < 0.76 ? 1 : 2;
+    if (activeStoryChapterRef.current !== nextChapter) {
+      activeStoryChapterRef.current = nextChapter;
+      setActiveStoryChapter(nextChapter);
+    }
+  });
+
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 1181px) and (min-height: 620px)");
+    const updateStoryMode = () =>
+      setStoryMode(query.matches && !Boolean(prefersReducedMotion));
+
+    updateStoryMode();
+    query.addEventListener("change", updateStoryMode);
+
+    return () => query.removeEventListener("change", updateStoryMode);
+  }, [prefersReducedMotion]);
+  const openFolio = useCallback((opener: "card" | "caption") => {
+    folioOpenerRef.current = opener;
+    setFolioOpen(true);
+  }, []);
+  const closeFolio = useCallback(() => setFolioOpen(false), []);
+  const handleFolioExitComplete = useCallback(() => {
+    const focusTarget =
+      folioOpenerRef.current === "caption"
+        ? folioCaptionRef.current
+        : folioTriggerRef.current;
+
+    if (focusTarget) {
+      focusTarget.focus({ preventScroll: true });
+    }
+
+    folioOpenerRef.current = null;
+  }, []);
+
+  function handleEditionPress() {
+    const nextPresses = editionPresses + 1;
+
+    if (nextPresses >= 3) {
+      setSecretActive((current) => !current);
+      setEditionPresses(0);
       return;
     }
 
-    setRole(nextLens);
+    setEditionPresses(nextPresses);
   }
 
   return (
-    <main className="min-h-screen px-[var(--layout-gutter)] py-10">
-        <section className="motion-section gold-thread-section mx-auto flex max-w-[var(--layout-wide-max)] flex-col gap-8">
-          <header className="grid gap-8 border-b border-[var(--border-subtle)] pb-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
-            <div className="max-w-4xl">
-              <p className="font-mono text-xs uppercase text-[var(--console-prompt)]">
-                Professional profile
-              </p>
-              <h1 className="mt-4 max-w-4xl font-[var(--font-display)] text-5xl font-semibold leading-[1.04] text-[var(--color-ivory)] sm:text-7xl">
-                {profile.displayName}
-              </h1>
-              <p className="mt-5 max-w-3xl text-xl leading-8 text-[var(--color-ivory-soft)]">
-                {profile.headline}
-              </p>
-              <p className="mt-5 max-w-3xl text-base leading-7 text-[var(--color-warm-silver)]">
-                {profile.expandedBio}
-              </p>
-              <div className="mt-7 flex flex-wrap gap-3">
-                <ResumeDownloadLink primary>
-                  Download one-page resume
-                </ResumeDownloadLink>
-                <Link
-                  className="motion-cta inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--radius-control)] border border-[var(--border-subtle)] px-4 text-sm font-semibold text-[var(--color-ivory-soft)] transition duration-[var(--duration-feedback)] hover:-translate-y-[var(--motion-distance-xs)] hover:border-[var(--border-gold)] hover:text-[var(--color-ivory)]"
-                  href="/proof"
-                >
-                  View proof
-                  <ArrowRight aria-hidden="true" className="h-4 w-4" />
-                </Link>
-              </div>
+    <main
+      className={styles.page}
+      data-folio-open={folioOpen ? "true" : undefined}
+      id="main-content"
+      tabIndex={-1}
+    >
+      <LayoutGroup id="profile-card-expansion">
+      <section
+        aria-hidden={folioOpen ? "true" : undefined}
+        className={styles.hero}
+        inert={folioOpen}
+      >
+        <div className={styles.heroInner}>
+          <motion.div
+            className={styles.heroCopy}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={
+              !storyMode || prefersReducedMotion
+                ? undefined
+                : { opacity: copyOpacity, y: copyY }
+            }
+            transition={{ duration: 0.72, ease: quietEase }}
+          >
+            <p className={styles.eyebrow}>
+              <span aria-hidden="true" />
+              Nirmal Kumar · Chennai, India
+            </p>
+            <h1 className={styles.heroTitle}>
+              Let&apos;s make complex work feel <em>inevitable.</em>
+            </h1>
+            <p className={styles.heroLead}>{contactHeadline}</p>
+
+            <div className={styles.heroActions}>
+              <a
+                aria-label="Open Nirmal Kumar's LinkedIn profile in a new tab"
+                className={styles.primaryAction}
+                href={primaryContact.url}
+                rel="noreferrer"
+                target="_blank"
+              >
+                <FaLinkedinIn aria-hidden="true" />
+                Connect on LinkedIn
+                <ArrowUpRight aria-hidden="true" strokeWidth={1.7} />
+              </a>
+              <DownloadLink
+                ariaLabel="Download Nirmal Kumar's one-page resume"
+                className={styles.secondaryAction}
+                download={onePageResume.fileName}
+                href={onePageResume.href}
+              >
+                One-page résumé
+              </DownloadLink>
             </div>
 
-            <HeroProfileCard />
-          </header>
+            <div className={styles.availability}>
+              <span aria-hidden="true" className={styles.availabilityMark} />
+              <span>Available for thoughtful roles and ambitious technical work.</span>
+            </div>
+          </motion.div>
 
-          <section
-            aria-label="Profile proof metrics"
-            className="motion-list grid gap-4 md:grid-cols-2 xl:grid-cols-4"
+          <motion.div
+            className={styles.cardStage}
+            initial={
+              prefersReducedMotion
+                ? false
+                : { opacity: 0, scale: 0.975, y: 24 }
+            }
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            style={
+              !storyMode || prefersReducedMotion
+                ? undefined
+                : { opacity: cardOpacity, scale: cardScale, y: cardY }
+            }
+            transition={{ duration: 0.9, delay: 0.12, ease: quietEase }}
           >
-            {profileMetricCards().map((metric) => (
-              <div
-                className="motion-card rounded-[var(--radius-panel)] border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-carbon)_72%,transparent)] p-4"
-                key={metric.label}
+            <div className={styles.cardSlot}>
+              {!folioOpen ? (
+                <CardIdentity
+                  onExpand={() => openFolio("card")}
+                  secretActive={secretActive}
+                  triggerRef={folioTriggerRef}
+                />
+              ) : null}
+            </div>
+            <div className={styles.cardCaption}>
+              <button
+                aria-label="Identity edition detail"
+                className={styles.editionTrigger}
+                onClick={handleEditionPress}
+                title="Edition detail"
+                type="button"
               >
-                <p className="font-mono text-[0.6875rem] uppercase text-[var(--color-steel)]">
-                  {metric.label}
-                </p>
-                <p className="mt-2 text-3xl font-semibold text-[var(--color-ivory)]">
-                  {metric.value}
-                </p>
-                <p className="mt-1 text-sm leading-5 text-[var(--color-warm-silver)]">
-                  {metric.detail}
-                </p>
-              </div>
-            ))}
-          </section>
+                01 / Personal identity
+              </button>
+              <button
+                className={styles.openFolioCaption}
+                onClick={() => openFolio("caption")}
+                ref={folioCaptionRef}
+                type="button"
+              >
+                Open folio
+                <Maximize2 aria-hidden="true" strokeWidth={1.5} />
+              </button>
+            </div>
+            <AnimatePresence>
+              {secretActive ? (
+                <motion.p
+                  animate={{ opacity: 1, y: 0 }}
+                  className={styles.atelierNote}
+                  exit={
+                    prefersReducedMotion
+                      ? { opacity: 0 }
+                      : { opacity: 0, y: -4 }
+                  }
+                  initial={
+                    prefersReducedMotion ? false : { opacity: 0, y: 6 }
+                  }
+                  transition={{
+                    duration: prefersReducedMotion ? 0.01 : 0.36,
+                    ease: quietEase
+                  }}
+                >
+                  Built in Chennai · refined one quiet decision at a time.
+                </motion.p>
+              ) : null}
+            </AnimatePresence>
+          </motion.div>
+        </div>
+      </section>
 
-          <section
-            aria-label="Profile role lens selection"
-            className="motion-panel-enter rounded-[var(--radius-panel)] border border-[var(--console-border)] bg-[var(--surface-console)] p-4 shadow-[var(--shadow-surface)]"
+      <div className={styles.storyTrack} ref={storyRef}>
+        <div className={styles.storySticky}>
+          <motion.div
+            aria-hidden="true"
+            className={styles.storySurface}
+            style={
+              !storyMode || prefersReducedMotion
+                ? undefined
+                : { y: surfaceY }
+            }
           >
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(260px,560px)] lg:items-center">
-              <div>
-                <p className="font-mono text-xs uppercase text-[var(--color-champagne)]">
-                  Role lens
-                </p>
-                <p className="mt-2 text-sm leading-6 text-[var(--color-warm-silver)]">
-                  Recruiters, engineers, leaders, and explorers need different
-                  evidence density; the profile keeps one identity while the
-                  emphasis shifts.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2" role="group">
-                {(["balanced", ...roleOrder] as const).map((lens) => (
-                  <ProfileLensButton
-                    active={activeLens === lens}
-                    key={lens}
-                    lens={lens}
-                    onSelect={() => handleLensSelect(lens)}
+            <motion.span
+              className={styles.storyRim}
+              style={
+                !storyMode || prefersReducedMotion
+                  ? undefined
+                  : { opacity: rimOpacity }
+              }
+            >
+              <motion.span
+                className={styles.storyRimGlint}
+                style={
+                  !storyMode || prefersReducedMotion
+                    ? undefined
+                    : { opacity: rimGlintOpacity, x: rimGlintX }
+                }
+              />
+            </motion.span>
+            <motion.span
+              className={styles.storyNameEtch}
+              style={
+                !storyMode || prefersReducedMotion
+                  ? undefined
+                  : { opacity: nameEtchOpacity, x: nameEtchX }
+              }
+            >
+              Nirmal Kumar
+            </motion.span>
+            <motion.span
+              className={styles.storyEditionEtch}
+              style={
+                !storyMode || prefersReducedMotion
+                  ? undefined
+                  : { opacity: editionEtchOpacity, y: editionEtchY }
+              }
+            >
+              NK / Edition 01
+            </motion.span>
+          </motion.div>
+
+          <div aria-hidden="true" className={styles.storyAtmosphere}>
+            <motion.span
+              className={styles.storyGlow}
+              style={
+                !storyMode || prefersReducedMotion
+                  ? undefined
+                  : { opacity: storyGlowOpacity }
+              }
+            />
+          </div>
+
+          <motion.section
+            aria-hidden={
+              folioOpen || (storyMode && activeStoryChapter !== 0)
+                ? "true"
+                : undefined
+            }
+            className={`${styles.outcomesSection} ${styles.storyChapter}`}
+            data-active={
+              !storyMode || activeStoryChapter === 0 ? "true" : undefined
+            }
+            inert={folioOpen || (storyMode && activeStoryChapter !== 0)}
+            style={
+              !storyMode || prefersReducedMotion
+                ? undefined
+                : {
+                    opacity: outcomesOpacity,
+                    scale: outcomesScale,
+                    y: outcomesY
+                  }
+            }
+          >
+            <SectionSweep
+              progress={storyMode ? outcomesSweep : undefined}
+              reduced={Boolean(prefersReducedMotion)}
+            />
+            <div className={styles.sectionInner}>
+              <header className={styles.sectionHeader}>
+                <motion.p
+                  className={styles.eyebrow}
+                  style={
+                    !storyMode || prefersReducedMotion
+                      ? undefined
+                      : {
+                          opacity: outcomesLabelOpacity,
+                          y: outcomesLabelY
+                        }
+                  }
+                >
+                  <span aria-hidden="true" />
+                  Selected outcomes
+                </motion.p>
+                <motion.div
+                  style={
+                    !storyMode || prefersReducedMotion
+                      ? undefined
+                      : {
+                          opacity: outcomesHeadingOpacity,
+                          y: outcomesHeadingY
+                        }
+                  }
+                >
+                  <h2>A quiet measure of the work.</h2>
+                  <p>
+                    Systems are only useful when they hold their shape at scale,
+                    through change, and under close review.
+                  </p>
+                </motion.div>
+              </header>
+
+              <div className={styles.outcomeGrid}>
+                {outcomes.map((outcome, index) => (
+                  <StoryOutcome
+                    index={index}
+                    key={outcome.value}
+                    outcome={outcome}
+                    progress={storyProgress}
+                    reduced={!storyMode || Boolean(prefersReducedMotion)}
                   />
                 ))}
               </div>
-            </div>
-          </section>
 
-          <LensPanel
-            activeLens={activeLens}
-            evidence={model.evidence}
-            model={model}
-          />
-
-          <section
-            aria-labelledby="profile-spine-title"
-            className="grid gap-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]"
-          >
-            <div>
-              <p className="font-mono text-xs uppercase text-[var(--console-prompt)]">
-                Professional spine
-              </p>
-              <h2
-                className="mt-3 text-3xl font-semibold leading-[1.14] text-[var(--color-ivory)]"
-                id="profile-spine-title"
+              <motion.div
+                className={styles.profileLedger}
+                style={
+                  !storyMode || prefersReducedMotion
+                    ? undefined
+                    : { opacity: ledgerOpacity, y: ledgerY }
+                }
               >
-                Current role, core disciplines, and public-safe proof.
-              </h2>
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--color-warm-silver)]">
-                The profile stays focused on the work that can be inspected:
-                data platforms, report trust, governed products, role-fit
-                positioning, and carefully bounded public content.
-              </p>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <article className="motion-card rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--surface-panel)] p-5">
-                <BriefcaseBusiness
-                  aria-hidden="true"
-                  className="h-5 w-5 text-[var(--color-champagne)]"
-                />
-                <h3 className="mt-4 text-xl font-semibold text-[var(--color-ivory)]">
-                  Work focus
-                </h3>
-                <p className="mt-3 text-sm leading-6 text-[var(--color-warm-silver)]">
-                  {currentRole.discipline} at {currentRole.organization}, with
-                  Fabric migration, Databricks products, validation, and BI
-                  modernization in scope.
-                </p>
-              </article>
-
-              <article className="motion-card rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--surface-panel)] p-5">
-                <UserRound
-                  aria-hidden="true"
-                  className="h-5 w-5 text-[var(--color-champagne)]"
-                />
-                <h3 className="mt-4 text-xl font-semibold text-[var(--color-ivory)]">
-                  Role positioning
-                </h3>
-                <p className="mt-3 text-sm leading-6 text-[var(--color-warm-silver)]">
-                  {profile.viewerPositioning[activeViewer]}
-                </p>
-              </article>
-            </div>
-          </section>
-
-          <section
-            aria-labelledby="profile-proof-title"
-            className="border-t border-[var(--border-subtle)] pt-8"
-          >
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] lg:items-end">
-              <div>
-                <p className="font-mono text-xs uppercase text-[var(--console-prompt)]">
-                  Proof links
-                </p>
-                <h2
-                  className="mt-3 text-3xl font-semibold leading-[1.14] text-[var(--color-ivory)]"
-                  id="profile-proof-title"
-                >
-                  Claims route into case files, credentials, and evidence.
-                </h2>
-                <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--color-warm-silver)]">
-                  {highlightedProjects.length} highlighted case files,{" "}
-                  {highlightedSkills.length} evidence-backed skill clusters, and{" "}
-                  {credentialCount} related credential links support the current
-                  profile view.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2 lg:justify-end">
-                {roleDisciplineLabels.map((label) => (
-                  <span
-                    className="rounded-[var(--radius-control)] border border-[var(--border-subtle)] px-3 py-1.5 font-mono text-xs text-[var(--color-ivory-muted)]"
-                    key={label}
-                  >
-                    {label}
+                <div>
+                  <BriefcaseBusiness aria-hidden="true" strokeWidth={1.55} />
+                  <span>
+                    <small>Now</small>
+                    <strong>{currentRole.title}</strong>
+                    <span>{currentRole.organization}</span>
                   </span>
-                ))}
-              </div>
+                </div>
+                <div>
+                  <GraduationCap aria-hidden="true" strokeWidth={1.55} />
+                  <span>
+                    <small>Study</small>
+                    <strong>B.E. Computer Science</strong>
+                    <span>{profile.education.cgpa} CGPA</span>
+                  </span>
+                </div>
+                <div>
+                  <Layers3 aria-hidden="true" strokeWidth={1.55} />
+                  <span>
+                    <small>Practice</small>
+                    <strong>Fabric · Databricks</strong>
+                    <span>SQL · PySpark · Power BI</span>
+                  </span>
+                </div>
+              </motion.div>
             </div>
+          </motion.section>
 
-            <div className="motion-list mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {proofRoutes.map((route) => (
-                <ProofRouteCard key={route.href} route={route} />
-              ))}
-            </div>
-          </section>
-
-          <section
-            aria-labelledby="profile-social-title"
-            className="grid gap-6 border-t border-[var(--border-subtle)] pt-8 xl:grid-cols-[minmax(0,1fr)_380px]"
+          <motion.section
+            aria-hidden={
+              folioOpen || (storyMode && activeStoryChapter !== 1)
+                ? "true"
+                : undefined
+            }
+            className={`${styles.contactSection} ${styles.storyChapter}`}
+            data-active={
+              !storyMode || activeStoryChapter === 1 ? "true" : undefined
+            }
+            inert={folioOpen || (storyMode && activeStoryChapter !== 1)}
+            style={
+              !storyMode || prefersReducedMotion
+                ? undefined
+                : {
+                    opacity: contactOpacity,
+                    scale: contactScale,
+                    y: contactY
+                  }
+            }
           >
-            <div>
-              <p className="font-mono text-xs uppercase text-[var(--console-prompt)]">
-                Social and proof routes
-              </p>
-              <h2
-                className="mt-3 text-3xl font-semibold leading-[1.14] text-[var(--color-ivory)]"
-                id="profile-social-title"
+            <SectionSweep
+              progress={storyMode ? contactSweep : undefined}
+              reduced={Boolean(prefersReducedMotion)}
+            />
+            <div className={styles.contactInner}>
+              <motion.header
+                className={styles.contactIntro}
+                style={
+                  !storyMode || prefersReducedMotion
+                    ? undefined
+                    : { x: contactIntroX }
+                }
               >
-                External links stay useful without overclaiming.
-              </h2>
-              <div className="motion-list mt-6 grid gap-4 sm:grid-cols-2">
-                {profile.socialLinks.map((link) => (
-                  <SocialLinkCard key={link.label} link={link} />
-                ))}
+                <p className={styles.eyebrow}>
+                  <span aria-hidden="true" />
+                  Contact
+                </p>
+                <h2>Choose the channel that fits the conversation.</h2>
+                <p>
+                  Professional outreach begins on LinkedIn. Code, selected work,
+                  and a concise résumé remain close at hand.
+                </p>
+                <button
+                  aria-label="Reveal Chennai coordinates"
+                  aria-pressed={showCoordinates}
+                  className={styles.locationLine}
+                  onClick={() => setShowCoordinates((current) => !current)}
+                  type="button"
+                >
+                  <MapPin aria-hidden="true" strokeWidth={1.6} />
+                  <AnimatePresence initial={false} mode="wait">
+                    <motion.span
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={
+                        prefersReducedMotion
+                          ? { opacity: 0 }
+                          : { opacity: 0, y: -4 }
+                      }
+                      initial={
+                        prefersReducedMotion ? false : { opacity: 0, y: 4 }
+                      }
+                      key={showCoordinates ? "coordinates" : "location"}
+                      transition={{
+                        duration: prefersReducedMotion ? 0.01 : 0.24,
+                        ease: quietEase
+                      }}
+                    >
+                      {showCoordinates
+                        ? "13.0827° N · 80.2707° E"
+                        : "Chennai · India · GMT +5:30"}
+                    </motion.span>
+                  </AnimatePresence>
+                </button>
+              </motion.header>
+
+              <div className={styles.channels}>
+                <span aria-hidden="true" className={styles.contactRail}>
+                  <motion.span
+                    style={{
+                      scaleY:
+                        !storyMode || prefersReducedMotion
+                          ? 1
+                          : contactRailProgress
+                    }}
+                  />
+                </span>
+
+                <StoryChannel
+                  index={0}
+                  progress={storyProgress}
+                  reduced={!storyMode || Boolean(prefersReducedMotion)}
+                >
+                  <ExternalChannel
+                    description="For roles, collaborations, and a considered first conversation."
+                    index="01"
+                    link={primaryContact}
+                    meta="Primary professional channel"
+                  />
+                </StoryChannel>
+
+                <StoryChannel
+                  index={1}
+                  progress={storyProgress}
+                  reduced={!storyMode || Boolean(prefersReducedMotion)}
+                >
+                  <ExternalChannel
+                    description="Repositories and selected engineering work in their native context."
+                    index="02"
+                    link={github}
+                    meta="Engineering profile"
+                  />
+                </StoryChannel>
+
+                <StoryChannel
+                  index={2}
+                  progress={storyProgress}
+                  reduced={!storyMode || Boolean(prefersReducedMotion)}
+                >
+                  <DownloadLink
+                    ariaLabel="Download Nirmal Kumar's one-page resume"
+                    className={`${styles.channel} ${styles.downloadChannel}`}
+                    download={onePageResume.fileName}
+                    href={onePageResume.href}
+                  >
+                    <ChannelContent
+                      description="A concise overview of current work, platforms, and experience."
+                      icon={<ArrowDownToLine aria-hidden="true" strokeWidth={1.7} />}
+                      index="03"
+                      meta="PDF · one page"
+                      title="Résumé"
+                      trailing={
+                        <ArrowDownToLine aria-hidden="true" strokeWidth={1.6} />
+                      }
+                    />
+                  </DownloadLink>
+                </StoryChannel>
+
+                <StoryChannel
+                  index={3}
+                  progress={storyProgress}
+                  reduced={!storyMode || Boolean(prefersReducedMotion)}
+                >
+                  <div className={styles.elsewhere}>
+                    <span>Elsewhere</span>
+                    {presenceLinks.map((link) => (
+                      <a
+                        aria-label={`Open ${link.label} in a new tab`}
+                        href={link.url}
+                        key={link.label}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        <PlatformIcon label={link.label} />
+                        {link.label}
+                        <ArrowUpRight aria-hidden="true" strokeWidth={1.5} />
+                      </a>
+                    ))}
+                  </div>
+                </StoryChannel>
               </div>
             </div>
+          </motion.section>
 
-            <aside className="motion-panel-enter rounded-[var(--radius-panel)] border border-[var(--console-border)] bg-[var(--surface-console)] p-5 shadow-[var(--shadow-surface)]">
-              <p className="font-mono text-xs uppercase text-[var(--color-champagne)]">
-                Public contact
+          <motion.section
+            aria-hidden={
+              folioOpen || (storyMode && activeStoryChapter !== 2)
+                ? "true"
+                : undefined
+            }
+            className={`${styles.finalSection} ${styles.storyChapter}`}
+            data-active={
+              !storyMode || activeStoryChapter === 2 ? "true" : undefined
+            }
+            inert={folioOpen || (storyMode && activeStoryChapter !== 2)}
+            style={
+              !storyMode || prefersReducedMotion
+                ? undefined
+                : {
+                    opacity: finalOpacity,
+                    scale: finalScale,
+                    y: finalY
+                  }
+            }
+          >
+            <StoryWatermark
+              progress={storyProgress}
+              reduced={!storyMode || Boolean(prefersReducedMotion)}
+            />
+            <SectionSweep
+              progress={storyMode ? finalSweep : undefined}
+              reduced={Boolean(prefersReducedMotion)}
+            />
+            <div className={styles.finalInner}>
+              <p className={styles.eyebrow}>
+                <span aria-hidden="true" />
+                The next chapter
               </p>
-              <h3 className="mt-3 text-2xl font-semibold leading-[1.16] text-[var(--color-ivory)]">
-                Professional contact stays simple and safe.
-              </h3>
-              <ul className="mt-5 grid gap-3">
-                {contactBoundaries.map((item) => (
-                  <li
-                    className="flex gap-3 text-sm leading-6 text-[var(--color-warm-silver)]"
-                    key={item}
-                  >
-                    <CheckCircle2
-                      aria-hidden="true"
-                      className="mt-1 h-4 w-4 shrink-0 text-[var(--color-success)]"
-                    />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-6 grid gap-2">
+              <h2>Start with the work. Continue with a conversation.</h2>
+              <div className={styles.finalActions}>
                 <a
-                  className="motion-cta inline-flex min-h-11 items-center justify-between gap-3 rounded-[var(--radius-control)] border border-[var(--border-gold)] bg-[color-mix(in_srgb,var(--color-antique-gold)_14%,transparent)] px-4 text-sm font-semibold text-[var(--color-ivory)] transition duration-[var(--duration-feedback)] hover:-translate-y-[var(--motion-distance-xs)]"
-                  href="https://www.linkedin.com/in/nirmalkumar6/"
+                  aria-label="Open Nirmal Kumar's LinkedIn profile in a new tab"
+                  className={styles.primaryAction}
+                  href={primaryContact.url}
                   rel="noreferrer"
                   target="_blank"
                 >
-                  <span className="inline-flex items-center gap-2">
-                    <SocialGlyph label="in" />
-                    Open LinkedIn
-                  </span>
-                  <ExternalLink aria-hidden="true" className="h-4 w-4" />
+                  Begin on LinkedIn
+                  <ArrowUpRight aria-hidden="true" strokeWidth={1.7} />
                 </a>
-                <ResumeDownloadLink>Download resume</ResumeDownloadLink>
-                <Link
-                  className="motion-cta inline-flex min-h-11 items-center justify-between gap-3 rounded-[var(--radius-control)] border border-[var(--border-subtle)] px-4 text-sm font-semibold text-[var(--color-ivory-soft)] transition duration-[var(--duration-feedback)] hover:-translate-y-[var(--motion-distance-xs)] hover:border-[var(--border-gold)] hover:text-[var(--color-ivory)]"
-                  href="/documents"
-                >
-                  <span className="inline-flex items-center gap-2">
-                    <BookOpenCheck aria-hidden="true" className="h-4 w-4" />
-                    Open document hub
-                  </span>
-                  <ArrowRight aria-hidden="true" className="h-4 w-4" />
+                <Link className={styles.textAction} href="/projects">
+                  Explore selected work
+                  <ArrowRight aria-hidden="true" strokeWidth={1.6} />
                 </Link>
               </div>
-            </aside>
-          </section>
-        </section>
+            </div>
+          </motion.section>
+        </div>
+      </div>
+      <AnimatePresence
+        initial={false}
+        onExitComplete={handleFolioExitComplete}
+      >
+        {folioOpen ? (
+          <ProfileFolio
+            key="profile-folio"
+            onClose={closeFolio}
+            secretActive={secretActive}
+          />
+        ) : null}
+      </AnimatePresence>
+      </LayoutGroup>
     </main>
   );
 }

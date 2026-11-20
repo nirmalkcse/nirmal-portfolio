@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { DocumentsHub } from "@/components/documents";
 import { RoleLensProvider } from "@/context/role-lens-context";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPageMetadata({
   title: "Documents",
   description:
-    "Role-aware document packet hub for Nirmal Kumar, with public resume downloads, proof routes, credential packet concepts, and honest project export placeholders."
-};
+    "Interview documents for Nirmal Kumar, including PDF resume downloads, editable DOCX copies, and proof routes.",
+  path: "/documents"
+});
 
 export default function DocumentsPage() {
   return (

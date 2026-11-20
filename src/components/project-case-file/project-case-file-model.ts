@@ -1,9 +1,22 @@
 import { featuredProjectSlugs, projects } from "@/data";
-import type { Priority, Project, Viewer } from "@/data";
+import type {
+  EvidenceConfidence,
+  EvidencePublicStatus,
+  EvidenceType,
+  Priority,
+  Project,
+  Viewer
+} from "@/data";
 
 export type LensId = "balanced" | Viewer;
 
 export type ProjectMetric = {
+  label: string;
+  value: string;
+  detail: string;
+};
+
+export type ProjectHeroStat = {
   label: string;
   value: string;
   detail: string;
@@ -33,7 +46,7 @@ const statusLabels = {
   current: "Current",
   complete: "Complete",
   published: "Published",
-  observed: "Observed"
+  observed: "Under review"
 } satisfies Record<Project["status"], string>;
 
 const statusTone = {
@@ -45,16 +58,43 @@ const statusTone = {
 
 const lensSummaries = {
   balanced:
-    "Default order keeps the three strongest professional proof points first, then opens the research, demo, and supporting analytics trail.",
+    "Standard order starts with the strongest professional work, then adds research, demos, and supporting analytics projects.",
   recruiter:
-    "Recruiter order favors fast fit signals: quantified outcomes, credential-adjacent proof, current work, and clear delivery scope.",
+    "Recruiter view emphasizes role fit, quantified outcomes, relevant credentials, current work, and delivery scope.",
   engineer:
-    "Engineer order favors inspectable systems: architecture, platform decisions, workflow depth, and implementation tradeoffs.",
+    "Engineer view emphasizes architecture, platform decisions, workflow depth, and implementation tradeoffs.",
   leader:
-    "Leader order favors ownership signals: business impact, governance, validation discipline, and public-safe delivery maturity.",
+    "Leader view emphasizes business impact, governance, validation discipline, and responsible delivery.",
   explorer:
-    "Explorer order widens the trail toward research, AI/data-agent demos, and portfolio-ready experiments."
+    "Explorer view expands into research, AI/data-agent demos, and current learning."
 } satisfies Record<LensId, string>;
+
+const evidenceStatusLabels = {
+  "publicly-verifiable": "Publicly verifiable",
+  "sanitized-for-confidentiality": "Client details anonymized",
+  "summarized-from-internal-work": "Private project summary",
+  "credential-verified": "Credential verified",
+  "evidence-still-being-collected": "Public proof to add",
+  "planned-public-artifact": "Artifact to add"
+} satisfies Record<EvidencePublicStatus, string>;
+
+const evidenceTypeLabels = {
+  metric: "Metric",
+  "project-detail": "Project detail",
+  "credential-url": "Credential URL",
+  "publication-link": "Publication link",
+  "code-or-demo-link": "Code or demo link",
+  "sanitized-diagram": "Sanitized diagram",
+  screenshot: "Screenshot",
+  "testimonial-or-recommendation": "Testimonial or recommendation",
+  "learning-or-reflection": "Learning or reflection"
+} satisfies Record<EvidenceType, string>;
+
+const evidenceConfidenceLabels = {
+  high: "High confidence",
+  medium: "Medium confidence",
+  "needs-review": "Needs review"
+} satisfies Record<EvidenceConfidence, string>;
 
 const architectureStagesBySlug: Record<string, readonly ArchitectureStage[]> = {
   "icore-enterprise-mdm-entity-resolution": [
@@ -105,7 +145,7 @@ const architectureStagesBySlug: Record<string, readonly ArchitectureStage[]> = {
     {
       label: "Warehouse serving",
       detail:
-        "Lakehouse and Warehouse surfaces prepare migrated data for downstream analytics consumption.",
+        "Lakehouse and Warehouse layers prepare migrated data for downstream analytics consumption.",
       tone: "silver"
     }
   ],
@@ -151,7 +191,7 @@ const architectureStagesBySlug: Record<string, readonly ArchitectureStage[]> = {
     {
       label: "Power BI delivery",
       detail:
-        "Fabric and Power BI convert the architecture into an externally inspectable research proof point.",
+        "Fabric and Power BI convert the architecture into a public research artifact.",
       tone: "blue"
     }
   ],
@@ -159,7 +199,7 @@ const architectureStagesBySlug: Record<string, readonly ArchitectureStage[]> = {
     {
       label: "Lakehouse context",
       detail:
-        "Fabric data and semantic models give the conversational surfaces a governed analytical base.",
+        "Fabric data and semantic models give the conversational BI experience a governed analytical base.",
       tone: "blue"
     },
     {
@@ -179,7 +219,7 @@ const architectureStagesBySlug: Record<string, readonly ArchitectureStage[]> = {
     {
       label: "Synthetic dataset",
       detail:
-        "Public-safe data keeps the proof inspectable without exposing client or operational records.",
+        "Sanitized data keeps the example reviewable without exposing client or operational records.",
       tone: "silver"
     },
     {
@@ -231,6 +271,185 @@ const architectureStagesBySlug: Record<string, readonly ArchitectureStage[]> = {
   ]
 };
 
+const heroStatsBySlug: Record<string, readonly ProjectHeroStat[]> = {
+  "icore-enterprise-mdm-entity-resolution": [
+    {
+      label: "Role",
+      value: "Data product engineer",
+      detail: "API workflows, Databricks orchestration, governance controls"
+    },
+    {
+      label: "Stack",
+      value: "Databricks + Next.js",
+      detail: "SQL Warehouse, Jobs API, Unity Catalog, Delta control tables"
+    },
+    {
+      label: "Scale",
+      value: "Governed MDM workflow",
+      detail: "Connectors, source mappings, canonical entities, golden records"
+    },
+    {
+      label: "Outcome",
+      value: "Traceable decisions",
+      detail: "RBAC, audit logging, review paths, explainable resolution"
+    }
+  ],
+  "telecom-fabric-migration-poc": [
+    {
+      label: "Role",
+      value: "Migration engineer",
+      detail: "Fabric ingestion, transformation, CDC/SCD2, validation"
+    },
+    {
+      label: "Stack",
+      value: "Microsoft Fabric",
+      detail: "Data Factory, Lakehouse, Warehouse, PySpark, Delta"
+    },
+    {
+      label: "Scale",
+      value: "3 source systems",
+      detail: "Roughly 18-24 daily incremental source tables"
+    },
+    {
+      label: "Outcome",
+      value: "Reusable migration path",
+      detail: "Metadata-driven ingestion and reporting-ready serving layers"
+    }
+  ],
+  "bi-migration-validation-analytics": [
+    {
+      label: "Role",
+      value: "BI validation engineer",
+      detail: "Semantic rebuild, regression checks, report parity"
+    },
+    {
+      label: "Stack",
+      value: "SQL + Power BI",
+      detail: "DAX, Power Query, Report Builder, migration validation"
+    },
+    {
+      label: "Scale",
+      value: "15+ reports",
+      detail: "Including 6 Tableau-to-Power BI migrations"
+    },
+    {
+      label: "Outcome",
+      value: "90% fewer discrepancies",
+      detail: "Validation loops reduced report mismatch noise"
+    }
+  ],
+  "ieee-semiconductor-chip-analysis-medallion": [
+    {
+      label: "Role",
+      value: "Research builder",
+      detail: "Medallion architecture, analytics framing, BI delivery"
+    },
+    {
+      label: "Stack",
+      value: "Fabric + Power BI",
+      detail: "Lakehouse pattern, transformation layers, report output"
+    },
+    {
+      label: "Scale",
+      value: "Public research",
+      detail: "IEEE article with a reviewable external reference"
+    },
+    {
+      label: "Outcome",
+      value: "Published proof",
+      detail: "A public artifact supporting architecture and analytics range"
+    }
+  ],
+  "fabcon25-talk-to-your-data-demo": [
+    {
+      label: "Role",
+      value: "Demo architect",
+      detail: "Conversational BI, governed context, root-cause flow"
+    },
+    {
+      label: "Stack",
+      value: "Fabric + Copilot",
+      detail: "Power BI Chat with Data, Data Agent RCA, Copilot Studio"
+    },
+    {
+      label: "Scale",
+      value: "Conference demo",
+      detail: "Public-safe talk-to-your-data concept"
+    },
+    {
+      label: "Outcome",
+      value: "Executive-friendly analysis",
+      detail: "Natural-language path from question to BI-backed answer"
+    }
+  ],
+  "insurance-analytics-copilot-data-agent-poc": [
+    {
+      label: "Role",
+      value: "Analytics PoC builder",
+      detail: "Synthetic data, semantic model, answer validation"
+    },
+    {
+      label: "Stack",
+      value: "Power BI + Fabric",
+      detail: "DAX, Power Query, SQL patterns, Copilot-assisted analysis"
+    },
+    {
+      label: "Scale",
+      value: "Synthetic domain model",
+      detail: "Insurance-style measures and prompt workflows"
+    },
+    {
+      label: "Outcome",
+      value: "Checkable answers",
+      detail: "Prompt libraries and SQL patterns make responses reviewable"
+    }
+  ],
+  "vitac-skincare-market-analysis": [
+    {
+      label: "Role",
+      value: "Market analytics builder",
+      detail: "Sizing logic, business framing, Power BI output"
+    },
+    {
+      label: "Stack",
+      value: "Fabric + ADF + Power BI",
+      detail: "Data intake, transformation, business storytelling"
+    },
+    {
+      label: "Scale",
+      value: "Market-sizing model",
+      detail: "TAM, SAM, SOM, SCQA, and Pyramid Principle framing"
+    },
+    {
+      label: "Outcome",
+      value: "Shareable insight story",
+      detail: "Analytics packaged for business decision review"
+    }
+  ],
+  align: [
+    {
+      label: "Status",
+      value: "Under review",
+      detail: "Not counted as a finished case study"
+    },
+    {
+      label: "Review focus",
+      value: "Repository quality",
+      detail: "README, screenshots, architecture, and positioning"
+    },
+    {
+      label: "Public stance",
+      value: "Profile artifact",
+      detail: "Keep as a GitHub profile reference for now"
+    },
+    {
+      label: "Promotion gate",
+      value: "Clear systems story",
+      detail: "Promote only if the work supports data-engineering positioning"
+    }
+  ]
+};
+
 export function getProjectBySlug(slug: string) {
   return projects.find((project) => project.slug === slug);
 }
@@ -242,36 +461,36 @@ export function getOrderedProjects(lens: LensId): readonly Project[] {
 export function getCaseFileMetrics(
   projectList: readonly Project[] = projects
 ): readonly ProjectMetric[] {
-  const publicLinks = projectList.flatMap((project) =>
-    project.links.filter((link) => link.status === "verified")
-  );
-  const pendingMedia = projectList.flatMap((project) =>
-    project.media.filter((asset) => asset.status === "pending")
-  );
   const primaryProjects = projectList.filter(
     (project) => project.status !== "observed"
+  );
+  const publicLinks = primaryProjects.flatMap((project) =>
+    project.links.filter((link) => link.status === "verified")
+  );
+  const underReviewProjects = projectList.filter(
+    (project) => project.status === "observed"
   );
 
   return [
     {
+      label: "Flagship work",
+      value: featuredProjectSlugs.length.toString(),
+      detail: "primary case studies"
+    },
+    {
       label: "Case files",
       value: primaryProjects.length.toString(),
-      detail: "portfolio-ready records"
+      detail: "case-study-ready records"
     },
     {
-      label: "Featured",
-      value: featuredProjectSlugs.length.toString(),
-      detail: "primary proof stories"
-    },
-    {
-      label: "Public links",
+      label: "Live references",
       value: publicLinks.length.toString(),
-      detail: "verified artifacts"
+      detail: "verified project links"
     },
     {
-      label: "Media queue",
-      value: pendingMedia.length.toString(),
-      detail: "assets to approve"
+      label: "Under review",
+      value: underReviewProjects.length.toString(),
+      detail: "not counted as case studies"
     }
   ];
 }
@@ -282,6 +501,33 @@ export function getProjectStatusLabel(status: Project["status"]) {
 
 export function getProjectStatusTone(status: Project["status"]) {
   return statusTone[status];
+}
+
+export function getProjectHeroStats(project: Project): readonly ProjectHeroStat[] {
+  return (
+    heroStatsBySlug[project.slug] ?? [
+      {
+        label: "Role",
+        value: project.type,
+        detail: "Primary contribution and delivery context"
+      },
+      {
+        label: "Stack",
+        value: project.stack.slice(0, 2).join(" + ") || "Stack to review",
+        detail: project.stack.slice(2, 5).join(", ") || "Implementation details to add"
+      },
+      {
+        label: "Scale",
+        value: project.dates,
+        detail: "Project window and delivery scope"
+      },
+      {
+        label: "Outcome",
+        value: project.impact,
+        detail: "Result and public-safe impact summary"
+      }
+    ]
+  );
 }
 
 export function getLensSummary(lens: LensId) {
@@ -295,7 +541,7 @@ export function getPriorityLabel(project: Project, lens: LensId) {
 
   const priority = project.viewerPriority[lens];
 
-  return priority ? `${capitalize(priority)} for ${capitalize(lens)}` : "Support signal";
+    return priority ? `${publicPriorityLabel(priority)} for ${capitalize(lens)}` : "Supporting work";
 }
 
 export function getProjectProofStats(project: Project) {
@@ -310,6 +556,7 @@ export function getProjectProofStats(project: Project) {
   ).length;
 
   return {
+    evidenceNoteCount: project.evidenceNotes?.length ?? 0,
     verifiedLinks,
     pendingLinks,
     pendingMedia,
@@ -317,6 +564,18 @@ export function getProjectProofStats(project: Project) {
     skillCount: project.relatedSkills.length,
     credentialCount: project.relatedCredentials.length
   };
+}
+
+export function getEvidenceStatusLabel(status: EvidencePublicStatus) {
+  return evidenceStatusLabels[status];
+}
+
+export function getEvidenceTypeLabel(type: EvidenceType) {
+  return evidenceTypeLabels[type];
+}
+
+export function getEvidenceConfidenceLabel(confidence: EvidenceConfidence) {
+  return evidenceConfidenceLabels[confidence];
 }
 
 export function getArchitectureStages(project: Project) {
@@ -411,4 +670,15 @@ function projectIndex(slug: string) {
 
 function capitalize(value: string) {
   return `${value.slice(0, 1).toUpperCase()}${value.slice(1)}`;
+}
+
+function publicPriorityLabel(priority: Priority) {
+  switch (priority) {
+    case "high":
+      return "Core";
+    case "medium":
+      return "Supporting";
+    case "low":
+      return "Background";
+  }
 }

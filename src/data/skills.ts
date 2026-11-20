@@ -5,7 +5,7 @@ export const skillClusters = [
     id: "fabric-lakehouse-engineering",
     title: "Fabric Lakehouse Engineering",
     priority: 1,
-    portfolioRole: "Core Data Engineer credibility",
+    portfolioRole: "Core data engineering signal",
     canonicalSkills: [
       "Microsoft Fabric",
       "Lakehouse",
@@ -29,14 +29,14 @@ export const skillClusters = [
       "18-24 daily incremental source tables",
       "Bronze/Silver/Gold processing",
       "Fabric Lakehouse/Warehouse architecture",
-      "validation-ready stages"
+      "validation stages ready for BI review"
     ],
     relatedCredentials: [
       "fabric-data-engineer-associate",
       "fabric-analytics-engineer-associate"
     ],
     publicFraming:
-      "Fabric lakehouse delivery across ingestion, transformation, validation, and BI-serving layers.",
+      "Fabric lakehouse delivery across ingestion, transformation, validation, and BI-ready outputs.",
     viewerPriority: {
       recruiter: "high",
       engineer: "high",
@@ -48,7 +48,7 @@ export const skillClusters = [
     id: "databricks-data-product-engineering",
     title: "Databricks Data Product Engineering",
     priority: 2,
-    portfolioRole: "Strongest current depth story",
+    portfolioRole: "Strong current depth signal",
     canonicalSkills: [
       "Databricks Apps",
       "SQL Warehouse",
@@ -77,7 +77,7 @@ export const skillClusters = [
       "databricks-fundamentals"
     ],
     publicFraming:
-      "Databricks-hosted data products with governed orchestration and audit-ready workflows.",
+      "Databricks-hosted data products with governed orchestration and reviewable workflows.",
     viewerPriority: {
       engineer: "high",
       leader: "high",
@@ -87,7 +87,7 @@ export const skillClusters = [
   },
   {
     id: "sql-spark-data-quality",
-    title: "SQL, Spark, And Data Quality",
+    title: "SQL, Spark, and Data Quality",
     priority: 3,
     portfolioRole: "Implementation backbone",
     canonicalSkills: [
@@ -130,7 +130,7 @@ export const skillClusters = [
   },
   {
     id: "bi-modernization-semantic-modeling",
-    title: "BI Modernization And Semantic Modeling",
+    title: "BI Modernization and Semantic Modeling",
     priority: 4,
     portfolioRole: "Measurable business impact",
     canonicalSkills: [
@@ -174,20 +174,20 @@ export const skillClusters = [
   },
   {
     id: "governance-stewardship-auditability",
-    title: "Governance, Stewardship, And Auditability",
+    title: "Governed Data Workflows",
     priority: 5,
-    portfolioRole: "Leader-facing maturity signal",
+    portfolioRole: "Leader-facing maturity indicator",
     canonicalSkills: [
       "RBAC",
       "audit logging",
-      "decision lineage",
+      "decision history",
       "approval chains",
       "SLA policies",
       "delegation",
       "escalation",
       "overrides",
       "compliance scorecards",
-      "evidence packs"
+      "evidence trails"
     ],
     evidenceProjects: ["icore-enterprise-mdm-entity-resolution"],
     evidenceStrength: "medium-high",
@@ -196,9 +196,9 @@ export const skillClusters = [
       "review queues",
       "approval chains",
       "compliance scorecards",
-      "evidence packs",
-      "decision lineage",
-      "model-backed decision audit trails"
+      "evidence trails",
+      "decision history",
+      "model-backed decision review trails"
     ],
     relatedCredentials: [
       "databricks-uc-upgrade-delivery-specialization",
@@ -215,7 +215,7 @@ export const skillClusters = [
   },
   {
     id: "product-engineering-data-workflows",
-    title: "Product Engineering For Data Workflows",
+    title: "Product Engineering for Data Workflows",
     priority: 6,
     portfolioRole: "Differentiator beyond pure ETL",
     canonicalSkills: [
@@ -245,7 +245,7 @@ export const skillClusters = [
       "databricks-uc-upgrade-delivery-specialization"
     ],
     publicFraming:
-      "Data products with real workflow surfaces, not only backend pipelines.",
+      "Data products with real workflow interfaces, not only backend pipelines.",
     viewerPriority: {
       engineer: "high",
       leader: "medium",
@@ -255,9 +255,9 @@ export const skillClusters = [
   },
   {
     id: "ai-assisted-analytics-data-agents",
-    title: "AI-Assisted Analytics And Data Agents",
+    title: "AI-Assisted Analytics and Data Agents",
     priority: 7,
-    portfolioRole: "Explorer/future-facing signal",
+    portfolioRole: "Explorer/current-learning indicator",
     canonicalSkills: [
       "Power BI Chat with Data",
       "in-report Copilot",
@@ -295,9 +295,9 @@ export const skillClusters = [
   },
   {
     id: "research-business-storytelling",
-    title: "Research And Business Storytelling",
+    title: "Research and Business Storytelling",
     priority: 8,
-    portfolioRole: "Credibility and communication layer",
+    portfolioRole: "Research and communication signal",
     canonicalSkills: [
       "Research communication",
       "Medallion Architecture explanation",
@@ -336,27 +336,27 @@ export const skillClusters = [
 export const proofGraphEdges = [
   {
     from: "fabric-lakehouse-engineering",
-    relationship: "proven by",
+    relationship: "is visible in",
     to: "telecom-fabric-migration-poc"
   },
   {
     from: "telecom-fabric-migration-poc",
-    relationship: "quantified by",
+    relationship: "is measured by",
     to: "metric-3-source-systems"
   },
   {
     from: "telecom-fabric-migration-poc",
-    relationship: "quantified by",
+    relationship: "is measured by",
     to: "metric-18-24-daily-incremental-source-tables"
   },
   {
     from: "sql-spark-data-quality",
-    relationship: "demonstrated through",
+    relationship: "is shown through",
     to: "cdc-scd2-validation-stages"
   },
   {
     from: "databricks-data-product-engineering",
-    relationship: "proven by",
+    relationship: "is visible in",
     to: "icore-enterprise-mdm-entity-resolution"
   },
   {
@@ -371,22 +371,22 @@ export const proofGraphEdges = [
   },
   {
     from: "bi-modernization-semantic-modeling",
-    relationship: "proven by",
+    relationship: "is visible in",
     to: "bi-migration-validation-analytics"
   },
   {
     from: "bi-migration-validation-analytics",
-    relationship: "quantified by",
+    relationship: "is measured by",
     to: "metric-15-plus-reports-validated"
   },
   {
     from: "bi-migration-validation-analytics",
-    relationship: "quantified by",
+    relationship: "is measured by",
     to: "metric-90-percent-discrepancy-reduction"
   },
   {
     from: "bi-migration-validation-analytics",
-    relationship: "quantified by",
+    relationship: "is measured by",
     to: "metric-6-tableau-reports-migrated"
   },
   {
@@ -396,12 +396,12 @@ export const proofGraphEdges = [
   },
   {
     from: "product-engineering-data-workflows",
-    relationship: "proven by",
+    relationship: "is visible in",
     to: "icore-enterprise-mdm-entity-resolution"
   },
   {
     from: "governance-stewardship-auditability",
-    relationship: "proven by",
+    relationship: "is visible in",
     to: "review-queues-approval-chains-evidence-packs-decision-lineage"
   },
   {
@@ -411,12 +411,12 @@ export const proofGraphEdges = [
   },
   {
     from: "ai-assisted-analytics-data-agents",
-    relationship: "demonstrated by",
+    relationship: "is shown in",
     to: "fabcon25-talk-to-your-data-demo"
   },
   {
     from: "research-business-storytelling",
-    relationship: "proven by",
+    relationship: "is visible in",
     to: "ieee-semiconductor-chip-analysis-medallion"
   },
   {
@@ -434,5 +434,5 @@ export const proofGraphEdges = [
 export const weakSignalsToAvoid = [
   "GitHub public repository count",
   "LeetCode solved count",
-  "Generic AI claims without FabCon25, Copilot, semantic model, data-agent, or verified-response evidence"
+  "Broad AI positioning without FabCon25, Copilot, semantic model, data-agent, or verified-response context"
 ] satisfies readonly string[];

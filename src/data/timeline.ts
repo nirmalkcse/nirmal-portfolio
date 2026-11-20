@@ -4,7 +4,7 @@ const resumeSource = {
   label: "Resume source",
   url: null,
   status: "pending",
-  note: "Extracted in Session 02; public resume asset path pending."
+  note: "Resume download available through the site."
 } satisfies TimelineEvent["proofLinks"][number];
 
 export const timelineEvents = [
@@ -46,7 +46,7 @@ export const timelineEvents = [
         label: "IEEE article",
         url: "https://ieeexplore.ieee.org/document/10544873",
         status: "verified",
-        note: "Exact citation metadata pending."
+        note: "Public IEEE article."
       }
     ],
     relatedProjects: ["ieee-semiconductor-chip-analysis-medallion"],
@@ -127,10 +127,10 @@ export const timelineEvents = [
     proofLinks: [
       resumeSource,
       {
-        label: "Event/demo proof",
+        label: "Event/demo reference",
         url: null,
         status: "pending",
-        note: "Public-safe event or demo proof pending."
+        note: "Public event or demo reference to add after approval."
       }
     ],
     relatedProjects: ["fabcon25-talk-to-your-data-demo"],
@@ -158,10 +158,10 @@ export const timelineEvents = [
     proofLinks: [
       resumeSource,
       {
-        label: "Public-safe artifacts",
+        label: "Approved public artifacts",
         url: null,
         status: "pending",
-        note: "Architecture diagram and validation proof pending."
+        note: "Architecture diagram and validation example to add after approval."
       }
     ],
     relatedProjects: ["telecom-fabric-migration-poc"],
@@ -188,10 +188,10 @@ export const timelineEvents = [
     proofLinks: [
       resumeSource,
       {
-        label: "Public-safe artifacts",
+        label: "Approved public artifacts",
         url: null,
         status: "pending",
-        note: "Sanitized UI screenshots and architecture proof pending."
+        note: "UI screenshots and architecture example to add after approval."
       }
     ],
     relatedProjects: ["icore-enterprise-mdm-entity-resolution"],

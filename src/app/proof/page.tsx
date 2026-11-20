@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { ProofGraph } from "@/components/proof-graph";
 import { RoleLensProvider } from "@/context/role-lens-context";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Proof Graph",
+export const metadata: Metadata = createPageMetadata({
+  title: "Skills",
   description:
-    "Role-aware graph connecting Nirmal Kumar's skills to project evidence, credentials, metrics, and proof gaps."
-};
+    "Skills mapped to Nirmal Kumar's project work, credentials, metrics, and public proof points.",
+  path: "/proof"
+});
 
 export default function ProofPage() {
   return (

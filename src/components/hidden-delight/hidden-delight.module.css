@@ -1,7 +1,14 @@
 .overlay {
   animation: hidden-delight-fade var(--duration-panel) var(--ease-out) both;
-  background: color-mix(in srgb, var(--color-obsidian) 78%, transparent);
-  backdrop-filter: blur(18px);
+  background:
+    radial-gradient(
+      circle at 28% 20%,
+      color-mix(in srgb, var(--color-antique-gold) 10%, transparent),
+      transparent 30%
+    ),
+    color-mix(in srgb, var(--color-obsidian) 78%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(1.08);
+  backdrop-filter: blur(20px) saturate(1.08);
   display: grid;
   inset: 0;
   justify-items: center;
@@ -12,6 +19,7 @@
 }
 
 .dialog {
+  position: relative;
   animation: hidden-delight-rise var(--duration-panel) var(--ease-out) both;
   background:
     linear-gradient(
@@ -29,7 +37,39 @@
   width: 100%;
 }
 
+.dialog::before,
+.dialog::after {
+  position: absolute;
+  pointer-events: none;
+  content: "";
+}
+
+.dialog::before {
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 84% 4%,
+      color-mix(in srgb, var(--color-champagne) 16%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--color-champagne) 15%, transparent),
+      transparent
+    );
+  opacity: 0.82;
+}
+
+.dialog::after {
+  inset: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-ivory) 7%, transparent);
+  border-radius: calc(var(--radius-panel) - 8px);
+}
+
 .topbar {
+  position: relative;
+  z-index: 1;
   align-items: center;
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
@@ -94,10 +134,13 @@
 }
 
 .content {
+  position: relative;
+  z-index: 1;
   padding: var(--space-4);
 }
 
 .searchRow {
+  position: relative;
   align-items: center;
   background: color-mix(in srgb, var(--color-obsidian) 56%, var(--color-carbon));
   border: 1px solid var(--border-subtle);
@@ -107,6 +150,21 @@
   grid-template-columns: 20px minmax(0, 1fr) auto;
   min-height: 48px;
   padding-inline: var(--space-3);
+}
+
+.searchRow::after {
+  position: absolute;
+  inset: auto 18px -1px;
+  height: 1px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--color-champagne) 54%, transparent),
+      transparent
+    );
+  content: "";
+  opacity: 0.44;
 }
 
 .searchIcon {
@@ -149,6 +207,7 @@
 }
 
 .commandButton {
+  position: relative;
   align-items: center;
   background: color-mix(in srgb, var(--color-carbon) 68%, transparent);
   border: 1px solid var(--border-subtle);
@@ -168,6 +227,24 @@
   width: 100%;
 }
 
+.commandButton::before {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(
+      105deg,
+      transparent,
+      color-mix(in srgb, var(--color-ivory) 8%, transparent),
+      transparent
+    );
+  background-position: 120% 0;
+  background-size: 220% 100%;
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+}
+
 .commandButton:hover,
 .commandButton[data-active="true"] {
   background: color-mix(in srgb, var(--color-charcoal) 88%, transparent);
@@ -176,7 +253,13 @@
   transform: translateY(calc(-1 * var(--motion-distance-xs)));
 }
 
+.commandButton:hover::before,
+.commandButton[data-active="true"]::before {
+  animation: hidden-delight-sheen 820ms var(--ease-emphasized) both;
+}
+
 .commandIcon {
+  position: relative;
   align-items: center;
   background: color-mix(in srgb, var(--color-antique-gold) 12%, transparent);
   border: 1px solid var(--border-gold);
@@ -186,6 +269,28 @@
   height: 40px;
   justify-content: center;
   width: 40px;
+}
+
+.commandIcon::after {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-champagne);
+  content: "";
+  opacity: 0;
+  transform: scale(0.7);
+  transition:
+    opacity var(--duration-feedback) var(--ease-out),
+    transform var(--duration-feedback) var(--ease-out);
+}
+
+.commandButton:hover .commandIcon::after,
+.commandButton[data-active="true"] .commandIcon::after {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .commandLabel {
@@ -253,10 +358,25 @@
 
 .vaultCard,
 .noteCard {
+  position: relative;
   background: color-mix(in srgb, var(--color-carbon) 72%, transparent);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-card);
   padding: var(--space-4);
+}
+
+.vaultCard::after,
+.noteCard::after {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-champagne) 68%, transparent);
+  content: "";
+  opacity: 0.54;
+  animation: hidden-delight-soft-pulse 4.2s var(--ease-standard) infinite;
 }
 
 .vaultCard {
@@ -341,6 +461,36 @@
   }
 }
 
+@keyframes hidden-delight-sheen {
+  0% {
+    background-position: 120% 0;
+    opacity: 0;
+  }
+
+  28%,
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    background-position: -30% 0;
+    opacity: 0;
+  }
+}
+
+@keyframes hidden-delight-soft-pulse {
+  0%,
+  100% {
+    opacity: 0.32;
+    transform: scale(0.82);
+  }
+
+  50% {
+    opacity: 0.78;
+    transform: scale(1.08);
+  }
+}
+
 @media (min-width: 720px) {
   .vaultGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -353,7 +503,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .overlay,
-  .dialog {
+  .dialog,
+  .commandButton::before,
+  .vaultCard::after,
+  .noteCard::after {
     animation: none;
   }
 

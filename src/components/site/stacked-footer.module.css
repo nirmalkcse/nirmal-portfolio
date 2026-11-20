@@ -1,0 +1,246 @@
+/*
+ * Footer plinth.
+ *
+ * The page above is cream; this closes it on a deep espresso plate so the footer
+ * reads as a separate surface rather than more page. Same palette, other end of
+ * it: the browns already used for the code window and the CTA pill, with the
+ * copper accent lifted to gold so it holds contrast on a dark ground.
+ *
+ * Deliberately plain. A name, a role, the links, the city. The character is
+ * meant to come from the type and the ground, not from widgets, so there is no
+ * status dot, no live clock, no ghosted wordmark and no cursor spotlight. Those
+ * read as template furniture and date a site fast.
+ */
+
+.stackedFooter {
+  --footer-ink: #f3ebe0;
+  --footer-muted: rgba(243, 235, 224, 0.58);
+  --footer-faint: rgba(243, 235, 224, 0.38);
+  --footer-gold: #d2a469;
+  --footer-line: rgba(243, 235, 224, 0.12);
+  background:
+    radial-gradient(112% 80% at 6% 0%, rgba(150, 96, 56, 0.3), transparent 58%),
+    linear-gradient(168deg, #2b211b 0%, #241c17 56%, #1c1512 100%);
+  border-top: 1px solid rgba(210, 164, 105, 0.2);
+  color: var(--footer-ink);
+  isolation: isolate;
+  overflow: clip;
+  position: relative;
+}
+
+.surface {
+  display: flex;
+  flex-direction: column;
+  margin-inline: auto;
+  max-width: 1320px;
+  padding-block: clamp(40px, 4.2vw, 60px) clamp(22px, 2.4vw, 30px);
+  padding-inline: clamp(24px, 5vw, 72px);
+  position: relative;
+  width: 100%;
+  z-index: 1;
+}
+
+.top {
+  display: grid;
+  gap: clamp(34px, 5vw, 90px);
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding-bottom: clamp(30px, 3.4vw, 46px);
+}
+
+.identity h2 {
+  color: var(--footer-ink);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: clamp(2.1rem, 3.6vw, 3.1rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin: 0 0 0.7rem;
+}
+
+.identity p {
+  color: var(--footer-muted);
+  font-size: 0.92rem;
+  letter-spacing: -0.005em;
+  margin: 0;
+}
+
+/* Two plain columns of links, with no headings above them. At five and four
+   items there is nothing to disambiguate. */
+.index {
+  display: grid;
+  gap: clamp(28px, 4vw, 64px);
+  grid-template-columns: repeat(2, auto);
+}
+
+.index nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.index a {
+  color: var(--footer-muted);
+  font-size: 0.9rem;
+  position: relative;
+  text-decoration: none;
+  transition: color 0.28s ease;
+  width: fit-content;
+}
+
+.index a::after {
+  background: var(--footer-gold);
+  bottom: -3px;
+  content: "";
+  height: 1px;
+  left: 0;
+  position: absolute;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+  width: 100%;
+}
+
+.index a:hover,
+.index a:focus-visible {
+  color: var(--footer-ink);
+}
+
+.index a:hover::after,
+.index a:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.contactBloom {
+  background: radial-gradient(circle, rgba(58, 42, 33, 0.95), rgba(40, 29, 23, 0.94) 60%, rgba(28, 21, 18, 0.92));
+  border-radius: 999px;
+  height: 26px;
+  margin-left: -13px;
+  margin-top: -13px;
+  pointer-events: none;
+  position: fixed;
+  width: 26px;
+  z-index: 9998;
+}
+
+.rule {
+  background: var(--footer-line);
+  display: block;
+  height: 1px;
+  width: 100%;
+}
+
+.baseline {
+  align-items: center;
+  display: flex;
+  gap: 16px 24px;
+  justify-content: space-between;
+  padding-top: clamp(18px, 2vw, 24px);
+}
+
+.baseline p {
+  color: var(--footer-faint);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.footerBrand {
+  align-items: center;
+  color: inherit;
+  display: inline-flex;
+  text-decoration: none;
+}
+
+.footerMonogram {
+  color: var(--footer-gold);
+  height: 26px;
+  width: 26px;
+}
+
+.footerMonogram > span {
+  font-size: 0.82rem;
+}
+
+/* One movement on the whole plate: it settles into place the first time it is
+   scrolled to, and after that everything is hover state. */
+.surface > * {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stackedFooter[data-revealed="true"] .surface > * {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.stackedFooter[data-revealed="true"] .baseline {
+  transition-delay: 0.12s;
+}
+
+.footerBrand:focus-visible,
+.index a:focus-visible {
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 2px rgba(28, 21, 18, 0.96),
+    0 0 0 4px rgba(210, 164, 105, 0.86);
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+}
+
+.completionSentinel {
+  display: block;
+  height: 2px;
+  pointer-events: none;
+  width: 100%;
+}
+
+@media (max-width: 760px) {
+  .top {
+    gap: 32px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .index {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .surface {
+    padding-block: 32px 18px;
+  }
+
+  .identity h2 {
+    font-size: 1.95rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .surface > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .index a,
+  .index a::after {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .stackedFooter {
+    background: Canvas;
+    border-top: 1px solid CanvasText;
+    color: CanvasText;
+  }
+
+  .rule {
+    background: CanvasText;
+  }
+}

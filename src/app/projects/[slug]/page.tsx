@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { CaseStudy } from "@/components/case-study/case-study";
 import {
   getOrderedProjects,
-  getProjectBySlug,
-  ProjectCaseFileDetail
+  getProjectBySlug
 } from "@/components/project-case-file";
+import { createPageMetadata } from "@/lib/seo";
 
 type ProjectCaseFilePageProps = {
   params: Promise<{
@@ -24,10 +25,11 @@ export async function generateMetadata({
     };
   }
 
-  return {
+  return createPageMetadata({
     title: project.title,
-    description: project.summary
-  };
+    description: project.summary,
+    path: `/projects/${project.slug}`
+  });
 }
 
 export function generateStaticParams() {
@@ -46,5 +48,5 @@ export default async function ProjectCaseFilePage({
     notFound();
   }
 
-  return <ProjectCaseFileDetail project={project} />;
+  return <CaseStudy project={project} />;
 }

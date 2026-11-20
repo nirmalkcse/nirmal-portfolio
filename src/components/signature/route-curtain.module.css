@@ -1,0 +1,72 @@
+.curtain {
+  /* Just under the header (z 20) so the nav pill stays in view. */
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+  display: flex;
+  align-items: flex-end;
+  background:
+    radial-gradient(110% 80% at 0% 100%, rgba(118, 74, 44, 0.32), transparent 60%),
+    linear-gradient(180deg, #261c16 0%, #1c1511 100%);
+  color: #f3eadc;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* A chapter opener, not a splash: ranged left on the same gutter and
+   measure as the pages, sitting low in the frame where the eye lands after
+   the nav. */
+.opener {
+  width: min(var(--layout-page-max), 100%);
+  margin: 0 auto;
+  padding: 0 var(--layout-gutter) clamp(56px, 11vh, 120px);
+}
+
+.titleMask {
+  display: block;
+  overflow: hidden;
+  /* Room for descenders inside the mask. */
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+.title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(3.25rem, 8vw, 7.5rem);
+  font-weight: 600;
+  font-kerning: normal;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  text-wrap: balance;
+}
+
+.rule {
+  display: block;
+  height: 1px;
+  margin: clamp(22px, 3vh, 32px) 0 clamp(16px, 2.2vh, 22px);
+  background: rgba(243, 234, 220, 0.16);
+  transform-origin: left center;
+}
+
+.summary {
+  max-width: 34rem;
+  margin: 0;
+  color: rgba(243, 234, 220, 0.6);
+  font-family: var(--font-ui);
+  font-size: clamp(1.05rem, 1.35vw, 1.3rem);
+  font-weight: 500;
+  letter-spacing: -0.014em;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+/* The lifting edge: one warm hairline and a soft fall-off shadow, so the
+   sheet reads as lifted off the page rather than wiped. */
+.edge {
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: rgba(217, 173, 115, 0.5);
+  box-shadow: 0 18px 60px 18px rgba(26, 21, 17, 0.34);
+}

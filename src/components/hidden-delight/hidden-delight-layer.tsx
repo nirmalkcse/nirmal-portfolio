@@ -1,6 +1,15 @@
 "use client";
 
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore
+} from "react";
+import { usePathname } from "next/navigation";
 import type {
   HiddenDelightMode,
   HiddenDelightStampPayload
@@ -11,6 +20,11 @@ type Stamp = HiddenDelightStampPayload & {
   instanceId: string;
 };
 
+const subscribeToPlatform = () => () => undefined;
+const getPlatformModifier = () =>
+  /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent) ? "⌘" : "Ctrl";
+const getServerPlatformModifier = () => "⌘";
+
 const HiddenDelightPanel = lazy(() =>
   import("./hidden-delight-panel").then((module) => ({
     default: module.HiddenDelightPanel
@@ -18,6 +32,7 @@ const HiddenDelightPanel = lazy(() =>
 );
 
 export function HiddenDelightLayer() {
+  const pathname = usePathname();
   const issuedStampIds = useRef<Set<string>>(new Set());
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const timeouts = useRef<number[]>([]);
@@ -25,7 +40,13 @@ export function HiddenDelightLayer() {
   const [mode, setMode] = useState<HiddenDelightMode>("commands");
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [goldThreadUnlocked, setGoldThreadUnlocked] = useState(false);
+  const [switchEngaged, setSwitchEngaged] = useState(false);
   const [stamps, setStamps] = useState<Stamp[]>([]);
+  const modifierKey = useSyncExternalStore(
+    subscribeToPlatform,
+    getPlatformModifier,
+    getServerPlatformModifier
+  );
 
   const rememberFocusOrigin = useCallback(() => {
     const activeElement = document.activeElement;
@@ -92,10 +113,10 @@ export function HiddenDelightLayer() {
       setPaletteOpen(true);
       emitStamp({
         id: nextMode === "vault" ? "vault-opened" : "notes-opened",
-        title: nextMode === "vault" ? "Dossier Vault" : "Build Notes",
+        title: nextMode === "vault" ? "Review Vault" : "Build Notes",
         detail:
           nextMode === "vault"
-            ? "Private proof cues are now visible."
+            ? "Private review cues are now visible."
             : "Design and engineering notes are now visible.",
         unique: true
       });
@@ -134,9 +155,11 @@ export function HiddenDelightLayer() {
       return;
     }
 
-    const footer = document.querySelector("footer");
+    const footerCompletionTarget = document.querySelector(
+      "[data-footer-complete]"
+    );
 
-    if (!footer) {
+    if (!footerCompletionTarget) {
       return;
     }
 
@@ -151,13 +174,13 @@ export function HiddenDelightLayer() {
           });
         }
       },
-      { threshold: 0.35 }
+      { threshold: 0.6 }
     );
 
-    observer.observe(footer);
+    observer.observe(footerCompletionTarget);
 
     return () => observer.disconnect();
-  }, [emitStamp, goldThreadUnlocked]);
+  }, [emitStamp, goldThreadUnlocked, pathname]);
 
   useEffect(() => {
     function handleWindowKeyDown(event: globalThis.KeyboardEvent) {
@@ -194,6 +217,40 @@ export function HiddenDelightLayer() {
 
   return (
     <>
+      <button
+        aria-keyshortcuts="Meta+K Control+K"
+        aria-label="Open the command layer"
+        className={styles.atelierSwitch}
+        data-active={goldThreadUnlocked ? "true" : "false"}
+        data-engaged={switchEngaged ? "true" : "false"}
+        // The timeline keeps its year counter in this corner; the shortcut
+        // still works there, the keycap just steps aside.
+        data-hidden={pathname === "/timeline" ? "true" : undefined}
+        onBlur={() => setSwitchEngaged(false)}
+        onClick={openPalette}
+        onFocus={() => setSwitchEngaged(true)}
+        onPointerEnter={() => setSwitchEngaged(true)}
+        onPointerLeave={() => setSwitchEngaged(false)}
+        type="button"
+      >
+        <span aria-hidden="true" className={styles.switchAura} />
+        <span aria-hidden="true" className={styles.switchMark}>
+          <kbd className={styles.switchKey}>{modifierKey}</kbd>
+          <kbd className={styles.switchKey}>K</kbd>
+        </span>
+        <span
+          aria-hidden="true"
+          className={styles.switchHint}
+          data-visible={switchEngaged ? "true" : "false"}
+          style={{
+            visibility: switchEngaged ? "visible" : undefined,
+            transform: switchEngaged ? "translateY(0)" : undefined
+          }}
+        >
+          Atelier · jump anywhere
+        </span>
+      </button>
+
       <div
         aria-hidden="true"
         className={styles.goldTrace}

@@ -1,0 +1,201 @@
+/* The record field: loose records that resolve into entities. */
+
+.resolve {
+  --field-ink: 29, 26, 23;
+  --field-accent: 154, 86, 55;
+  position: relative;
+}
+
+.resolvePinned {
+  height: 300vh;
+}
+
+.stage {
+  height: 100svh;
+  min-height: 600px;
+  overflow: hidden;
+  position: relative;
+}
+
+.resolvePinned .stage {
+  position: sticky;
+  top: 0;
+}
+
+.canvas {
+  inset: 0;
+  position: absolute;
+}
+
+.tail {
+  color: var(--gray);
+}
+
+/* Centred headline */
+
+.introSlot {
+  display: grid;
+  inset: 0;
+  place-items: center;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.intro {
+  padding: 0 var(--gutter);
+  text-align: center;
+}
+
+.title {
+  font-size: clamp(3.4rem, 8.6vw, 9.4rem);
+  font-weight: 600;
+  letter-spacing: -0.058em;
+  line-height: 0.94;
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--ink);
+  font-size: clamp(1.1rem, 1.55vw, 1.5rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+  margin: clamp(18px, 2.6vh, 28px) auto 0;
+  max-width: 42ch;
+  text-wrap: balance;
+}
+
+/* Closing line */
+
+.outro {
+  bottom: clamp(72px, 13vh, 132px);
+  font-size: clamp(1.4rem, 2.4vw, 2.3rem);
+  font-weight: 600;
+  left: 50%;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  margin: 0;
+  pointer-events: none;
+  position: absolute;
+  text-align: center;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  z-index: 2;
+}
+
+/* Entity labels, laid over the canvas nodes. */
+
+.entities {
+  inset: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.entities li {
+  position: absolute;
+  transform: translate(-50%, 54px);
+}
+
+.entity {
+  align-items: center;
+  background: none;
+  border: 0;
+  border-radius: 14px;
+  color: var(--ink);
+  display: grid;
+  gap: 3px;
+  justify-items: center;
+  padding: 8px 12px;
+  pointer-events: none;
+  text-align: center;
+  transition:
+    background 0.4s var(--ease),
+    box-shadow 0.4s var(--ease),
+    transform 0.5s var(--ease);
+}
+
+.entitiesLive .entity {
+  pointer-events: auto;
+}
+
+.entity:hover,
+.entity:focus-visible {
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 12px 30px -18px rgba(60, 40, 20, 0.45);
+  transform: translateY(-2px);
+}
+
+.entityIndex {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.entityName {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+}
+
+.entityFlagship .entityName {
+  color: var(--accent);
+}
+
+.entitiesNarrow li {
+  transform: translate(46px, -50%);
+}
+
+.entitiesNarrow .entity {
+  column-gap: 10px;
+  grid-template-columns: auto auto;
+  justify-items: start;
+  text-align: left;
+}
+
+/* Autoplay (no pinning): the canvas resolves between ~1.6s and ~6.8s. */
+
+.introAuto {
+  animation: field-out 0.9s var(--ease) 4s both;
+}
+
+.outroAuto,
+.entitiesAuto {
+  animation: field-in 1s var(--ease) 5.4s both;
+}
+
+@keyframes field-in {
+  from {
+    filter: blur(8px);
+    opacity: 0;
+  }
+
+  to {
+    filter: blur(0);
+    opacity: 1;
+  }
+}
+
+@keyframes field-out {
+  to {
+    filter: blur(10px);
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+}
+
+@media (max-width: 760px) {
+  .outro {
+    bottom: clamp(64px, 10vh, 96px);
+    font-size: 1.35rem;
+    white-space: normal;
+    width: calc(100% - 2 * var(--gutter));
+  }
+}

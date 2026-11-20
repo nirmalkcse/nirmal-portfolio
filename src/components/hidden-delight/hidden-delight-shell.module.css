@@ -1,3 +1,157 @@
+.atelierSwitch {
+  position: fixed;
+  bottom: clamp(16px, 2.2vw, 28px);
+  left: clamp(16px, 2.4vw, 28px);
+  z-index: var(--z-sticky);
+  align-items: center;
+  display: inline-grid;
+  grid-template-columns: auto;
+  min-width: 26px;
+  width: 26px;
+  height: 18px;
+  border: 1px solid color-mix(in srgb, var(--color-brass) 18%, transparent);
+  border-radius: 3px;
+  background:
+    linear-gradient(
+      180deg,
+      #fffaf2,
+      #f4ecdf
+    );
+  box-shadow:
+    0 16px 34px -28px color-mix(in srgb, var(--color-lacquer) 28%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 88%, transparent);
+  color: var(--color-ink);
+  cursor: pointer;
+  isolation: isolate;
+  overflow: visible;
+  opacity: 0.42;
+  padding: 0;
+  transition:
+    border-color var(--duration-state) var(--ease-out),
+    box-shadow var(--duration-state) var(--ease-out),
+    height var(--duration-state) var(--ease-out),
+    opacity var(--duration-state) var(--ease-out),
+    transform var(--duration-state) var(--ease-out),
+    width var(--duration-state) var(--ease-out);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.atelierSwitch:hover,
+.atelierSwitch:focus,
+.atelierSwitch:focus-visible,
+.atelierSwitch[data-engaged="true"] {
+  border-color: color-mix(in srgb, var(--color-champagne) 48%, transparent);
+  box-shadow:
+    0 18px 40px -30px color-mix(in srgb, var(--color-lacquer) 34%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--color-antique-gold) 14%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 92%, transparent);
+  height: 28px;
+  min-width: 46px;
+  opacity: 1;
+  outline: none;
+  padding: 0 11px;
+  transform: none;
+  width: 46px;
+}
+
+.atelierSwitch[data-active="true"] {
+  border-color: color-mix(in srgb, var(--color-champagne) 54%, transparent);
+}
+
+.switchAura {
+  position: absolute;
+  inset: auto 6px 5px;
+  z-index: 0;
+  height: 1px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, #d7b56d 48%, transparent),
+      transparent
+    );
+  opacity: 0.34;
+  pointer-events: none;
+  transform: scaleX(0.58);
+  transform-origin: left;
+  animation: hidden-delight-breath 4.8s var(--ease-standard) infinite;
+}
+
+.switchMark {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: auto;
+  height: auto;
+  place-items: center;
+  color: #241f18;
+  font-family: var(--font-display);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1;
+  opacity: 0;
+  text-shadow: none;
+  transform: scale(0.94);
+  transition:
+    opacity var(--duration-state) var(--ease-out),
+    transform var(--duration-state) var(--ease-out);
+}
+
+.switchMark::after {
+  content: none;
+}
+
+.switchHint {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  width: max-content;
+  max-width: min(180px, calc(100vw - 32px));
+  border: 1px solid color-mix(in srgb, var(--color-brass) 16%, transparent);
+  border-radius: 3px;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #1b1510 94%, transparent),
+      color-mix(in srgb, #0f0b08 96%, transparent)
+    );
+  box-shadow:
+    0 18px 38px -28px color-mix(in srgb, black 48%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff8ea 8%, transparent);
+  color: #fff8ea;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  padding: 8px 10px;
+  pointer-events: none;
+  text-transform: uppercase;
+  transform: translateY(3px);
+  visibility: hidden;
+  transition:
+    transform var(--duration-feedback) var(--ease-out);
+}
+
+.atelierSwitch:hover .switchHint,
+.atelierSwitch:focus .switchHint,
+.atelierSwitch:focus-visible .switchHint,
+.atelierSwitch[data-engaged="true"] .switchHint,
+.switchHint[data-visible="true"] {
+  transform: translateY(0);
+  visibility: visible;
+}
+
+.atelierSwitch:hover .switchMark,
+.atelierSwitch:focus .switchMark,
+.atelierSwitch:focus-visible .switchMark,
+.atelierSwitch[data-engaged="true"] .switchMark {
+  opacity: 1;
+  transform: scale(1);
+}
+
 .goldTrace {
   background:
     linear-gradient(
@@ -53,6 +207,8 @@
   color: var(--color-ivory-soft);
   max-width: min(360px, calc(100vw - 32px));
   padding: var(--space-3) var(--space-4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+  backdrop-filter: blur(18px) saturate(1.08);
 }
 
 .stampTitle {
@@ -103,9 +259,41 @@
   }
 }
 
+@keyframes hidden-delight-breath {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: scaleX(0.44);
+  }
+
+  50% {
+    opacity: 0.62;
+    transform: scaleX(1);
+  }
+}
+
+@media (max-width: 700px) {
+  .atelierSwitch {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .stamp {
+  .stamp,
+  .switchAura,
+  .switchMark::after {
     animation: none;
+  }
+
+  .atelierSwitch,
+  .switchHint {
+    transition-duration: 1ms;
+  }
+
+  .atelierSwitch:hover,
+  .atelierSwitch:focus,
+  .atelierSwitch:focus-visible {
+    transform: none;
   }
 
   .goldTrace {
@@ -116,4 +304,78 @@
   .goldTrace[data-active="true"] {
     transform: none;
   }
+}
+
+/* ─── Keycap entry point ─────────────────────────────────────────────────
+   The switch used to rest as an unlabeled 26×18 chip at 42% opacity, which
+   read as a rendering fault. It now rests as a quiet ⌘K keycap pair, so the
+   command layer is discoverable without hovering blind. */
+.atelierSwitch,
+.atelierSwitch:hover,
+.atelierSwitch:focus,
+.atelierSwitch:focus-visible,
+.atelierSwitch[data-engaged="true"] {
+  width: auto;
+  min-width: 0;
+  height: 30px;
+  padding: 0 7px;
+  border-radius: 9px;
+}
+
+.atelierSwitch {
+  opacity: 0.72;
+}
+
+.atelierSwitch:hover,
+.atelierSwitch:focus-visible,
+.atelierSwitch[data-engaged="true"] {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.switchMark,
+.atelierSwitch:hover .switchMark,
+.atelierSwitch:focus .switchMark,
+.atelierSwitch:focus-visible .switchMark,
+.atelierSwitch[data-engaged="true"] .switchMark {
+  display: inline-flex;
+  gap: 3px;
+  opacity: 1;
+  transform: none;
+}
+
+.switchKey {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border: 1px solid color-mix(in srgb, var(--color-brass) 26%, transparent);
+  border-radius: 5px;
+  background: linear-gradient(180deg, #fffdf8, #efe5d6);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--color-lacquer) 18%, transparent),
+    inset 0 1px 0 #ffffff;
+  color: #4a3a2b;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.switchHint {
+  border-radius: 6px;
+  letter-spacing: 0.08em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atelierSwitch:hover,
+  .atelierSwitch:focus-visible,
+  .atelierSwitch[data-engaged="true"] {
+    transform: none;
+  }
+}
+
+.atelierSwitch[data-hidden="true"] {
+  display: none;
 }

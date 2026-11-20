@@ -1,12 +1,19 @@
-/* eslint-disable @next/next/no-img-element */
-import { BookOpenCheck, ExternalLink, Plus } from "lucide-react";
-import type { ReactElement } from "react";
+"use client";
+
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { ExternalLink, Plus } from "lucide-react";
+import { useRef, type ReactElement } from "react";
+import { motion } from "framer-motion";
+import { useHeroReveal } from "@/context/hero-reveal-context";
+import { useOnDarkSurface } from "@/hooks/use-on-dark-surface";
 import {
   credentialLinks,
   publicationLinks,
   socialLinks
 } from "@/data/links";
 import type { LinkStatus, Viewer } from "@/data/types";
+import { Logo } from "@/components/brand/logo";
 import styles from "./social-dock.module.css";
 
 type DockIconProps = {
@@ -41,12 +48,17 @@ type SocialDockProps = {
   className?: string;
 };
 
-const statusCopy: Record<LinkStatus, string> = {
-  verified: "Verified",
-  "link-captured": "Link captured",
-  "manual-verification-needed": "Manual check needed",
-  pending: "Pending"
-};
+const dockIconSources = {
+  databricks: "/assets/social-dock/databricks.png",
+  github: "/assets/social-dock/github.png",
+  ieee: "/assets/social-dock/ieee.png",
+  leetcode: "/assets/social-dock/leetcode.png",
+  // Same mark with only the black bracket turned white — orange and grey are
+  // pixel-identical. Cross-faded in when the dock sits on a dark surface.
+  leetcodeOnDark: "/assets/social-dock/leetcode-on-dark.png",
+  linkedin: "/assets/social-dock/linkedin.png",
+  microsoftLearn: "/assets/social-dock/microsoft-learn.png"
+} as const;
 
 const futureSlots: readonly DockSlotItem[] = [
   {
@@ -70,40 +82,55 @@ const futureSlots: readonly DockSlotItem[] = [
 ];
 
 function LinkedinIcon({ className }: DockIconProps) {
-  return <DockGlyph className={className} label="in" />;
+  return <DockAssetIcon className={className} src={dockIconSources.linkedin} />;
 }
 
 function GithubIcon({ className }: DockIconProps) {
-  return <DockGlyph className={className} label="GH" />;
+  return <DockAssetIcon className={className} src={dockIconSources.github} />;
 }
 
 function MicrosoftLearnIcon({ className }: DockIconProps) {
-  return (
-    <BookOpenCheck aria-hidden="true" className={className} strokeWidth={1.8} />
-  );
+  return <DockAssetIcon className={className} src={dockIconSources.microsoftLearn} />;
 }
 
 function DatabricksIcon({ className }: DockIconProps) {
-  return <DockGlyph className={className} label="DB" />;
+  return <DockAssetIcon className={className} src={dockIconSources.databricks} />;
 }
 
 function IeeeIcon({ className }: DockIconProps) {
-  return <DockGlyph className={className} label="IEEE" />;
+  return <DockAssetIcon className={className} src={dockIconSources.ieee} />;
 }
 
 function LeetCodeIcon({ className }: DockIconProps) {
-  return <DockGlyph className={className} label="LC" />;
+  return (
+    <span className={styles.swapIcon}>
+      <DockAssetIcon
+        className={`${className ?? ""} ${styles.swapIconBase}`}
+        src={dockIconSources.leetcode}
+      />
+      <DockAssetIcon
+        className={`${className ?? ""} ${styles.swapIconAlt}`}
+        src={dockIconSources.leetcodeOnDark}
+      />
+    </span>
+  );
 }
 
 function FutureSlotIcon({ className }: DockIconProps) {
   return <Plus aria-hidden="true" className={className} strokeWidth={1.8} />;
 }
 
-function DockGlyph({ className, label }: DockIconProps & { label: string }) {
+function DockAssetIcon({ className, src }: DockIconProps & { src: string }) {
   return (
-    <span aria-hidden="true" className={`${className ?? ""} ${styles.iconGlyph}`}>
-      {label}
-    </span>
+    <Image
+      alt=""
+      aria-hidden="true"
+      className={`${className ?? ""} ${styles.iconImage}`}
+      height={24}
+      src={src}
+      unoptimized
+      width={24}
+    />
   );
 }
 
@@ -165,7 +192,7 @@ function buildDockItems(): readonly DockLinkItem[] {
           href: microsoftLinks[0].url,
           icon: MicrosoftLearnIcon,
           status: microsoftLinks[0].status,
-          description: `${microsoftLinks.length} credential links captured from Microsoft Learn.`,
+          description: `${microsoftLinks.length} Microsoft Learn credential links available.`,
           viewerRelevance: ["recruiter", "engineer", "leader"] as const,
           priority: 2,
           count: microsoftLinks.length
@@ -178,7 +205,7 @@ function buildDockItems(): readonly DockLinkItem[] {
           href: databricks.url,
           icon: DatabricksIcon,
           status: databricks.status,
-          description: databricks.note ?? "Databricks credential proof link.",
+          description: databricks.note ?? "Databricks credential reference link.",
           viewerRelevance: ["recruiter", "engineer", "leader"] as const,
           priority: 2
         })
@@ -193,7 +220,7 @@ function buildDockItems(): readonly DockLinkItem[] {
           description:
             ieeeSocial?.publicUse ??
             ieeePublication?.note ??
-            "Publication proof link.",
+            "Publication reference link.",
           viewerRelevance: ieeeSocial?.viewerRelevance ?? [
             "engineer",
             "explorer"
@@ -230,24 +257,37 @@ function cx(...classes: Array<string | false | undefined>) {
 
 export function SocialDock({
   viewer = "recruiter",
-  showFutureSlots = true,
+  showFutureSlots = false,
   className
 }: SocialDockProps) {
+  const pathname = usePathname();
+  const { isRevealed } = useHeroReveal();
+  const shellRef = useRef<HTMLElement | null>(null);
+  // Whether the page surface behind the dock is currently dark — drives the
+  // GitHub mark's flip to white so it stays visible over dark sections.
+  const onDarkSurface = useOnDarkSurface(shellRef);
   const items: readonly DockItem[] = showFutureSlots
     ? [...socialDockItems, ...futureSlots]
     : socialDockItems;
 
+  if ((pathname === "/" && !isRevealed) || pathname === "/profile") {
+    return null;
+  }
+
   return (
-    <aside className={cx(styles.shell, className)} aria-label="Profile dock">
-      <nav className={styles.rail} aria-label="External profile and proof links">
+    <motion.aside
+      ref={shellRef}
+      className={cx(styles.shell, className)}
+      data-on-dark={onDarkSurface}
+      aria-label="Profile dock"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.8, delay: pathname === "/" ? 1.0 : 0 }}
+    >
+      <nav className={styles.rail} aria-label="External profile and credential links">
         <span className={styles.brandMark} aria-hidden="true">
-          <img
-            alt=""
-            height="28"
-            loading="lazy"
-            src="/assets/brand/nk-threadline-monogram-one-color-ivory.svg"
-            width="28"
-          />
+          <span aria-hidden="true" className={styles.brandPulse} />
+          <Logo isMonogram={true} />
         </span>
 
         <ul className={styles.list}>
@@ -259,26 +299,20 @@ export function SocialDock({
                 {item.kind === "link" ? (
                   <a
                     aria-describedby={tooltipId}
-                    aria-label={`${item.label}. ${item.description} ${statusCopy[item.status]}. Opens in a new tab.`}
+                    aria-label={`${item.label}. ${item.description} Opens in a new tab.`}
                     className={styles.control}
+                    data-id={item.id}
                     data-emphasis={isEmphasized(item, viewer)}
                     data-status={item.status}
                     href={item.href}
                     rel="noreferrer"
                     target="_blank"
                   >
+                    <span className={styles.controlSheen} aria-hidden="true" />
                     <span className={styles.iconFrame}>
                       <item.icon className={styles.icon} />
                     </span>
                     <span className={styles.label}>{item.label}</span>
-                    {item.count ? (
-                      <span
-                        aria-label={`${item.count} links`}
-                        className={styles.count}
-                      >
-                        {item.count}
-                      </span>
-                    ) : null}
                     <span className={styles.statusDot} aria-hidden="true" />
                     <ExternalLink
                       aria-hidden="true"
@@ -287,8 +321,6 @@ export function SocialDock({
                     />
                     <span className={styles.tooltip} id={tooltipId} role="tooltip">
                       <strong>{item.label}</strong>
-                      <span>{item.description}</span>
-                      <em>{statusCopy[item.status]}</em>
                     </span>
                   </a>
                 ) : (
@@ -297,16 +329,16 @@ export function SocialDock({
                     aria-describedby={tooltipId}
                     aria-label={`${item.label}. ${item.description}`}
                     className={cx(styles.control, styles.slot)}
+                    data-id={item.id}
                     role="link"
                   >
+                    <span className={styles.controlSheen} aria-hidden="true" />
                     <span className={styles.iconFrame}>
                       <FutureSlotIcon className={styles.icon} />
                     </span>
                     <span className={styles.label}>{item.label}</span>
                     <span className={styles.tooltip} id={tooltipId} role="tooltip">
                       <strong>{item.label}</strong>
-                      <span>{item.description}</span>
-                      <em>Reserved slot</em>
                     </span>
                   </span>
                 )}
@@ -315,6 +347,7 @@ export function SocialDock({
           })}
         </ul>
       </nav>
-    </aside>
+    </motion.aside>
   );
 }
+

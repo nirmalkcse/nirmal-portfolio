@@ -6,7 +6,7 @@
 @import "./motion.css";
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   background: var(--surface-page);
   color: var(--color-text-primary);
 }
@@ -17,18 +17,31 @@
 
 html {
   min-height: 100%;
-  background: var(--surface-page);
+  background-color: #fbf8f2;
   font-size: 100%;
+  position: relative;
   scroll-padding-top: var(--site-header-offset);
-  scroll-behavior: smooth;
+}
+
+html::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -100;
+  pointer-events: none;
+  /* Silk, not paper. Two very wide, very low-contrast washes give the ground
+     depth without any tooth to it — no turbulence texture to rasterise, and
+     nothing that has to re-blend over the page on every scrolled frame. */
+  background-image:
+    radial-gradient(128% 92% at 10% 2%, rgba(255, 253, 250, 0.92) 0%, rgba(255, 253, 250, 0.34) 38%, rgba(255, 253, 250, 0) 66%),
+    radial-gradient(104% 84% at 92% 98%, rgba(238, 228, 213, 0.62) 0%, rgba(238, 228, 213, 0.22) 44%, rgba(238, 228, 213, 0) 72%);
+  background-color: #fbf8f2;
 }
 
 body {
   min-height: 100vh;
   margin: 0;
-  background:
-    linear-gradient(180deg, rgba(185, 151, 74, 0.08), transparent 38%),
-    var(--surface-page);
+  background: transparent;
   color: var(--color-text-primary);
   font-family: var(--font-ui);
   font-size: var(--text-body);
@@ -37,12 +50,77 @@ body {
   line-height: var(--leading-body);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   font-synthesis-weight: none;
 }
 
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* ─── Title system ──────────────────────────────────────────────────────
+   One typographic voice for every page and section title, set the way
+   Apple sets SF Pro Display: semibold, tracked in, leading close but open
+   enough for descenders. The emphasis word stays upright and takes the
+   bronze accent instead of an italic; the closing period is bronze too.
+   Display = full-bleed page/scene heroes. Section = in-flow section titles
+   and long sentence headlines. */
+.editorial-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.028em;
+  line-height: 1.04;
+  color: #1d1915;
+  font-kerning: normal;
+  text-wrap: balance;
+}
+
+.editorial-title em {
+  font-family: inherit;
+  font-style: normal;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  color: #9a5637;
+}
+
+.editorial-title--display {
+  font-size: clamp(3.2rem, 7.6vw, 6.75rem);
+  line-height: 1.02;
+}
+
+.editorial-title--section {
+  font-size: clamp(2.3rem, 4.6vw, 4.25rem);
+}
+
+.editorial-title--ivory {
+  color: var(--color-ivory);
+}
+
+.editorial-title--inherit {
+  color: inherit;
+}
+
+.editorial-accent {
+  color: #9a5637;
+}
+
+.editorial-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #8d7c6d;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.editorial-eyebrow-rule {
+  height: 1px;
+  width: 32px;
+  background: color-mix(in srgb, #9b7357 60%, transparent);
 }
 
 button,
@@ -82,6 +160,111 @@ video {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--color-antique-gold) 48%, transparent);
+  background: color-mix(in srgb, var(--color-antique-gold) 60%, transparent);
   color: var(--color-obsidian);
+}
+
+.site-scroll-progress {
+  contain: paint;
+  height: 2px;
+  inset: 0 0 auto;
+  pointer-events: none;
+  position: fixed;
+  z-index: 100;
+}
+
+.site-scroll-progress::before {
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--color-ivory) 5%, transparent),
+      transparent
+    );
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+
+.site-scroll-progress__fill {
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-brass-bright) 100%, transparent),
+      color-mix(in srgb, var(--color-antique-gold) 100%, transparent) 60%,
+      color-mix(in srgb, var(--color-signal-blue) 100%, transparent)
+    );
+  box-shadow:
+    0 0 24px color-mix(in srgb, var(--color-antique-gold) 40%, transparent),
+    0 1px 0 color-mix(in srgb, #ffffff 40%, transparent);
+  display: block;
+  height: 100%;
+  transform-origin: left center;
+  width: 100%;
+}
+
+/* Tactile press. Buttons and button-like links give a little under the
+   pointer, the same amount everywhere. It uses the standalone `scale`
+   property so it composes with any transform a component already animates,
+   and skips the motion-* classes that define their own press. */
+:where(button, [role="button"]):not(:disabled):not(.motion-card, .motion-cta, .motion-lens-choice, .motion-timeline-item):active {
+  scale: 0.97;
+}
+
+:where(a[class]):not(.motion-card, .motion-cta, .motion-lens-choice, .motion-timeline-item):active {
+  scale: 0.985;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(button, [role="button"], a[class]):active {
+    scale: none;
+  }
+}
+
+/* A hairline brass scrollbar instead of the platform grey slab. */
+html {
+  scrollbar-color: color-mix(in srgb, var(--color-brass) 58%, transparent) transparent;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-brass) 52%, transparent) padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--color-bronze) 72%, transparent) padding-box;
+}
+
+/* Lenis recommended css */
+html.lenis, html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }

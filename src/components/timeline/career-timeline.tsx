@@ -1,7 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import clsx from "clsx";
 import {
+  ArrowLeft,
+  ArrowDown,
+  ArrowRight,
   Award,
   BadgeCheck,
   Briefcase,
@@ -26,6 +30,13 @@ import {
   type ComponentType,
   type ReactNode
 } from "react";
+import {
+  motion,
+  useMotionValue,
+  useScroll,
+  useSpring,
+  useTransform
+} from "framer-motion";
 import { useRoleLens } from "@/context/role-lens-context";
 import {
   certifications,
@@ -41,6 +52,7 @@ import {
   type Viewer,
   type ViewerPriority
 } from "@/data";
+import styles from "./career-timeline.module.css";
 
 type TimelineLens = Viewer | "balanced";
 type TimelineTrackId =
@@ -50,6 +62,9 @@ type TimelineTrackId =
   | "projects"
   | "exploring";
 type TimelineSource = "timeline" | "certification" | "future";
+type TimelineTrackFilter = TimelineTrackId | "all";
+type TimelineYearFilter = 2024 | 2025 | 2026 | "all";
+type TimelineCursorTone = "default" | "filter" | "read" | "open" | "step";
 
 type TimelineItem = {
   id: string;
@@ -76,11 +91,11 @@ type IconComponent = ComponentType<{
 }>;
 
 const TIMELINE_DETAIL_PANEL_ID = "timeline-detail-panel";
+const TIMELINE_CURSOR_SELECTOR = "[data-cursor-label]";
 
 const CURRENT_VALUE = 2026 + 4.5 / 12;
 const EXPLORING_VALUE = 2026 + 7 / 12;
 const TIMELINE_MIN = 2023 + 10 / 12;
-const TIMELINE_MAX = 2026 + 8 / 12;
 
 const priorityScore = {
   high: 3,
@@ -114,6 +129,34 @@ const lensOptions = [
   label: string;
   Icon: IconComponent;
 }[];
+
+const narrativeSpine = [
+  {
+    detail: "B.E. CSE foundations, publication path, and core systems vocabulary.",
+    label: "Foundation",
+    period: "2024"
+  },
+  {
+    detail: "Reporting validation, Power BI migration, and measurable delivery habits.",
+    label: "BI validation",
+    period: "2025"
+  },
+  {
+    detail: "Fabric lakehouse, CDC/SCD choices, validation matrices, and BI serving.",
+    label: "Fabric delivery",
+    period: "2025"
+  },
+  {
+    detail: "Databricks-hosted MDM/entity-resolution product work with governed review.",
+    label: "Data products",
+    period: "2026"
+  },
+  {
+    detail: "Public-safe demos, credential routes, and future proof packets.",
+    label: "Public proof",
+    period: "Now"
+  }
+] as const;
 
 const trackMeta = {
   education: {
@@ -178,6 +221,8 @@ const trackOrder = [
   "exploring"
 ] as const satisfies readonly TimelineTrackId[];
 
+const timelineYears = [2024, 2025, 2026] as const;
+
 const monthLabels = [
   "Jan",
   "Feb",
@@ -224,7 +269,7 @@ function parseDateValue(date: string | null, fallback: number) {
 
 function formatDate(date: string | null) {
   if (!date) {
-    return "Date pending";
+    return "Date not shown";
   }
 
   if (date === "Present") {
@@ -250,16 +295,6 @@ function formatDateRange(startDate: string | null, endDate: string | null) {
   return formatDate(endDate ?? startDate);
 }
 
-function clampTimelineValue(value: number) {
-  return Math.min(Math.max(value, TIMELINE_MIN), TIMELINE_MAX);
-}
-
-function toTimelinePct(value: number) {
-  const clamped = clampTimelineValue(value);
-
-  return ((clamped - TIMELINE_MIN) / (TIMELINE_MAX - TIMELINE_MIN)) * 100;
-}
-
 function trackForEvent(category: TimelineEvent["category"]): TimelineTrackId {
   switch (category) {
     case "education":
@@ -276,10 +311,6 @@ function trackForEvent(category: TimelineEvent["category"]): TimelineTrackId {
 
 function projectBySlug(slug: string) {
   return projectCatalog.find((project) => project.slug === slug);
-}
-
-function certificationBySlug(slug: string) {
-  return certificationCatalog.find((credential) => credential.slug === slug);
 }
 
 function projectHref(slugs: readonly string[]) {
@@ -347,12 +378,12 @@ function certificationToTimelineItem(
     track: "certifications",
     source: "certification",
     typeLabel: credential.issuer,
-    dateLabel: credential.date ? formatDate(credential.date) : "Verification date pending",
+    dateLabel: credential.date ? formatDate(credential.date) : "Date not shown",
     startValue,
     endValue: startValue + 0.18,
     description:
       credential.note ??
-      `${credential.category} credential connected to the project evidence graph.`,
+      `${credential.category} credential connected to the skill map.`,
     importance: isVerified ? "high" : "medium",
     viewerPriority: {
       recruiter: "high",
@@ -367,7 +398,7 @@ function certificationToTimelineItem(
     proofLinks: credential.credentialUrl
       ? [
           {
-            label: "Credential proof",
+            label: "Credential reference",
             url: credential.credentialUrl,
             status: credential.verificationStatus
           }
@@ -396,7 +427,7 @@ function futureProjectToTimelineItem(
     track: "exploring",
     source: "future",
     typeLabel: futureProject.status,
-    dateLabel: "Next proof horizon",
+    dateLabel: "Roadmap item",
     startValue,
     endValue: startValue + 0.16,
     description: futureProject.whyItMatters,
@@ -414,8 +445,8 @@ function futureProjectToTimelineItem(
     relatedCertifications: [],
     metadata: [
       futureProject.targetOutcome,
-      `${futureProject.plannedStack.length} planned stack items`,
-      `${futureProject.plannedProof.length} planned proof assets`
+      `${futureProject.plannedStack.length} implementation themes`,
+      `${futureProject.plannedProof.length} public deliverables`
     ]
   };
 }
@@ -448,6 +479,17 @@ function priorityForLens(
   return viewerPriority[lens] ?? "low";
 }
 
+function publicPriorityLabel(priority: Priority) {
+  switch (priority) {
+    case "high":
+      return "Core";
+    case "medium":
+      return "Supporting";
+    case "low":
+      return "Background";
+  }
+}
+
 function scoreForLens(item: TimelineItem, lens: TimelineLens) {
   return priorityScore[priorityForLens(item.viewerPriority, item.importance, lens)];
 }
@@ -456,33 +498,40 @@ function getTrackItems(items: readonly TimelineItem[], track: TimelineTrackId) {
   return items.filter((item) => item.track === track);
 }
 
-function getTrackLayout(items: readonly TimelineItem[]) {
-  const laneEnds: number[] = [];
+function yearForItem(item: TimelineItem) {
+  return Math.floor(item.startValue);
+}
 
-  return items
-    .map((item) => {
-      const startPct = toTimelinePct(item.startValue);
-      const minimumSpan = item.track === "certifications" ? 14 : 12;
-      const endPct = Math.max(
-        toTimelinePct(item.endValue),
-        Math.min(startPct + minimumSpan, 100)
-      );
-      let lane = laneEnds.findIndex((laneEnd) => laneEnd + 1.5 < startPct);
+function matchesTimelineScope(
+  item: TimelineItem,
+  trackFilter: TimelineTrackFilter,
+  yearFilter: TimelineYearFilter
+) {
+  return (
+    (trackFilter === "all" || item.track === trackFilter) &&
+    (yearFilter === "all" || yearForItem(item) === yearFilter)
+  );
+}
 
-      if (lane === -1) {
-        lane = laneEnds.length;
-      }
+function itemsForScope(
+  items: readonly TimelineItem[],
+  trackFilter: TimelineTrackFilter,
+  yearFilter: TimelineYearFilter
+) {
+  return items.filter((item) =>
+    matchesTimelineScope(item, trackFilter, yearFilter)
+  );
+}
 
-      laneEnds[lane] = endPct;
-
-      return {
-        ...item,
-        startPct,
-        endPct,
-        lane
-      };
-    })
-    .sort((a, b) => a.lane - b.lane || a.startValue - b.startValue);
+function evidenceCountForItems(items: readonly TimelineItem[]) {
+  return items.reduce(
+    (total, item) =>
+      total +
+      item.relatedProjects.length +
+      item.relatedCertifications.length +
+      item.proofLinks.length,
+    0
+  );
 }
 
 function compactItemLabel(item: TimelineItem) {
@@ -628,16 +677,15 @@ function LensButton({
     <button
       aria-controls={TIMELINE_DETAIL_PANEL_ID}
       aria-pressed={active}
-      className={`motion-lens-choice inline-flex min-h-10 items-center gap-2 rounded-[var(--radius-control)] border px-3 text-sm transition duration-[var(--duration-feedback)] hover:-translate-y-[var(--motion-distance-xs)] ${
-        active
-          ? "border-[var(--border-cool)] bg-[color-mix(in_srgb,var(--color-signal-blue)_14%,transparent)] text-[var(--color-ivory)]"
-          : "border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-carbon)_72%,transparent)] text-[var(--color-warm-silver)] hover:border-[var(--border-strong)] hover:text-[var(--color-ivory-soft)]"
-      }`}
+      className={clsx(styles.lensChoice, active && styles.lensChoiceActive)}
+      data-cursor-label="Lens"
+      data-cursor-tone="filter"
       onClick={onSelect}
       type="button"
     >
+      <span aria-hidden="true" className={styles.lensChoiceGlow} />
       <Icon aria-hidden="true" className="h-4 w-4" />
-      {option.label}
+      <span>{option.label}</span>
     </button>
   );
 }
@@ -651,6 +699,160 @@ function TrackBadge({ item }: { item: TimelineItem }) {
       <Icon aria-hidden="true" className="h-3.5 w-3.5" />
       {track.shortLabel}
     </Badge>
+  );
+}
+
+function TimelineCursor({
+  prefersReducedMotion
+}: {
+  prefersReducedMotion: boolean;
+}) {
+  const { scrollYProgress } = useScroll();
+  const cursorX = useMotionValue(-120);
+  const cursorY = useMotionValue(-120);
+  const [enabled, setEnabled] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [cursorState, setCursorState] = useState<{
+    active: boolean;
+    label: string;
+    tone: TimelineCursorTone;
+  }>({
+    active: false,
+    label: "",
+    tone: "default"
+  });
+  const orbitRotate = useTransform(scrollYProgress, [0, 1], [0, 540]);
+  const apertureScale = useSpring(cursorState.active ? 1 : 0.64, {
+    damping: 26,
+    mass: 0.36,
+    stiffness: 360
+  });
+  const cursorKeyRef = useRef("idle");
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
+
+    function handleMediaChange() {
+      setEnabled(mediaQuery.matches && !prefersReducedMotion);
+    }
+
+    const frame = window.requestAnimationFrame(handleMediaChange);
+    mediaQuery.addEventListener("change", handleMediaChange);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      mediaQuery.removeEventListener("change", handleMediaChange);
+    };
+  }, [prefersReducedMotion]);
+
+  useEffect(() => {
+    if (!enabled) {
+      delete document.documentElement.dataset.timelineCursor;
+      return;
+    }
+
+    document.documentElement.dataset.timelineCursor = "true";
+    const scope = document.querySelector<HTMLElement>(
+      "[data-timeline-cursor-scope='true']"
+    );
+
+    function handlePointerMove(event: PointerEvent) {
+      const target = event.target;
+
+      if (!scope || !(target instanceof Node) || !scope.contains(target)) {
+        setVisible(false);
+        return;
+      }
+
+      const cursorTarget =
+        target instanceof Element
+          ? target.closest<HTMLElement>(TIMELINE_CURSOR_SELECTOR)
+          : null;
+      const nextLabel = cursorTarget?.dataset.cursorLabel ?? "";
+      const nextTone =
+        (cursorTarget?.dataset.cursorTone as TimelineCursorTone | undefined) ??
+        "default";
+
+      cursorX.set(event.clientX);
+      cursorY.set(event.clientY);
+
+      setVisible(true);
+
+      const nextKey = `${nextLabel}:${nextTone}`;
+
+      if (cursorKeyRef.current !== nextKey) {
+        cursorKeyRef.current = nextKey;
+        setCursorState({
+          active: Boolean(nextLabel),
+          label: nextLabel,
+          tone: nextTone
+        });
+      }
+    }
+
+    function handlePointerLeave() {
+      setVisible(false);
+    }
+
+    window.addEventListener("pointermove", handlePointerMove, {
+      passive: true
+    });
+    window.addEventListener("pointerleave", handlePointerLeave);
+    window.addEventListener("blur", handlePointerLeave);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerleave", handlePointerLeave);
+      window.removeEventListener("blur", handlePointerLeave);
+      delete document.documentElement.dataset.timelineCursor;
+    };
+  }, [cursorX, cursorY, enabled]);
+
+  if (!enabled) {
+    return null;
+  }
+
+  return (
+    <motion.div
+      aria-hidden="true"
+      className={styles.timelineCursor}
+      style={{ opacity: visible ? 1 : 0, x: cursorX, y: cursorY }}
+    >
+      <motion.span
+        className={clsx(
+          styles.timelineCursorAura,
+          cursorState.active && styles.timelineCursorAuraActive,
+          cursorState.tone === "filter" && styles.timelineCursorFilter,
+          cursorState.tone === "read" && styles.timelineCursorRead,
+          cursorState.tone === "open" && styles.timelineCursorOpen,
+          cursorState.tone === "step" && styles.timelineCursorStep
+        )}
+        style={{ scale: apertureScale }}
+      />
+      <motion.span
+        className={styles.timelineCursorOrbit}
+        style={{ rotate: orbitRotate, scale: apertureScale }}
+      />
+      <span
+        className={clsx(
+          styles.timelineCursorCore,
+          cursorState.active && styles.timelineCursorCoreActive,
+          cursorState.tone === "filter" && styles.timelineCursorFilter,
+          cursorState.tone === "read" && styles.timelineCursorRead,
+          cursorState.tone === "open" && styles.timelineCursorOpen,
+          cursorState.tone === "step" && styles.timelineCursorStep
+        )}
+      >
+        <span className={styles.timelineCursorDot} />
+        <span className={styles.timelineCursorLabel}>
+          {cursorState.label || "Atlas"}
+        </span>
+      </span>
+    </motion.div>
   );
 }
 
@@ -675,28 +877,18 @@ function TimelineMetrics({
   );
 
   return (
-    <dl className="motion-list grid grid-cols-2 gap-3">
+    <dl className={styles.metricStrip}>
       {[
-        ["Milestones", items.length.toString(), "Events and derived proof"],
-        ["Tracks", trackOrder.length.toString(), "Career evidence lanes"],
-        ["High fit", highFit.toString(), lensLabels[activeLens]],
-        ["Live edges", activeWork.toString(), "Current and next work"]
+        ["Milestones", items.length.toString(), `${verifiedLinks} verified links`],
+        ["Tracks", trackOrder.length.toString(), "Timeline lanes"],
+        ["Core matches", highFit.toString(), lensLabels[activeLens]],
+        ["Live edges", activeWork.toString(), "Current and next"]
       ].map(([label, value, detail]) => (
-        <div
-          className="motion-card rounded-[var(--radius-panel)] border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-carbon)_72%,transparent)] p-4"
-          key={label}
-        >
-          <dt className="font-mono text-[0.6875rem] uppercase text-[var(--color-steel)]">
-            {label}
-          </dt>
-          <dd className="mt-2 text-2xl font-semibold text-[var(--color-ivory)]">
-            {value}
-          </dd>
-          <dd className="mt-1 text-xs text-[var(--color-warm-silver)]">
-            {label === "Milestones"
-              ? `${verifiedLinks} verified public link${verifiedLinks === 1 ? "" : "s"}`
-              : detail}
-          </dd>
+        <div className={styles.metricTile} key={label}>
+          <span aria-hidden="true" className={styles.timelineMetricPulse} />
+          <dt>{label}</dt>
+          <dd>{value}</dd>
+          <dd>{detail}</dd>
         </div>
       ))}
     </dl>
@@ -715,17 +907,19 @@ function LensPanel({
   const topItems = topItemsForLens(items, activeLens);
 
   return (
-    <section
-      aria-label="Timeline role lens"
-      className="motion-panel-enter rounded-[var(--radius-panel)] border border-[var(--console-border)] bg-[var(--surface-console)] p-4 shadow-[var(--shadow-surface)]"
-    >
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px] xl:items-start">
+    <section aria-label="Timeline review focus" className={styles.lensPanel}>
+      <div className={styles.panelEyebrow}>
+        <Sparkles aria-hidden="true" className="h-4 w-4" />
+        Role emphasis
+      </div>
+
+      <div className={styles.lensPanelGrid}>
         <div>
-          <div className="flex items-center gap-2 font-mono text-xs uppercase text-[var(--color-champagne)]">
-            <Sparkles aria-hidden="true" className="h-4 w-4" />
-            Role emphasis
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2" role="group">
+          <h2 className={styles.lensTitle}>Choose the most useful review path.</h2>
+          <p className={styles.lensCopy}>
+            The map reprioritizes milestones without hiding the full chronology.
+          </p>
+          <div className={styles.lensChoices} role="group">
             {lensOptions.map((option) => (
               <LensButton
                 active={activeLens === option.id}
@@ -737,18 +931,19 @@ function LensPanel({
           </div>
         </div>
 
-        <div className="motion-list grid gap-2">
-          {topItems.map((item) => (
-            <div
-              className="grid gap-1 border-l border-[var(--border-gold)] pl-3"
-              key={item.id}
-            >
-              <p className="font-mono text-[0.6875rem] uppercase text-[var(--color-steel)]">
-                {priorityForLens(item.viewerPriority, item.importance, activeLens)} fit
-              </p>
-              <p className="text-sm font-medium leading-5 text-[var(--color-ivory-soft)]">
-                {item.title}
-              </p>
+          <div className={styles.lensShortlist}>
+          {topItems.map((item, index) => (
+            <div className={styles.lensShortlistItem} key={item.id}>
+              <span aria-hidden="true" className={styles.timelineCurrentSweep} />
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <div>
+                <p>
+                  {publicPriorityLabel(
+                    priorityForLens(item.viewerPriority, item.importance, activeLens)
+                  )}
+                </p>
+                <strong>{compactItemLabel(item)}</strong>
+              </div>
             </div>
           ))}
         </div>
@@ -757,533 +952,941 @@ function LensPanel({
   );
 }
 
-function DesktopTimelineBoard({
-  activeItemId,
-  activeLens,
-  items,
-  onSelect
-}: {
-  activeItemId: string;
-  activeLens: TimelineLens;
-  items: readonly TimelineItem[];
-  onSelect: (itemId: string) => void;
-}) {
-  const activeItem = items.find((item) => item.id === activeItemId) ?? items[0];
-  const activePct = toTimelinePct(activeItem.startValue);
-
+function TimelineNarrativeSpine() {
   return (
-    <section className="hidden xl:block">
-      <div className="motion-panel-enter rounded-[var(--radius-panel)] border border-[var(--console-border)] bg-[var(--surface-console)] shadow-[var(--shadow-surface)]">
-        <div className="border-b border-[var(--border-subtle)] px-5 py-5">
-          <p className="font-mono text-xs uppercase text-[var(--console-prompt)]">
-            Career timeline
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold leading-[1.16] text-[var(--color-ivory)]">
-            {activeItem.title}
-          </h2>
-          <p className="mt-3 text-sm leading-6 text-[var(--color-warm-silver)]">
-            {activeItem.description}
-          </p>
-        </div>
-
-        <div className="relative px-5 py-5">
-          <div className="mb-4 ml-[132px] grid grid-cols-4 font-mono text-[0.6875rem] uppercase text-[var(--color-steel)]">
-            {["2024", "2025", "2026", "Next"].map((label) => (
-              <span key={label}>{label}</span>
-            ))}
+    <section aria-label="Timeline narrative spine" className={styles.narrativeSpine}>
+      <div className={styles.narrativeHeader}>
+        <div>
+          <div className={styles.panelEyebrow}>
+            <Rocket aria-hidden="true" className="h-4 w-4" />
+            Reading spine
           </div>
-
-          <div
-            aria-hidden="true"
-            className="absolute bottom-5 top-[72px] w-px bg-[var(--color-champagne)] opacity-70 shadow-[0_0_18px_color-mix(in_srgb,var(--color-antique-gold)_40%,transparent)]"
-            style={{ left: `calc(132px + ${activePct}% * (100% - 132px - 20px) / 100)` }}
-          />
-
-          <div className="grid gap-3">
-            {trackOrder.map((trackId) => (
-              <TrackRow
-                activeItemId={activeItemId}
-                activeLens={activeLens}
-                items={getTrackItems(items, trackId)}
-                key={trackId}
-                onSelect={onSelect}
-                trackId={trackId}
-              />
-            ))}
-          </div>
+          <h2>Read the path as one arc, then inspect the evidence.</h2>
         </div>
-
-        <div className="border-t border-[var(--border-subtle)] px-5 py-4">
-          <ActiveSummary activeLens={activeLens} item={activeItem} />
-        </div>
+        <p>
+          The chronology is arranged so the eye can move from foundation to
+          delivery to public proof before opening individual milestones.
+        </p>
       </div>
+
+      <ol className={styles.narrativeSteps}>
+        {narrativeSpine.map((step, index) => (
+          <li key={step.label}>
+            <i aria-hidden="true" className={styles.narrativeSignal} />
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <div>
+              <p>{step.period}</p>
+              <strong>{step.label}</strong>
+              <em>{step.detail}</em>
+            </div>
+          </li>
+        ))}
+      </ol>
     </section>
   );
 }
 
-function TrackRow({
-  activeItemId,
+function TimelineDetailPanel({
   activeLens,
-  items,
-  onSelect,
-  trackId
-}: {
-  activeItemId: string;
-  activeLens: TimelineLens;
-  items: readonly TimelineItem[];
-  onSelect: (itemId: string) => void;
-  trackId: TimelineTrackId;
-}) {
-  const track = trackMeta[trackId];
-  const Icon = track.Icon;
-  const layoutItems = getTrackLayout(items);
-  const laneCount = Math.max(1, ...layoutItems.map((item) => item.lane + 1));
-  const rowHeight = 46 + laneCount * 36;
-
-  return (
-    <div
-      className="grid grid-cols-[116px_minmax(0,1fr)] gap-4 rounded-[var(--radius-control)] border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-carbon)_58%,transparent)] p-3"
-      style={{ minHeight: rowHeight }}
-    >
-      <div className="flex items-start gap-2 pt-1">
-        <Icon aria-hidden="true" className="h-4 w-4 text-[var(--color-champagne)]" />
-        <div>
-          <p className="font-mono text-[0.6875rem] uppercase text-[var(--color-steel)]">
-            {track.label}
-          </p>
-          <p className="mt-1 text-xs text-[var(--color-warm-silver)]">
-            {items.length} item{items.length === 1 ? "" : "s"}
-          </p>
-        </div>
-      </div>
-
-      <div className="relative">
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 top-4 h-px bg-[linear-gradient(90deg,var(--border-subtle),var(--border-gold),var(--border-subtle))]"
-        />
-        {layoutItems.map((item) => {
-          const priority = priorityForLens(
-            item.viewerPriority,
-            item.importance,
-            activeLens
-          );
-          const width = Math.max(item.endPct - item.startPct, 12);
-          const isActive = item.id === activeItemId;
-
-          return (
-            <button
-              aria-controls={TIMELINE_DETAIL_PANEL_ID}
-              aria-label={`${item.title}. ${item.dateLabel}. ${track.label}. ${priority} fit.`}
-              aria-pressed={isActive}
-              className={`motion-timeline-item absolute flex h-8 items-center overflow-hidden rounded-[var(--radius-control)] border px-2 text-left text-xs transition duration-[var(--duration-feedback)] hover:-translate-y-[var(--motion-distance-xs)] ${
-                isActive
-                  ? "border-[var(--border-gold)] bg-[var(--button-primary-bg)] text-[var(--color-ivory)] shadow-[var(--shadow-gold-trace)]"
-                  : priority === "high"
-                    ? `border-[var(--border-cool)] ${track.fill} text-[var(--color-ivory-soft)]`
-                    : "border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-carbon)_82%,transparent)] text-[var(--color-warm-silver)] opacity-80 hover:opacity-100"
-              }`}
-              key={item.id}
-              onClick={() => onSelect(item.id)}
-              style={{
-                left: `${item.startPct}%`,
-                top: `${30 + item.lane * 36}px`,
-                width: `${width}%`
-              }}
-              title={item.title}
-              type="button"
-            >
-              <span className="truncate">{compactItemLabel(item)}</span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function ActiveSummary({
-  activeLens,
-  item
-}: {
-  activeLens: TimelineLens;
-  item: TimelineItem;
-}) {
-  const priority = priorityForLens(item.viewerPriority, item.importance, activeLens);
-
-  return (
-    <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_150px]">
-      <div>
-        <div className="flex flex-wrap items-center gap-2">
-          <TrackBadge item={item} />
-          <Badge className="border-[var(--border-subtle)] text-[var(--color-warm-silver)]">
-            <CalendarDays aria-hidden="true" className="h-3.5 w-3.5" />
-            {item.dateLabel}
-          </Badge>
-        </div>
-        <p className="mt-3 text-sm leading-6 text-[var(--console-muted)]">
-          {item.metadata[0]}
-        </p>
-      </div>
-      <div className="border-l border-[var(--border-subtle)] pl-4">
-        <p className="font-mono text-[0.6875rem] uppercase text-[var(--color-steel)]">
-          {lensLabels[activeLens]} fit
-        </p>
-        <p className="mt-2 text-2xl font-semibold capitalize text-[var(--color-ivory)]">
-          {priority}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function DesktopScrollCards({
-  activeItemId,
-  activeLens,
-  items,
-  registerItem,
-  onSelect
-}: {
-  activeItemId: string;
-  activeLens: TimelineLens;
-  items: readonly TimelineItem[];
-  registerItem: (itemId: string, node: HTMLElement | null) => void;
-  onSelect: (itemId: string) => void;
-}) {
-  return (
-    <div className="motion-list hidden gap-4 xl:grid">
-      {items.map((item) => (
-        <TimelineScrollCard
-          activeLens={activeLens}
-          isActive={activeItemId === item.id}
-          item={item}
-          key={item.id}
-          onSelect={() => onSelect(item.id)}
-          registerItem={registerItem}
-        />
-      ))}
-    </div>
-  );
-}
-
-function TimelineScrollCard({
-  activeLens,
-  isActive,
   item,
-  onSelect,
-  registerItem
+  nextItem,
+  onSelectItem,
+  previousItem,
+  scrollHalo
 }: {
   activeLens: TimelineLens;
-  isActive: boolean;
   item: TimelineItem;
-  onSelect: () => void;
-  registerItem: (itemId: string, node: HTMLElement | null) => void;
+  nextItem?: TimelineItem;
+  onSelectItem: (itemId: string) => void;
+  previousItem?: TimelineItem;
+  scrollHalo?: ReactNode;
 }) {
   const priority = priorityForLens(item.viewerPriority, item.importance, activeLens);
 
   return (
-    <article
-      className={`motion-card scroll-mt-10 rounded-[var(--radius-card)] border bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-hairline-inset)] transition duration-[var(--duration-state)] ${
-        isActive
-          ? "border-[var(--border-gold)] shadow-[var(--shadow-surface)]"
-          : "border-[var(--card-border)]"
-      }`}
-      aria-controls={TIMELINE_DETAIL_PANEL_ID}
-      aria-label={`${item.title}. ${item.dateLabel}. ${priority} fit.`}
-      aria-pressed={isActive}
-      data-timeline-id={item.id}
-      onClick={onSelect}
-      ref={(node) => registerItem(item.id, node)}
-      role="button"
-      tabIndex={0}
-      onFocus={onSelect}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          onSelect();
-        }
-      }}
+    <motion.article
+      animate={{ opacity: 1, y: 0 }}
+      className={styles.detailPanel}
+      id={TIMELINE_DETAIL_PANEL_ID}
+      initial={{ opacity: 0, y: 12 }}
+      key={item.id}
+      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="flex flex-wrap items-center gap-2">
-        <TrackBadge item={item} />
-        <Badge className="border-[var(--border-subtle)] text-[var(--color-warm-silver)]">
-          {item.dateLabel}
-        </Badge>
-        <Badge
-          className={
-            priority === "high"
-              ? "border-[var(--border-cool)] text-[var(--color-signal-blue)]"
-              : "border-[var(--border-subtle)] text-[var(--color-steel)]"
-          }
-        >
-          {priority} fit
-        </Badge>
+      {scrollHalo}
+      <div className={styles.detailChrome} aria-hidden="true" />
+      <span aria-hidden="true" className={styles.detailHeartbeat} />
+      <span aria-hidden="true" className={styles.detailScan} />
+
+      <div className={styles.detailTopline}>
+        <div className={styles.detailBadges}>
+          <TrackBadge item={item} />
+          <span>{item.dateLabel}</span>
+        </div>
+        <span className={styles.priorityBadge}>
+          {publicPriorityLabel(priority)}
+        </span>
       </div>
 
-      <h3 className="mt-4 text-2xl font-semibold leading-[1.16] text-[var(--color-ivory)]">
+      <p className={styles.detailKicker}>Active milestone</p>
+      <h3 className={styles.detailTitle}>
         {item.title}
       </h3>
-      <p className="mt-3 text-sm leading-6 text-[var(--color-warm-silver)]">
+
+      <p className={styles.detailCopy}>
         {item.description}
       </p>
 
-      <div className="mt-5 grid gap-3 border-t border-[var(--border-subtle)] pt-4 sm:grid-cols-3">
-        {item.metadata.slice(0, 3).map((detail, index) => (
-          <p
-            className="rounded-[var(--radius-control)] border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-carbon)_58%,transparent)] px-3 py-2 text-xs leading-5 text-[var(--color-ivory-soft)]"
-            key={`${detail}-${index}`}
-          >
-            {detail}
-          </p>
-        ))}
-      </div>
-    </article>
-  );
-}
+      <TimelineMilestoneReceipt
+        activeLens={activeLens}
+        item={item}
+        priority={priority}
+      />
 
-function DetailPanel({
-  activeLens,
-  item
-}: {
-  activeLens: TimelineLens;
-  item: TimelineItem;
-}) {
-  const track = trackMeta[item.track];
-  const TrackIcon = track.Icon;
-  const priority = priorityForLens(item.viewerPriority, item.importance, activeLens);
-  const linkedProjects = item.relatedProjects
-    .map(projectBySlug)
-    .filter((project): project is Project => Boolean(project));
-  const linkedCertifications = item.relatedCertifications
-    .map(certificationBySlug)
-    .filter((credential): credential is Certification => Boolean(credential));
-  const externalProofLinks = item.proofLinks.filter((link) => Boolean(link.url));
-  const pendingProofLinks = item.proofLinks.filter((link) => !link.url);
-
-  return (
-    <aside
-      aria-labelledby={`${TIMELINE_DETAIL_PANEL_ID}-title`}
-      aria-live="polite"
-      className="motion-detail-swap rounded-[var(--radius-panel)] border border-[var(--console-border)] bg-[var(--surface-console)] shadow-[var(--shadow-surface)] xl:sticky xl:top-[var(--site-header-offset)] xl:max-h-[var(--sticky-panel-max-height)] xl:overflow-y-auto"
-      id={TIMELINE_DETAIL_PANEL_ID}
-      role="region"
-    >
-      <div className={`border-b ${track.tone} px-5 py-5`}>
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge className={track.tone}>
-            <TrackIcon aria-hidden="true" className="h-3.5 w-3.5" />
-            {track.label}
-          </Badge>
-          <Badge className="border-[var(--border-subtle)] text-[var(--color-warm-silver)]">
-            {item.dateLabel}
-          </Badge>
-        </div>
-        <h2
-          className="mt-4 text-2xl font-semibold leading-[1.16] text-[var(--color-ivory)]"
-          id={`${TIMELINE_DETAIL_PANEL_ID}-title`}
-        >
-          {item.title}
-        </h2>
-        <p className="mt-3 text-sm leading-6 text-[var(--console-muted)]">
-          {item.description}
-        </p>
-      </div>
-
-      <div className="space-y-6 px-5 py-5">
-        <dl className="grid grid-cols-2 gap-3">
-          {[
-            ["Lens fit", priority],
-            ["Importance", item.importance],
-            ["Type", item.typeLabel],
-            ["Source", item.source]
-          ].map(([label, value]) => (
-            <div
-              className="rounded-[var(--radius-control)] border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-carbon)_58%,transparent)] p-3"
-              key={label}
+      {item.metadata.length > 0 ? (
+        <div className={styles.detailMetadata}>
+          {item.metadata.map((meta, metaIndex) => (
+            <span
+              key={`${item.id}-${metaIndex}-${meta}`}
             >
-              <dt className="font-mono text-[0.6875rem] uppercase text-[var(--color-steel)]">
-                {label}
-              </dt>
-              <dd className="mt-1 text-sm capitalize leading-5 text-[var(--color-ivory-soft)]">
-                {value}
-              </dd>
-            </div>
+              {meta}
+            </span>
           ))}
-        </dl>
+        </div>
+      ) : null}
 
+      <div className={styles.detailActions}>
         {item.href ? (
           <Link
-            aria-label={`Open related proof for ${item.title}`}
-            className="motion-cta inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-control)] border border-[var(--border-gold)] bg-[var(--button-primary-bg)] px-3 text-sm font-medium text-[var(--button-primary-text)] transition duration-[var(--duration-feedback)] hover:border-[var(--color-champagne)]"
+            className={styles.primaryAction}
+            data-cursor-label="Open"
+            data-cursor-tone="open"
             href={item.href}
           >
-            Open related proof
+            <span aria-hidden="true" className={styles.timelineCurrentSweep} />
+            Open related page
             <ExternalLink aria-hidden="true" className="h-4 w-4" />
           </Link>
         ) : null}
 
-        <DetailSection title="Project links">
-          {linkedProjects.length > 0 ? (
-            <div className="grid gap-2">
-              {linkedProjects.map((project) => (
-                <Link
-                  className="motion-cta rounded-[var(--radius-control)] border border-[var(--border-subtle)] px-3 py-2 text-sm leading-5 text-[var(--color-ivory-soft)] transition duration-[var(--duration-feedback)] hover:border-[var(--border-gold)] hover:text-[var(--color-ivory)]"
-                  href={`/projects/${project.slug}`}
-                  key={project.slug}
-                >
-                  {project.title}
-                </Link>
-              ))}
-            </div>
+        {item.proofLinks.map((link) =>
+          link.url ? (
+            <Link
+              className={styles.secondaryAction}
+              data-cursor-label="Proof"
+              data-cursor-tone="open"
+              href={link.url}
+              key={link.url}
+            >
+              <span aria-hidden="true" className={styles.timelineCurrentSweep} />
+              {link.label}
+              <ExternalLink aria-hidden="true" className="h-4 w-4" />
+            </Link>
           ) : (
-            <EmptyDetail>Project proof is not attached yet.</EmptyDetail>
-          )}
-        </DetailSection>
-
-        <DetailSection title="Credential links">
-          {linkedCertifications.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {linkedCertifications.map((credential) => (
-                <Link
-                  className="motion-cta rounded-[var(--radius-control)] border border-[var(--border-subtle)] px-2.5 py-1 text-xs text-[var(--color-ivory-soft)] transition duration-[var(--duration-feedback)] hover:border-[var(--border-gold)] hover:text-[var(--color-ivory)]"
-                  href="/certifications"
-                  key={credential.slug}
-                >
-                  {credential.title}
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <EmptyDetail>No credential is attached to this item.</EmptyDetail>
-          )}
-        </DetailSection>
-
-        <DetailSection title="Proof state">
-          <div className="grid gap-2">
-            {externalProofLinks.map((link) => (
-              <a
-                aria-label={`${link.label} for ${item.title}. Opens in a new tab.`}
-                className="motion-cta flex min-h-10 items-center justify-between gap-3 rounded-[var(--radius-control)] border border-[var(--border-subtle)] px-3 text-sm text-[var(--color-ivory-soft)] transition duration-[var(--duration-feedback)] hover:border-[var(--border-gold)] hover:text-[var(--color-ivory)]"
-                href={link.url ?? undefined}
-                key={`${link.label}-${link.url}`}
-                rel="noreferrer"
-                target="_blank"
-              >
-                <span>{link.label}</span>
-                <ExternalLink aria-hidden="true" className="h-4 w-4" />
-              </a>
-            ))}
-            {pendingProofLinks.map((link) => (
-              <p
-                className="rounded-[var(--radius-control)] border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-warm-silver)_8%,transparent)] px-3 py-2 text-sm leading-5 text-[var(--color-warm-silver)]"
-                key={link.label}
-              >
-                {link.label}: {link.status.replaceAll("-", " ")}
-              </p>
-            ))}
-            {item.proofLinks.length === 0 ? (
-              <EmptyDetail>Proof assets are queued through related records.</EmptyDetail>
-            ) : null}
-          </div>
-        </DetailSection>
+            <span
+              className={styles.secondaryAction}
+              data-cursor-label="Proof"
+              data-cursor-tone="open"
+              key={`${item.id}-${link.label}`}
+            >
+              <span aria-hidden="true" className={styles.timelineCurrentSweep} />
+              {link.label}
+            </span>
+          )
+        )}
       </div>
-    </aside>
+
+      <div className={styles.detailStepper}>
+        <button
+          aria-label={
+            previousItem
+              ? `Previous milestone: ${previousItem.title}`
+              : "No previous milestone"
+          }
+          disabled={!previousItem}
+          data-cursor-label={previousItem ? "Prev" : undefined}
+          data-cursor-tone="step"
+          onClick={() => {
+            if (previousItem) {
+              onSelectItem(previousItem.id);
+            }
+          }}
+          type="button"
+        >
+          <ArrowLeft aria-hidden="true" className="h-4 w-4" />
+          <span>{previousItem ? compactItemLabel(previousItem) : "Start"}</span>
+        </button>
+        <button
+          aria-label={
+            nextItem ? `Next milestone: ${nextItem.title}` : "No next milestone"
+          }
+          disabled={!nextItem}
+          data-cursor-label={nextItem ? "Next" : undefined}
+          data-cursor-tone="step"
+          onClick={() => {
+            if (nextItem) {
+              onSelectItem(nextItem.id);
+            }
+          }}
+          type="button"
+        >
+          <span>{nextItem ? compactItemLabel(nextItem) : "End"}</span>
+          <ArrowRight aria-hidden="true" className="h-4 w-4" />
+        </button>
+      </div>
+    </motion.article>
   );
 }
 
-function DetailSection({
-  children,
-  title
+function TimelineMilestoneReceipt({
+  activeLens,
+  item,
+  priority
 }: {
-  children: ReactNode;
-  title: string;
+  activeLens: TimelineLens;
+  item: TimelineItem;
+  priority: Priority;
 }) {
+  const track = trackMeta[item.track];
+  const proofTotal =
+    item.relatedProjects.length +
+    item.relatedCertifications.length +
+    item.proofLinks.length;
+  const receiptItems = [
+    {
+      detail: "Timeline window",
+      label: "Date",
+      value: item.dateLabel
+    },
+    {
+      detail: "Chapter lane",
+      label: "Track",
+      value: track.label
+    },
+    {
+      detail: `${lensLabels[activeLens]} lens`,
+      label: "Fit",
+      value: publicPriorityLabel(priority)
+    },
+    {
+      detail: `${item.relatedProjects.length} projects / ${item.relatedCertifications.length} credentials / ${item.proofLinks.length} links`,
+      label: "Proof",
+      value: `${proofTotal} refs`
+    }
+  ] as const;
+
   return (
-    <section>
-      <h3 className="font-mono text-xs uppercase text-[var(--color-champagne)]">
-        {title}
-      </h3>
-      <div className="mt-3">{children}</div>
-    </section>
+    <dl className={styles.detailReceipt} aria-label="Selected milestone receipt">
+      {receiptItems.map((receipt) => (
+        <div key={receipt.label}>
+          <span aria-hidden="true" className={styles.timelineMetricPulse} />
+          <dt>{receipt.label}</dt>
+          <dd>{receipt.value}</dd>
+          <dd>{receipt.detail}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 
-function EmptyDetail({ children }: { children: ReactNode }) {
-  return (
-    <p className="rounded-[var(--radius-control)] border border-[var(--border-subtle)] px-3 py-2 text-sm leading-6 text-[var(--color-warm-silver)]">
-      {children}
-    </p>
-  );
-}
-
-function MobileTimelineFallback({
+function TimelineAtlas({
   activeItemId,
   activeLens,
+  activeTrackFilter,
+  activeYearFilter,
   items,
-  onSelect
+  onActiveItemChange,
+  onClearScope,
+  onRegisterItem,
+  onTrackFilterSelect,
+  onYearFilterSelect
 }: {
   activeItemId: string;
   activeLens: TimelineLens;
+  activeTrackFilter: TimelineTrackFilter;
+  activeYearFilter: TimelineYearFilter;
   items: readonly TimelineItem[];
-  onSelect: (itemId: string) => void;
+  onActiveItemChange: (itemId: string) => void;
+  onClearScope: (focusFirstItem?: boolean) => void;
+  onRegisterItem: (itemId: string, node: HTMLElement | null) => void;
+  onTrackFilterSelect: (trackId: TimelineTrackId) => void;
+  onYearFilterSelect: (year: TimelineYearFilter) => void;
 }) {
-  return (
-    <section className="motion-list grid gap-4 xl:hidden">
-      {trackOrder.map((trackId) => {
-        const track = trackMeta[trackId];
-        const TrackIcon = track.Icon;
-        const trackItems = getTrackItems(items, trackId);
+  const atlasRef = useRef<HTMLElement | null>(null);
+  const scopeActive =
+    activeTrackFilter !== "all" || activeYearFilter !== "all";
+  const scopedItems = itemsForScope(
+    items,
+    activeTrackFilter,
+    activeYearFilter
+  );
+  const activeItem =
+    items.find((item) => item.id === activeItemId) ?? items[0];
+  const activeIndex = Math.max(
+    0,
+    items.findIndex((item) => item.id === activeItem?.id)
+  );
+  const scopedActiveIndex = Math.max(
+    0,
+    scopedItems.findIndex((item) => item.id === activeItem?.id)
+  );
+  const previousItem =
+    scopedActiveIndex > 0 ? scopedItems[scopedActiveIndex - 1] : undefined;
+  const nextItem =
+    scopedActiveIndex >= 0 && scopedActiveIndex < scopedItems.length - 1
+      ? scopedItems[scopedActiveIndex + 1]
+      : undefined;
+  const topItems = topItemsForLens(scopedItems.length > 0 ? scopedItems : items, activeLens);
+  const yearChapters = timelineYears.map((year) => ({
+    year,
+    items: items.filter((item) => yearForItem(item) === year)
+  }));
+  const scopeEvidenceCount = evidenceCountForItems(scopedItems);
+  const scopeHighFitCount = scopedItems.filter(
+    (item) =>
+      priorityForLens(item.viewerPriority, item.importance, activeLens) === "high"
+  ).length;
+  const scopeYearCount = new Set(scopedItems.map(yearForItem)).size;
+  const scopeTrackLabel =
+    activeTrackFilter === "all"
+      ? "All tracks"
+      : trackMeta[activeTrackFilter].label;
+  const scopeYearLabel =
+    activeYearFilter === "all" ? "All years" : String(activeYearFilter);
+  const { scrollYProgress } = useScroll({
+    target: atlasRef,
+    offset: ["start 78%", "end 34%"]
+  });
+  const haloProgress = useSpring(scrollYProgress, {
+    damping: 28,
+    mass: 0.78,
+    stiffness: 90
+  });
+  const haloHeight = useTransform(haloProgress, [0, 1], ["0%", "100%"]);
+  const haloOpacity = useTransform(
+    haloProgress,
+    [0, 0.12, 0.88, 1],
+    [0.24, 1, 1, 0.42]
+  );
+  const haloY = useTransform(haloProgress, [0, 1], ["-6%", "74%"]);
+  const haloScale = useTransform(haloProgress, [0, 0.5, 1], [0.96, 1.06, 0.98]);
+  const haloRotate = useTransform(haloProgress, [0, 1], [-7, 8]);
+  const ambientOpacity = useTransform(
+    haloProgress,
+    [0, 0.18, 0.86, 1],
+    [0.08, 0.92, 0.86, 0.32]
+  );
+  const inspectorGlowY = useTransform(haloProgress, [0, 1], ["-18%", "68%"]);
 
-        return (
-          <div
-            className="rounded-[var(--radius-panel)] border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-carbon)_70%,transparent)] p-4"
-            key={trackId}
+  function handleMilestoneSelect(item: TimelineItem, isInScope: boolean) {
+    if (scopeActive && !isInScope) {
+      onClearScope(false);
+    }
+
+    onActiveItemChange(item.id);
+  }
+
+  return (
+    <section
+      aria-labelledby="timeline-atlas-title"
+      className={styles.atlasSection}
+      id="timeline-path"
+      ref={atlasRef}
+    >
+      <motion.div
+        aria-hidden="true"
+        className={styles.atlasSpine}
+        style={{ opacity: haloOpacity }}
+      >
+        <motion.div
+          className={styles.atlasSpineGlow}
+          style={{ height: haloHeight }}
+        />
+        <motion.div
+          className={styles.atlasSpineFill}
+          style={{ height: haloHeight }}
+        />
+      </motion.div>
+
+      <div className={styles.atlasHeader}>
+        <div>
+          <div className={styles.panelEyebrow}>
+            <Network aria-hidden="true" className="h-4 w-4" />
+            Timeline atlas
+          </div>
+          <h2
+            className={styles.atlasTitle}
+            id="timeline-atlas-title"
           >
-            <div className="flex items-center gap-2 font-mono text-xs uppercase text-[var(--color-champagne)]">
-              <TrackIcon aria-hidden="true" className="h-4 w-4" />
-              {track.label}
+            Career milestones, curated by chapter.
+          </h2>
+          <p className={styles.atlasCopy}>
+            Jump by track, scan the chronology, and step through each selected
+            milestone without decoding a chart.
+          </p>
+        </div>
+
+        <div className={styles.activeSummary}>
+          <span aria-hidden="true" className={styles.timelineCurrentSweep} />
+          <span aria-hidden="true" className={styles.activeSummaryPulse} />
+          <p>
+            Active milestone
+          </p>
+          <strong>
+            {activeItem ? compactItemLabel(activeItem) : "Timeline"}
+          </strong>
+          <span>
+            {activeIndex + 1} / {items.length}
+          </span>
+        </div>
+      </div>
+
+      <div className={styles.atlasGrid}>
+        <div className={styles.navigatorShell}>
+          <motion.div
+            aria-hidden="true"
+            className={styles.scrollHalo}
+            style={{
+              opacity: ambientOpacity,
+              rotate: haloRotate,
+              scale: haloScale,
+              y: haloY
+            }}
+          />
+          <motion.div
+            aria-hidden="true"
+            className={styles.scrollScanline}
+            style={{ opacity: haloOpacity, y: haloY }}
+          />
+
+          <div className={styles.navigatorHeader}>
+            <div>
+              <p>
+                Milestone navigator
+              </p>
+              <strong>Choose the chapter, then read the milestone.</strong>
             </div>
-            <div className="mt-4 grid gap-3">
-              {trackItems.map((item) => {
-                const priority = priorityForLens(
-                  item.viewerPriority,
-                  item.importance,
-                  activeLens
+            <div className={styles.yearJumpNav} aria-label="Filter by year">
+              <button
+                aria-pressed={activeYearFilter === "all"}
+                className={clsx(
+                  activeYearFilter === "all" && styles.yearJumpButtonActive
+                )}
+                data-cursor-label="Years"
+                data-cursor-tone="filter"
+                onClick={() => onYearFilterSelect("all")}
+                type="button"
+              >
+                <span aria-hidden="true" className={styles.timelineCurrentSweep} />
+                <span>All</span>
+                <em>{itemsForScope(items, activeTrackFilter, "all").length}</em>
+              </button>
+
+              {yearChapters.map((chapter) => {
+                const scopedYearItems = itemsForScope(
+                  chapter.items,
+                  activeTrackFilter,
+                  "all"
                 );
 
                 return (
                   <button
-                    aria-controls={TIMELINE_DETAIL_PANEL_ID}
-                    aria-label={`${item.title}. ${item.dateLabel}. ${priority} fit.`}
-                    aria-pressed={activeItemId === item.id}
-                    className={`motion-card motion-timeline-item w-full rounded-[var(--radius-card)] border p-4 text-left transition duration-[var(--duration-feedback)] ${
-                      activeItemId === item.id
-                        ? "border-[var(--border-gold)] bg-[var(--surface-panel-hover)]"
-                        : "border-[var(--card-border)] bg-[var(--surface-panel)]"
-                    }`}
-                    key={item.id}
-                    onClick={() => onSelect(item.id)}
+                    aria-pressed={activeYearFilter === chapter.year}
+                    className={clsx(
+                      activeYearFilter === chapter.year &&
+                        styles.yearJumpButtonActive
+                    )}
+                    disabled={scopedYearItems.length === 0}
+                    data-cursor-label={
+                      scopedYearItems.length > 0 ? "Year" : undefined
+                    }
+                    data-cursor-tone="filter"
+                    key={chapter.year}
+                    onClick={() => onYearFilterSelect(chapter.year)}
                     type="button"
                   >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge className={track.tone}>{item.dateLabel}</Badge>
-                      <Badge className="border-[var(--border-subtle)] text-[var(--color-warm-silver)]">
-                        {priority} fit
-                      </Badge>
-                    </div>
-                    <h3 className="mt-3 text-xl font-semibold leading-[1.18] text-[var(--color-ivory)]">
-                      {item.title}
-                    </h3>
-                    <p className="mt-2 text-sm leading-6 text-[var(--color-warm-silver)]">
-                      {item.description}
-                    </p>
+                    <span aria-hidden="true" className={styles.timelineCurrentSweep} />
+                    <span>{chapter.year}</span>
+                    <em>{scopedYearItems.length}</em>
                   </button>
                 );
               })}
             </div>
           </div>
-        );
-      })}
+
+          <div className={styles.scopeSummary}>
+            <div>
+              <p>Current scope</p>
+              <strong>
+                {scopeTrackLabel} / {scopeYearLabel}
+              </strong>
+            </div>
+            <dl className={styles.scopeStats}>
+              <div>
+                <span aria-hidden="true" className={styles.timelineMetricPulse} />
+                <dt>Milestones</dt>
+                <dd>{scopedItems.length}</dd>
+              </div>
+              <div>
+                <span aria-hidden="true" className={styles.timelineMetricPulse} />
+                <dt>Core matches</dt>
+                <dd>{scopeHighFitCount}</dd>
+              </div>
+              <div>
+                <span aria-hidden="true" className={styles.timelineMetricPulse} />
+                <dt>Links</dt>
+                <dd>{scopeEvidenceCount}</dd>
+              </div>
+              <div>
+                <span aria-hidden="true" className={styles.timelineMetricPulse} />
+                <dt>Years</dt>
+                <dd>{scopeYearCount}</dd>
+              </div>
+            </dl>
+            {scopeActive ? (
+              <button
+                className={styles.scopeClear}
+                data-cursor-label="Clear"
+                data-cursor-tone="filter"
+                onClick={() => onClearScope()}
+                type="button"
+              >
+                <span aria-hidden="true" className={styles.timelineCurrentSweep} />
+                Clear
+              </button>
+            ) : null}
+          </div>
+
+          <div className={styles.navigatorLayout}>
+            <nav aria-label="Timeline tracks" className={styles.trackRail}>
+              {trackOrder.map((trackId) => {
+                const trackItems = getTrackItems(items, trackId);
+                const scopedTrackItems = itemsForScope(
+                  trackItems,
+                  "all",
+                  activeYearFilter
+                );
+                const track = trackMeta[trackId];
+                const Icon = track.Icon;
+                const isActiveTrack = activeTrackFilter === trackId;
+
+                return (
+                  <button
+                    aria-pressed={isActiveTrack}
+                    className={clsx(
+                      styles.trackRailButton,
+                      isActiveTrack && styles.trackRailButtonActive
+                    )}
+                    disabled={scopedTrackItems.length === 0}
+                    data-cursor-label={
+                      scopedTrackItems.length > 0 ? "Filter" : undefined
+                    }
+                    data-cursor-tone="filter"
+                    key={trackId}
+                    onClick={() => onTrackFilterSelect(trackId)}
+                    type="button"
+                  >
+                    <span aria-hidden="true" className={styles.timelineCurrentSweep} />
+                    <Icon aria-hidden="true" className="h-4 w-4" />
+                    <span>{track.shortLabel}</span>
+                    <em>{scopedTrackItems.length}</em>
+                  </button>
+                );
+              })}
+            </nav>
+
+            <div className={styles.chronicle}>
+              {yearChapters.map((chapter) => {
+                const scopedChapterItems = chapter.items.filter((item) =>
+                  matchesTimelineScope(
+                    item,
+                    activeTrackFilter,
+                    activeYearFilter
+                  )
+                );
+
+                return (
+                  <section className={styles.yearChapter} key={chapter.year}>
+                    <header className={styles.yearChapterHeader}>
+                      <span>{chapter.year}</span>
+                      <em>
+                        {scopeActive
+                          ? `${scopedChapterItems.length} shown / ${chapter.items.length}`
+                          : `${chapter.items.length} milestone${
+                              chapter.items.length === 1 ? "" : "s"
+                            }`}
+                      </em>
+                    </header>
+
+                    <div className={styles.chapterRows}>
+                      {chapter.items.map((item) => {
+                      const isActive = item.id === activeItemId;
+                      const isInScope = matchesTimelineScope(
+                        item,
+                        activeTrackFilter,
+                        activeYearFilter
+                      );
+                      const priority = priorityForLens(
+                        item.viewerPriority,
+                        item.importance,
+                        activeLens
+                      );
+                      const evidenceCount =
+                        item.relatedProjects.length +
+                        item.relatedCertifications.length +
+                        item.proofLinks.length;
+                      const itemIndex = items.findIndex(
+                        (timelineItem) => timelineItem.id === item.id
+                      );
+                      const track = trackMeta[item.track];
+                      const Icon = track.Icon;
+
+                      return (
+                        <button
+                          aria-controls={TIMELINE_DETAIL_PANEL_ID}
+                          aria-label={`${item.title}, ${item.dateLabel}`}
+                          aria-pressed={isActive}
+                          className={clsx(
+                            styles.milestoneRow,
+                            scopeActive &&
+                              isInScope &&
+                              styles.milestoneRowInScope,
+                            scopeActive &&
+                              !isInScope &&
+                              styles.milestoneRowMuted,
+                            isActive && styles.milestoneRowActive
+                          )}
+                          data-active={isActive ? "true" : undefined}
+                          data-cursor-label="Read"
+                          data-cursor-tone="read"
+                          data-timeline-scope={isInScope ? "true" : "false"}
+                          data-timeline-id={item.id}
+                          key={item.id}
+                          onClick={() => handleMilestoneSelect(item, isInScope)}
+                          ref={(node) => onRegisterItem(item.id, node)}
+                          type="button"
+                        >
+                          <span aria-hidden="true" className={styles.milestoneLens} />
+                          <span aria-hidden="true" className={styles.timelineCurrentSweep} />
+                          <span aria-hidden="true" className={styles.milestonePulse} />
+                          <span className={styles.milestoneIndex}>
+                            {String(itemIndex + 1).padStart(2, "0")}
+                          </span>
+                          <span className={styles.milestoneBody}>
+                            <span className={styles.milestoneMeta}>
+                              <span>
+                                <Icon aria-hidden="true" className="h-3.5 w-3.5" />
+                                {track.shortLabel}
+                              </span>
+                              <span>{item.dateLabel}</span>
+                              <span>{publicPriorityLabel(priority)}</span>
+                            </span>
+                            <strong>{compactItemLabel(item)}</strong>
+                            <span>{item.description}</span>
+                          </span>
+                          <span className={styles.milestoneEvidence}>
+                            <span aria-hidden="true" className={styles.timelineMetricPulse} />
+                            <strong>{evidenceCount}</strong>
+                            <span>refs</span>
+                          </span>
+                        </button>
+                      );
+                      })}
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className={styles.shortlistPanel}>
+            <p>
+              {lensLabels[activeLens]} shortlist
+            </p>
+            <div className={styles.shortlistGrid}>
+              {topItems.map((item) => {
+                const track = trackMeta[item.track];
+                const Icon = track.Icon;
+
+                return (
+                  <button
+                    aria-controls={TIMELINE_DETAIL_PANEL_ID}
+                    className={clsx(
+                      styles.shortlistItem,
+                      item.id === activeItemId && styles.shortlistItemActive
+                    )}
+                    data-cursor-label="Focus"
+                    data-cursor-tone="read"
+                    key={item.id}
+                    onClick={() => onActiveItemChange(item.id)}
+                    type="button"
+                  >
+                    <span>
+                      <Icon aria-hidden="true" className="h-3.5 w-3.5" />
+                      {publicPriorityLabel(
+                        priorityForLens(item.viewerPriority, item.importance, activeLens)
+                      )}
+                    </span>
+                    <strong>{compactItemLabel(item)}</strong>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {activeItem ? (
+          <TimelineDetailPanel
+            activeLens={activeLens}
+            item={activeItem}
+            nextItem={nextItem}
+            onSelectItem={onActiveItemChange}
+            previousItem={previousItem}
+            scrollHalo={
+              <motion.div
+                aria-hidden="true"
+                className={styles.detailScrollHalo}
+                style={{ opacity: ambientOpacity, y: inspectorGlowY }}
+              />
+            }
+          />
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function TimelineHero({ items }: { items: readonly TimelineItem[] }) {
+  const containerRef = useRef<HTMLElement | null>(null);
+  const heroMilestones = [
+    "ilink-role-start",
+    "telecom-fabric-migration-poc",
+    "icore-mdm-entity-resolution"
+  ]
+    .map((id) => items.find((item) => item.id === id))
+    .filter((item): item is TimelineItem => Boolean(item));
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"]
+  });
+
+  const smoothProgress = useSpring(scrollYProgress, {
+    damping: 30,
+    mass: 0.8,
+    stiffness: 70
+  });
+  const contentY = useTransform(smoothProgress, [0, 0.75], [0, -56]);
+  const backgroundY = useTransform(smoothProgress, [0, 1], [0, 200]);
+  const threadHeight = useTransform(smoothProgress, [0, 1], ["0%", "100%"]);
+  const threadOpacity = useTransform(
+    smoothProgress,
+    [0, 0.2, 0.8, 1],
+    [0, 1, 1, 0]
+  );
+
+  return (
+    <section
+      aria-labelledby="timeline-hero-title"
+      className={styles.previousHero}
+      ref={containerRef}
+    >
+      <div className={styles.previousHeroSticky}>
+        <motion.div
+          aria-hidden="true"
+          className={styles.previousHeroField}
+          style={{ y: backgroundY }}
+        />
+
+        <motion.div
+          className={styles.previousHeroContent}
+          style={{ y: contentY }}
+        >
+          <motion.div
+            initial={{ y: 14 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.55, ease: "easeOut", delay: 0.05 }}
+          >
+            <Badge className={styles.previousHeroBadge}>
+              <CalendarDays aria-hidden="true" className="h-3.5 w-3.5" />
+              Professional Timeline
+            </Badge>
+          </motion.div>
+
+          <motion.h1
+            initial={{ y: 14 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.55, ease: "easeOut", delay: 0.08 }}
+            className={styles.previousHeroTitle}
+            id="timeline-hero-title"
+          >
+            Data systems, <br className="hidden sm:block" /> mapped in motion.
+          </motion.h1>
+
+          <motion.p
+            initial={{ y: 12 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
+            className={styles.previousHeroLead}
+          >
+            A compact career atlas from academic foundations to shipped BI,
+            Fabric, Databricks, and AI/data-agent work.
+          </motion.p>
+
+          <motion.p
+            initial={{ y: 10 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.48, ease: "easeOut", delay: 0.12 }}
+            className={styles.previousHeroArc}
+          >
+            Education - BI validation - Fabric migration - Databricks data products
+          </motion.p>
+
+          <motion.ol
+            initial={{ y: 10 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.48, ease: "easeOut", delay: 0.14 }}
+            className={styles.previousHeroMilestones}
+            aria-label="Key career milestones"
+          >
+            {heroMilestones.map((item) => (
+              <li key={item.id}>
+                <span>{item.dateLabel}</span>
+                <strong>{compactItemLabel(item)}</strong>
+                <em>{trackMeta[item.track].shortLabel}</em>
+              </li>
+            ))}
+          </motion.ol>
+
+          <motion.nav
+            initial={{ y: 12 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.16 }}
+            aria-label="Timeline shortcuts"
+            className={styles.previousHeroActions}
+          >
+            <a
+              className={clsx("timeline-enter-link motion-cta", styles.previousHeroPrimary)}
+              data-cursor-label="Open"
+              data-cursor-tone="open"
+              href="#timeline-path"
+            >
+              <span className="inline-flex items-center gap-2">
+                <ArrowDown aria-hidden="true" className="h-4 w-4" />
+                <span>Jump to work timeline</span>
+              </span>
+            </a>
+            <span className={styles.previousHeroCount}>
+              {items.length} milestones
+            </span>
+          </motion.nav>
+        </motion.div>
+
+        <motion.div
+          className={styles.previousHeroThread}
+          style={{ opacity: threadOpacity }}
+        >
+          <motion.div
+            className={styles.previousHeroThreadFill}
+            style={{ height: threadHeight }}
+          />
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+function TimelineWayfinder({
+  activeItemId,
+  activeLens,
+  activeTrackFilter,
+  activeYearFilter,
+  items,
+  onTrackFilterSelect
+}: {
+  activeItemId: string;
+  activeLens: TimelineLens;
+  activeTrackFilter: TimelineTrackFilter;
+  activeYearFilter: TimelineYearFilter;
+  items: readonly TimelineItem[];
+  onTrackFilterSelect: (trackId: TimelineTrackId) => void;
+}) {
+  const activeItem = items.find((item) => item.id === activeItemId) ?? items[0];
+
+  return (
+    <section
+      aria-label="Timeline wayfinder"
+      className={styles.wayfinder}
+      id="timeline-wayfinder"
+    >
+      <div className={styles.wayfinderInner}>
+        <div className={styles.wayfinderStatus}>
+          <span>
+            <CalendarDays aria-hidden="true" className="h-4 w-4" />
+          </span>
+          <div>
+            <p>
+              {lensLabels[activeLens]} lens
+            </p>
+            <strong>
+              {activeItem ? compactItemLabel(activeItem) : "Timeline"}
+              {activeItem ? (
+                <span>
+                  {" "}
+                  / {activeItem.dateLabel}
+                </span>
+              ) : null}
+            </strong>
+          </div>
+        </div>
+
+        <div
+          aria-label="Timeline track filters"
+          className={styles.trackNav}
+          role="group"
+        >
+          {trackOrder.map((trackId) => {
+            const trackItems = getTrackItems(items, trackId);
+            const scopedTrackItems = itemsForScope(
+              trackItems,
+              "all",
+              activeYearFilter
+            );
+            const track = trackMeta[trackId];
+            const Icon = track.Icon;
+            const isActiveTrack = activeTrackFilter === trackId;
+
+            return (
+              <button
+                aria-pressed={isActiveTrack}
+                className={clsx(
+                  styles.trackButton,
+                  isActiveTrack && styles.trackButtonActive
+                )}
+                disabled={scopedTrackItems.length === 0}
+                data-cursor-label={
+                  scopedTrackItems.length > 0 ? "Filter" : undefined
+                }
+                data-cursor-tone="filter"
+                key={trackId}
+                onClick={() => onTrackFilterSelect(trackId)}
+                type="button"
+              >
+                <Icon aria-hidden="true" className="h-4 w-4" />
+                <span>{track.shortLabel}</span>
+                <em>{scopedTrackItems.length}</em>
+              </button>
+            );
+          })}
+        </div>
+
+        <nav aria-label="Timeline section jumps" className={styles.wayfinderLinks}>
+          <a data-cursor-label="Jump" data-cursor-tone="step" href="#timeline-lens">
+            Lens
+          </a>
+          <a data-cursor-label="Jump" data-cursor-tone="step" href="#timeline-path">
+            Navigator
+          </a>
+        </nav>
+      </div>
     </section>
   );
 }
@@ -1293,10 +1896,12 @@ export function CareerTimeline() {
   const prefersReducedMotion = usePrefersReducedMotion();
   const items = useMemo(() => buildTimelineItems(), []);
   const [activeItemId, setActiveItemId] = useState(items[0]?.id ?? "");
+  const [activeTrackFilter, setActiveTrackFilter] =
+    useState<TimelineTrackFilter>("all");
+  const [activeYearFilter, setActiveYearFilter] =
+    useState<TimelineYearFilter>("all");
   const itemRefs = useRef<Record<string, HTMLElement | null>>({});
   const activeLens: TimelineLens = role ?? "balanced";
-  const activeItem =
-    items.find((item) => item.id === activeItemId) ?? items[0];
 
   function handleLensSelect(nextLens: TimelineLens) {
     if (nextLens === "balanced") {
@@ -1313,154 +1918,205 @@ export function CareerTimeline() {
 
   function handleSelectItem(itemId: string) {
     setActiveItemId(itemId);
-    itemRefs.current[itemId]?.scrollIntoView({
+    (
+      itemRefs.current[itemId] ?? document.getElementById("timeline-path")
+    )?.scrollIntoView({
       behavior: prefersReducedMotion ? "auto" : "smooth",
-      block: "center"
+      block: "nearest",
+      inline: "center"
     });
   }
 
-  useEffect(() => {
-    if (prefersReducedMotion) {
-      return;
+  function focusFirstScopedItem(
+    nextTrackFilter: TimelineTrackFilter,
+    nextYearFilter: TimelineYearFilter
+  ) {
+    const nextScopedItems = itemsForScope(items, nextTrackFilter, nextYearFilter);
+    const preferredItem =
+      nextScopedItems.find((item) => item.id === activeItemId) ??
+      nextScopedItems[0];
+
+    if (preferredItem) {
+      handleSelectItem(preferredItem.id);
     }
+  }
+
+  function handleTrackFilterSelect(trackId: TimelineTrackId) {
+    const nextTrackFilter =
+      activeTrackFilter === trackId ? "all" : trackId;
+
+    setActiveTrackFilter(nextTrackFilter);
+    focusFirstScopedItem(nextTrackFilter, activeYearFilter);
+  }
+
+  function handleYearFilterSelect(year: TimelineYearFilter) {
+    const nextYearFilter =
+      activeYearFilter === year && year !== "all" ? "all" : year;
+
+    setActiveYearFilter(nextYearFilter);
+    focusFirstScopedItem(activeTrackFilter, nextYearFilter);
+  }
+
+  function handleClearScope(focusFirstItem = true) {
+    setActiveTrackFilter("all");
+    setActiveYearFilter("all");
+
+    if (focusFirstItem) {
+      focusFirstScopedItem("all", "all");
+    }
+  }
+
+  useEffect(() => {
+    const visibleRows = new Map<string, number>();
+    let animationFrame = 0;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const visibleEntry = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        entries.forEach((entry) => {
+          const itemId = (entry.target as HTMLElement).dataset.timelineId;
 
-        if (!visibleEntry) {
-          return;
-        }
+          if (!itemId) {
+            return;
+          }
 
-        const itemId = visibleEntry.target.getAttribute("data-timeline-id");
+          if (entry.isIntersecting) {
+            visibleRows.set(itemId, entry.intersectionRatio);
+          } else {
+            visibleRows.delete(itemId);
+          }
+        });
 
-        if (itemId) {
-          setActiveItemId(itemId);
-        }
+        cancelAnimationFrame(animationFrame);
+        animationFrame = window.requestAnimationFrame(() => {
+          const readingLine = window.innerHeight * 0.46;
+          let bestItemId = "";
+          let bestScore = Number.NEGATIVE_INFINITY;
+
+          visibleRows.forEach((intersectionRatio, itemId) => {
+            const node = itemRefs.current[itemId];
+
+            if (!node || node.dataset.timelineScope === "false") {
+              return;
+            }
+
+            const rect = node.getBoundingClientRect();
+            const midpoint = rect.top + rect.height / 2;
+            const distance = Math.abs(midpoint - readingLine);
+            const score = intersectionRatio * 1000 - distance;
+
+            if (score > bestScore) {
+              bestScore = score;
+              bestItemId = itemId;
+            }
+          });
+
+          if (bestItemId) {
+            setActiveItemId((currentItemId) =>
+              currentItemId === bestItemId ? currentItemId : bestItemId
+            );
+          }
+        });
       },
       {
-        rootMargin: "-32% 0px -48% 0px",
-        threshold: [0.25, 0.45, 0.65, 0.85]
+        rootMargin: "-30% 0px -42% 0px",
+        threshold: [0, 0.15, 0.35, 0.65, 1]
       }
     );
 
-    Object.values(itemRefs.current).forEach((node) => {
+    items.forEach((item) => {
+      const node = itemRefs.current[item.id];
+
       if (node) {
         observer.observe(node);
       }
     });
 
-    return () => observer.disconnect();
-  }, [items, prefersReducedMotion]);
+    return () => {
+      cancelAnimationFrame(animationFrame);
+      observer.disconnect();
+    };
+  }, [items]);
 
   return (
-    <main className="min-h-screen px-[var(--layout-gutter)] py-10">
-      <section className="motion-section gold-thread-section mx-auto flex max-w-[var(--layout-wide-max)] flex-col gap-8">
-        <header className="grid gap-8 border-b border-[var(--border-subtle)] pb-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
-          <div className="max-w-4xl">
-            <p className="font-mono text-xs uppercase text-[var(--console-prompt)]">
-              Career timeline
-            </p>
-            <h1 className="mt-4 max-w-4xl font-[var(--font-display)] text-4xl font-semibold leading-[1.08] text-[var(--color-ivory)] sm:text-6xl">
-              The thread from study to shipped data systems.
-            </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--color-warm-silver)] sm:text-lg">
-              Education, work, credentials, projects, and current exploration
-              sit on the same evidence rail, with each role lens changing which
-              milestones carry the most weight.
-            </p>
-          </div>
+    <main
+      className={styles.page}
+      data-timeline-cursor-scope="true"
+      id="main-content"
+      tabIndex={-1}
+    >
+      <TimelineCursor prefersReducedMotion={prefersReducedMotion} />
+      <TimelineHero items={items} />
+      <TimelineWayfinder
+        activeItemId={activeItemId}
+        activeLens={activeLens}
+        activeTrackFilter={activeTrackFilter}
+        activeYearFilter={activeYearFilter}
+        items={items}
+        onTrackFilterSelect={handleTrackFilterSelect}
+      />
 
+      <section className={styles.commandDeck} id="timeline-explorer">
+        <div className={styles.commandGrid}>
+          <div id="timeline-lens">
+            <LensPanel
+              activeLens={activeLens}
+              items={items}
+              onLensSelect={handleLensSelect}
+            />
+          </div>
           <TimelineMetrics activeLens={activeLens} items={items} />
-        </header>
+        </div>
+        <TimelineNarrativeSpine />
+      </section>
 
-        <LensPanel
+      {items.length > 0 ? (
+        <TimelineAtlas
+          activeItemId={activeItemId}
           activeLens={activeLens}
+          activeTrackFilter={activeTrackFilter}
+          activeYearFilter={activeYearFilter}
           items={items}
-          onLensSelect={handleLensSelect}
+          onActiveItemChange={handleSelectItem}
+          onClearScope={handleClearScope}
+          onRegisterItem={registerItem}
+          onTrackFilterSelect={handleTrackFilterSelect}
+          onYearFilterSelect={handleYearFilterSelect}
         />
+      ) : null}
 
-        {activeItem ? (
-          <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-            <div className="xl:sticky xl:top-[var(--site-header-offset)] xl:max-h-[var(--sticky-panel-max-height)] xl:self-start xl:overflow-y-auto">
-              <DesktopTimelineBoard
-                activeItemId={activeItem.id}
-                activeLens={activeLens}
-                items={items}
-                onSelect={handleSelectItem}
-              />
-              <div className="xl:hidden">
-                <DetailPanel
-                  activeLens={activeLens}
-                  item={activeItem}
-                  key={`mobile-${activeItem.id}`}
-                />
-              </div>
+      <section className={styles.integritySection}>
+        <div className={styles.integrityGrid}>
+          <div>
+            <div className={styles.panelEyebrow}>
+              <CheckCircle2 aria-hidden="true" className="h-4 w-4" />
+              Portfolio integrity
             </div>
-
-            <div className="grid gap-6">
-              <div className="hidden xl:block">
-                <DetailPanel
-                  activeLens={activeLens}
-                  item={activeItem}
-                  key={`desktop-${activeItem.id}`}
-                />
-              </div>
-              <DesktopScrollCards
-                activeItemId={activeItem.id}
-                activeLens={activeLens}
-                items={items}
-                onSelect={handleSelectItem}
-                registerItem={registerItem}
-              />
-              <MobileTimelineFallback
-                activeItemId={activeItem.id}
-                activeLens={activeLens}
-                items={items}
-                onSelect={handleSelectItem}
-              />
-            </div>
-          </section>
-        ) : null}
-
-        <section className="motion-section gold-thread-section rounded-[var(--radius-panel)] border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-carbon)_70%,transparent)] p-5">
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-            <div>
-              <div className="flex items-center gap-2 font-mono text-xs uppercase text-[var(--console-prompt)]">
-                <CheckCircle2 aria-hidden="true" className="h-4 w-4" />
-                Continuity checks
-              </div>
-              <h2 className="mt-2 text-2xl font-semibold text-[var(--color-ivory)]">
-                Every track is anchored to canonical portfolio data.
-              </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-warm-silver)]">
-                The base milestones come from `src/data/timeline.ts`; credential
-                and exploration rails are derived from their source modules and
-                linked back into timeline events, projects, and proof records.
-              </p>
-            </div>
-            <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
-              {[
-                "Education and work chronology",
-                "Project and publication evidence",
-                "Credential proof queue"
-              ].map((item) => (
-                <div
-                  className="flex min-h-11 items-center gap-2 rounded-[var(--radius-control)] border border-[var(--border-subtle)] px-3 text-sm text-[var(--color-ivory-soft)]"
-                  key={item}
-                >
-                  <BadgeCheck
-                    aria-hidden="true"
-                    className="h-4 w-4 text-[var(--color-success)]"
-                  />
-                  {item}
-                </div>
-              ))}
-            </div>
+            <h2>
+              Every track connects back to real education, work, projects, and
+              credentials.
+            </h2>
+            <p>
+              The atlas keeps the complete path visible while the inspector
+              explains why each point matters.
+            </p>
           </div>
-        </section>
+          <div className={styles.integrityChecks}>
+            {[
+              "Education and work chronology",
+              "Project and publication references",
+              "Credential verification paths"
+            ].map((item) => (
+              <div key={item}>
+                <span aria-hidden="true" className={styles.timelineCurrentSweep} />
+                <BadgeCheck
+                  aria-hidden="true"
+                  className="h-4 w-4 text-[var(--color-success)]"
+                />
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
     </main>
   );

@@ -1,0 +1,292 @@
+.splashContainer {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: #e8e1d5;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  perspective: 1200px;
+  will-change: opacity, transform;
+}
+
+/* Super Ultra Premium Live Creamy Gradient matching the earthy rich tones */
+.meshGradient {
+  position: absolute;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: 1;
+  background: 
+    radial-gradient(circle at 75% 25%, #dfa890 0%, transparent 55%), /* Richer Rose Gold/Copper */
+    radial-gradient(circle at 25% 75%, #b5c1b4 0%, transparent 55%), /* Richer Sage Green */
+    radial-gradient(circle at 85% 85%, #d4b8a0 0%, transparent 60%), /* Richer Bronze/Sand */
+    radial-gradient(circle at 25% 25%, #e6dcc6 0%, transparent 60%), /* Richer Cream/Gold */
+    radial-gradient(circle at 50% 50%, #f4eee1 0%, transparent 40%); /* Warmer White */
+  background-size: 100% 100%;
+  animation: meshSwirl 28s cubic-bezier(0.45, 0.05, 0.25, 0.95) infinite alternate;
+  filter: blur(60px);
+  pointer-events: none;
+  will-change: transform;
+}
+
+@keyframes meshSwirl {
+  0%   { transform: translate3d(-3.5%, 2%, 0); }
+  50%  { transform: translate3d(2.5%, -3%, 0); }
+  100% { transform: translate3d(3.5%, 2.5%, 0); }
+}
+
+/* Interactive Mouse Spotlight with Creamy Falloff */
+.spotlight {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  transition: opacity 0.5s ease;
+}
+
+/* Satin sheen, in place of the old film grain. Two very wide, very low-contrast
+   bands of light drifting across the canvas — the highlight silk gives, rather
+   than the tooth paper gives. Soft-light lets each band read as light on the
+   pale areas and as depth on the warm ones, which is what sells the fabric. */
+.silkSheen {
+  position: absolute;
+  inset: -30%;
+  z-index: 4;
+  background:
+    linear-gradient(102deg,
+      rgba(255, 252, 246, 0) 22%,
+      rgba(255, 252, 246, 0.36) 38%,
+      rgba(255, 252, 246, 0.09) 46%,
+      rgba(255, 252, 246, 0) 59%),
+    linear-gradient(102deg,
+      rgba(150, 112, 86, 0) 51%,
+      rgba(150, 112, 86, 0.14) 66%,
+      rgba(150, 112, 86, 0) 81%);
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+  will-change: transform;
+  animation: sheenDrift 26s cubic-bezier(0.45, 0.05, 0.25, 0.95) infinite alternate;
+}
+
+@keyframes sheenDrift {
+  0%   { transform: translate3d(-12%, -5%, 0); }
+  100% { transform: translate3d(11%, 6%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meshGradient,
+  .silkSheen {
+    animation: none;
+  }
+}
+
+.contentWrapper {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none; /* Let mouse through to 3D canvas */
+}
+
+/* Container for text */
+.titleArea {
+  padding: 3rem;
+  position: relative;
+  display: inline-block;
+  pointer-events: auto;
+}
+
+/* Cinematic Typography */
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 9vw, 8rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  margin: 0;
+  line-height: 1.02;
+  perspective: 1000px;
+}
+
+.charWrapper {
+  display: inline-block;
+  transform-style: preserve-3d;
+  /* Soft, elegant, fluid bronze (Soft to the eyes) */
+  background: 
+    /* Layer 1: Soft sweeping light bronze highlight */
+    linear-gradient(135deg, transparent 15%, rgba(185, 125, 85, 0.5) 25%, transparent 40%, transparent 60%, rgba(185, 125, 85, 0.5) 75%, transparent 85%),
+    /* Layer 2: Ambient warm glow */
+    radial-gradient(circle at 50% 50%, rgba(143, 92, 63, 0.4) 0%, transparent 60%),
+    /* Layer 3: Base darker bronze */
+    linear-gradient(45deg, #75482e 0%, #8f5c3f 30%, #633b22 60%, #8f5c3f 90%, #75482e 100%);
+  
+  background-size: 300% 300%, 200% 200%, 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  
+  /* Soft, fluid, multidirectional random animation */
+  will-change: transform, background-position;
+  animation: fluidRandomGlow 15s ease-in-out infinite;
+
+}
+
+@keyframes fluidRandomGlow {
+  0% {
+    background-position: 0% 0%, 50% 50%, 0% 0%;
+  }
+  20% {
+    background-position: 100% 30%, 20% 80%, 50% 100%;
+  }
+  40% {
+    background-position: 40% 100%, 80% 20%, 100% 50%;
+  }
+  60% {
+    background-position: 100% 80%, 10% 90%, 50% 0%;
+  }
+  80% {
+    background-position: 20% 10%, 90% 10%, 0% 50%;
+  }
+  100% {
+    background-position: 0% 0%, 50% 50%, 0% 0%;
+  }
+}
+
+.buttonContainer {
+  margin-top: 5rem;
+  position: relative;
+}
+
+/* Elegant, Sleek, Glassmorphic Button */
+.premiumButton {
+  position: relative;
+  appearance: none;
+  background: rgba(30, 18, 13, 0.95);
+  border: none; /* Physical borders on large radii cause subpixel jaggedness. Use shadow instead. */
+  padding: 1.2rem 4rem;
+  border-radius: 100px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateZ(0); /* Forces high-quality GPU anti-aliasing */
+  box-shadow: 
+    0 0 0 1px rgba(223, 168, 144, 0.4), /* Mathematically perfect, anti-aliased 1px stroke */
+    0 2px 4px rgba(0, 0, 0, 0.2),       /* Tight contact shadow */
+    0 8px 16px rgba(0, 0, 0, 0.3),      /* Mid ambient shadow */
+    0 16px 32px rgba(0, 0, 0, 0.4),     /* Deep ambient shadow */
+    inset 0 0 2px rgba(255, 255, 255, 0.1), /* Micro inner highlight for 3D volume */
+    inset 0 0 20px rgba(223, 168, 144, 0.05); /* Subtle inner glow */
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  z-index: 1;
+  will-change: transform;
+}
+
+.premiumButton:hover {
+  background: rgba(35, 20, 14, 1);
+  box-shadow: 
+    0 0 0 1px rgba(200, 140, 110, 0.7), /* Darker, richer copper stroke */
+    0 4px 8px rgba(0, 0, 0, 0.4),       /* Darker contact shadow */
+    0 12px 24px rgba(0, 0, 0, 0.5),     /* Darker mid shadow */
+    0 24px 48px rgba(0, 0, 0, 0.6),     /* Deeper ambient shadow */
+    0 0 35px rgba(180, 100, 60, 0.35),  /* Darker, richer bronze outer glow for contrast */
+    inset 0 1px 0 rgba(255, 255, 255, 0.4), /* Top border highlight without layout shift */
+    inset 0 0 2px rgba(255, 230, 200, 0.15), /* Subtle micro highlight */
+    inset 0 0 30px rgba(180, 100, 60, 0.25); /* Deeper inner bronze glow */
+}
+
+.premiumButton:active {
+  transform: translateY(1px);
+  box-shadow: 
+    0 5px 15px rgba(0, 0, 0, 0.2),
+    inset 0 0 10px rgba(223, 168, 144, 0.1);
+}
+
+.buttonText {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-inter), sans-serif;
+  letter-spacing: 0.3em;
+  font-size: 0.85rem;
+  font-weight: 600; /* Bolder weight makes the embossing pop more */
+  text-transform: uppercase;
+  
+  /* Rich, royal rose-gold/copper metallic gradient */
+  background: linear-gradient(
+    to bottom,
+    #fff0e6 0%,   /* Bright top edge reflection */
+    #e8bca5 30%,  /* Warm copper mid-tone */
+    #8c5237 50%,  /* Deep horizon line cut */
+    #c99175 100%  /* Soft bounce light */
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  
+  /* 3D Engraved Bevel Effect (Recessed) */
+  filter: 
+    drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.8))         /* Top shadow for recession */
+    drop-shadow(0px 1px 0px rgba(255, 230, 200, 0.3))    /* Bottom highlight */
+    drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));         /* Depth */
+}
+
+.buttonArrow {
+  position: relative;
+  z-index: 2;
+  color: #e8bca5; /* Matches the text's mid-tone */
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), color 0.5s ease;
+  
+  /* Matches the text's 3D Engraved Bevel Effect */
+  filter: 
+    drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.8))
+    drop-shadow(0px 1px 0px rgba(255, 230, 200, 0.3))
+    drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.buttonGlow {
+  position: absolute;
+  inset: 0;
+  /* A warm, rich champagne glow that follows the mouse */
+  background: radial-gradient(circle 100px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(223, 168, 144, 0.35), transparent 100%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.premiumButton:hover {
+  box-shadow: 
+    0 25px 50px rgba(43, 37, 31, 0.6),
+    0 12px 24px rgba(43, 37, 31, 0.4),
+    inset 0 1px 3px rgba(255, 255, 255, 0.3),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.8);
+  background: linear-gradient(145deg, #2a1b15, #140b08);
+}
+
+.premiumButton:hover .buttonText {
+  letter-spacing: 0.32em;
+  /* Maintain the metallic gradient, enhance the engraving and add glow, boost brightness for contrast */
+  filter: 
+    brightness(1.25)
+    drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.9))
+    drop-shadow(0px 1px 0px rgba(255, 255, 255, 0.4))
+    drop-shadow(0px 0px 8px rgba(223, 168, 144, 0.6));
+}
+
+.premiumButton:hover .buttonArrow {
+  transform: translateX(4px);
+  color: #ffd8c0; /* Brighten the copper on hover for better contrast */
+}
+
+.premiumButton:hover .buttonGlow {
+  opacity: 1;
+}

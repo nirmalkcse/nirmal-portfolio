@@ -76,22 +76,22 @@ const featuredProjects = featuredProjectSlugs
 
 const vaultSignals = [
   {
-    title: "Evidence spine",
+    title: "Case-study path",
     detail: featuredProjects.map((project) => project.title).join(" / "),
     Icon: Layers3
   },
   {
-    title: "Proof density",
-    detail: `${skillClusters.length} skill clusters, ${certifications.length} credentials, ${profile.achievements.length} quantified signals.`,
+    title: "Work density",
+    detail: `${skillClusters.length} skill clusters, ${certifications.length} credentials, ${profile.achievements.length} quantified outcomes.`,
     Icon: Network
   },
   {
-    title: "Exploration queue",
-    detail: `${futureProjects.length} currently exploring tracks, all grounded in existing proof instead of generic future claims.`,
+    title: "Learning tracks",
+    detail: `${futureProjects.length} current learning tracks, all grounded in existing work instead of broad future language.`,
     Icon: Compass
   },
   {
-    title: "Public-safety gate",
+    title: "Public sharing gate",
     detail:
       "Client names, private screenshots, internal URLs, and sensitive project details stay gated until explicitly approved.",
     Icon: ShieldCheck
@@ -100,9 +100,9 @@ const vaultSignals = [
 
 const buildNotes = [
   {
-    title: "Proof before spectacle",
+    title: "Work before spectacle",
     detail:
-      "The portfolio is structured as a proof system first: role lens, graph, case files, credentials, timeline, resume, and documents all point at the same evidence."
+      "The portfolio is structured around one consistent story: review focus, skill map, case studies, credentials, timeline, resume, and documents all point at the same work."
   },
   {
     title: "Gold stays scarce",
@@ -112,7 +112,7 @@ const buildNotes = [
   {
     title: "Hidden means optional",
     detail:
-      "This layer never interrupts the public path. Recruiters can still reach resume and contact surfaces without touching any hidden interaction."
+      "This layer never interrupts the public path. Recruiters can still reach the resume and contact routes without touching any hidden interaction."
   },
   {
     title: "Motion has a floor",
@@ -124,8 +124,8 @@ const buildNotes = [
 const commandCatalog = [
   {
     id: "show-proof",
-    label: "Show proof",
-    detail: "Open the evidence graph that connects skills, projects, and credentials.",
+    label: "Show skill map",
+    detail: "Open the skill map that connects skills, projects, and credentials.",
     keywords: ["proof", "graph", "evidence", "skills"],
     Icon: Network
   },
@@ -138,8 +138,8 @@ const commandCatalog = [
   },
   {
     id: "open-vault",
-    label: "Open Dossier Vault",
-    detail: "Reveal a compact private index of proof signals and safe boundaries.",
+    label: "Open Review Vault",
+    detail: "Reveal a compact private index of review signals and public-sharing boundaries.",
     keywords: ["vault", "dossier", "signals", "private"],
     Icon: LockKeyhole
   },
@@ -230,10 +230,10 @@ export function HiddenDelightPanel({
     onModeChange(nextMode);
     onStamp({
       id: nextMode === "vault" ? "vault-opened" : "notes-opened",
-      title: nextMode === "vault" ? "Dossier Vault" : "Build Notes",
+      title: nextMode === "vault" ? "Review Vault" : "Build Notes",
       detail:
         nextMode === "vault"
-          ? "Private proof cues are now visible."
+          ? "Private review cues are now visible."
           : "Design and engineering notes are now visible.",
       unique: true
     });
@@ -337,7 +337,7 @@ export function HiddenDelightPanel({
               {mode === "commands"
                 ? "Command palette"
                 : mode === "vault"
-                  ? "Dossier Vault"
+                  ? "Review Vault"
                   : "Build notes"}
             </h2>
           </div>
@@ -423,7 +423,7 @@ function CommandPalette({
           aria-controls="hidden-command-list"
           className={styles.searchInput}
           onChange={(event) => onQueryChange(event.target.value)}
-          placeholder="Type a command: show proof, open vault, trace gold thread..."
+          placeholder="Type a command: show skill map, open vault, trace gold thread..."
           ref={inputRef}
           type="search"
           value={query}
@@ -486,10 +486,10 @@ function DossierVault({
     <div className={styles.panel}>
       <div className={styles.panelIntro}>
         <p className={styles.eyebrow}>Private index</p>
-        <h3 className={styles.panelTitle}>Proof signals, quietly indexed.</h3>
+        <h3 className={styles.panelTitle}>Review signals, quietly indexed.</h3>
         <p className={styles.panelCopy}>
           The vault is a hidden overview for the portfolio system. It summarizes
-          the strongest proof paths and the public-safety boundaries without
+          the strongest review paths and public-sharing boundaries without
           creating another visible page for recruiters to parse.
         </p>
       </div>
@@ -514,7 +514,7 @@ function DossierVault({
 
       <div className={styles.panelActions}>
         <Link className={styles.panelAction} href="/projects" onClick={onClose}>
-          Open case files
+          Open case studies
           <ArrowRight aria-hidden="true" className="h-4 w-4" />
         </Link>
         <Link
@@ -547,7 +547,7 @@ function BuildNotes({ onClose }: { onClose: () => void }) {
         <p className={styles.panelCopy}>
           These notes are deliberately behind a command layer. They add craft
           context for curious visitors while leaving the primary portfolio path
-          focused on evidence, resume, and contact.
+          focused on work, resume, and contact.
         </p>
       </div>
 

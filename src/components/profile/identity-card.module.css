@@ -1,0 +1,755 @@
+/* ------------------------------------------------------------------------- */
+/*  Identity card                                                             */
+/*                                                                            */
+/*  A physical object, not a panel. Every dimension is expressed in `cqi`     */
+/*  (container-inline units) so the card scales like a real 85.6 × 54 mm      */
+/*  card wherever it is rendered. The parent that wants a card sets           */
+/*  `container-type: inline-size`; `.frame` does so for the hero stage.       */
+/*                                                                            */
+/*  Lighting comes from four custom properties written by the component:     */
+/*    --card-lx / --card-ly   key-light position across the face (%)          */
+/*    --card-ex / --card-ey   same light as a -1..1 direction for relief      */
+/*    --card-glare            0 resting → 1 under the hand                    */
+/* ------------------------------------------------------------------------- */
+
+.frame {
+  aspect-ratio: 1.586 / 1;
+  container-type: inline-size;
+  perspective: 1100px;
+  position: relative;
+  width: 100%;
+}
+
+.shadow {
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(38, 26, 16, 0.62) 0%,
+    rgba(38, 26, 16, 0.34) 36%,
+    rgba(38, 26, 16, 0.08) 60%,
+    transparent 74%
+  );
+  border-radius: 50%;
+  filter: blur(24px);
+  inset: 16% 4% -3% 4%;
+  opacity: 0.58;
+  pointer-events: none;
+  position: absolute;
+  transform-origin: 50% 65%;
+  will-change: transform, opacity;
+  z-index: 0;
+}
+
+.card {
+  --card-lx: 30%;
+  --card-ly: 22%;
+  --card-ex: -0.4;
+  --card-ey: -0.56;
+  --card-glare: 0;
+  --card-depth: 1.6cqi;
+  border-radius: 3.6cqi;
+  box-shadow:
+    0 0 0 1px rgba(52, 42, 32, 0.24),
+    0 1px 1px rgba(30, 22, 14, 0.2),
+    0 12px 26px -16px rgba(30, 22, 14, 0.5);
+  color: #2a241e;
+  inset: 0;
+  position: absolute;
+  transform-style: preserve-3d;
+  will-change: transform;
+  z-index: 1;
+}
+
+.card[data-secret="true"] {
+  box-shadow:
+    0 0 0 1px rgba(8, 6, 4, 0.7),
+    0 1px 1px rgba(0, 0, 0, 0.5),
+    0 12px 28px -14px rgba(0, 0, 0, 0.7);
+  color: #efe7da;
+}
+
+/* ------------------------------------------------------------------------- */
+/*  Body                                                                      */
+/* ------------------------------------------------------------------------- */
+
+.body {
+  border-radius: inherit;
+  display: block;
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  transform-style: preserve-3d;
+}
+
+.bodyLayer {
+  border-radius: inherit;
+  display: block;
+  inset: 0;
+  position: absolute;
+}
+
+.body[data-secret="true"] .bodyLayer {
+  filter: brightness(0.32) saturate(0.6);
+}
+
+/* ------------------------------------------------------------------------- */
+/*  Material                                                                  */
+/* ------------------------------------------------------------------------- */
+
+.shell {
+  border-radius: inherit;
+  inset: 0;
+  overflow: hidden;
+  position: absolute;
+  transform: translateZ(0);
+  z-index: 0;
+}
+
+.shell > span {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+/* Broad environment reflections: brushed titanium reads as soft bands */
+.base {
+  background: linear-gradient(
+    116deg,
+    #b6b2aa 0%,
+    #d8d4cc 11%,
+    #f1eee8 25%,
+    #c7c3ba 40%,
+    #e8e5de 54%,
+    #b1aca3 68%,
+    #dbd7cf 82%,
+    #c3bfb6 100%
+  );
+}
+
+.shell[data-secret="true"] .base {
+  background: linear-gradient(
+    116deg,
+    #141110 0%,
+    #2a2521 12%,
+    #3a3430 26%,
+    #1c1815 40%,
+    #332e29 54%,
+    #121010 68%,
+    #2c2722 82%,
+    #1a1613 100%
+  );
+}
+
+/* Horizontal brushing: a fine 3px cadence plus a sparser 13px cadence */
+.brush {
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.1) 0px,
+      rgba(255, 255, 255, 0.1) 1px,
+      rgba(0, 0, 0, 0) 1px,
+      rgba(0, 0, 0, 0.05) 2px,
+      rgba(0, 0, 0, 0) 3px
+    ),
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px,
+      transparent 7px,
+      rgba(255, 255, 255, 0.06) 7px,
+      rgba(255, 255, 255, 0.06) 8px,
+      transparent 8px,
+      transparent 13px
+    );
+  mix-blend-mode: overlay;
+  opacity: 0.95;
+}
+
+.shell[data-secret="true"] .brush {
+  opacity: 0.7;
+}
+
+/* Metal grain */
+.grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  mix-blend-mode: overlay;
+  opacity: 0.42;
+}
+
+/* The side of the card facing away from the light falls into shade */
+.shade {
+  background: radial-gradient(
+    ellipse 78% 92% at calc(100% - var(--card-lx, 30%)) calc(100% - var(--card-ly, 22%)),
+    rgba(26, 18, 10, 0.2) 0%,
+    rgba(26, 18, 10, 0.08) 42%,
+    transparent 72%
+  );
+  opacity: calc(0.55 + 0.45 * var(--card-glare, 0));
+}
+
+.shell[data-secret="true"] .shade {
+  background: radial-gradient(
+    ellipse 78% 92% at calc(100% - var(--card-lx, 30%)) calc(100% - var(--card-ly, 22%)),
+    rgba(0, 0, 0, 0.5) 0%,
+    rgba(0, 0, 0, 0.22) 42%,
+    transparent 72%
+  );
+}
+
+/* Anisotropic highlight: brushing stretches the hot spot into a tall streak */
+.specular {
+  background:
+    radial-gradient(
+      ellipse 13% 96% at var(--card-lx, 30%) var(--card-ly, 22%),
+      rgba(255, 255, 255, 0.78) 0%,
+      rgba(255, 255, 255, 0.26) 40%,
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 46% 64% at var(--card-lx, 30%) var(--card-ly, 22%),
+      rgba(255, 255, 255, 0.34) 0%,
+      rgba(255, 255, 255, 0.08) 48%,
+      transparent 72%
+    );
+  opacity: calc(0.5 + 0.5 * var(--card-glare, 0));
+}
+
+.shell[data-secret="true"] .specular {
+  background:
+    radial-gradient(
+      ellipse 11% 96% at var(--card-lx, 30%) var(--card-ly, 22%),
+      rgba(255, 250, 240, 0.5) 0%,
+      rgba(255, 250, 240, 0.14) 40%,
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 46% 64% at var(--card-lx, 30%) var(--card-ly, 22%),
+      rgba(255, 240, 220, 0.18) 0%,
+      rgba(255, 240, 220, 0.05) 48%,
+      transparent 72%
+    );
+}
+
+/* One pass of light across the metal when the card arrives */
+.sweep {
+  animation: card-sweep 1.5s 1.05s var(--ease-out) both;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 32%,
+    rgba(255, 255, 255, 0.62) 50%,
+    rgba(255, 255, 255, 0) 68%,
+    transparent 100%
+  );
+  inset: -40% auto -40% 0;
+  opacity: 0;
+  transform: translate3d(-170%, 0, 0) skewX(-18deg);
+  width: 34%;
+  will-change: transform, opacity;
+}
+
+.shell[data-secret="true"] .sweep {
+  animation: card-sweep 1.2s 0.05s var(--ease-out) both;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 244, 222, 0) 32%,
+    rgba(255, 244, 222, 0.42) 50%,
+    rgba(255, 244, 222, 0) 68%,
+    transparent 100%
+  );
+}
+
+/* Matte finish: the quieter titanium behind long-form text */
+.shell[data-finish="matte"] .base {
+  background: linear-gradient(
+    116deg,
+    #d3cfc7 0%,
+    #e5e2db 13%,
+    #f2f0eb 29%,
+    #dcd9d1 45%,
+    #eeebe5 61%,
+    #d0ccc4 77%,
+    #e7e4dd 100%
+  );
+}
+
+.shell[data-finish="matte"] .brush {
+  opacity: 0.55;
+}
+
+.shell[data-finish="matte"] .grain {
+  opacity: 0.3;
+}
+
+.shell[data-finish="matte"] .shade {
+  opacity: calc(0.3 + 0.3 * var(--card-glare, 0));
+}
+
+.shell[data-finish="matte"] .specular {
+  opacity: calc(0.2 + 0.22 * var(--card-glare, 0));
+}
+
+.shell[data-finish="matte"] .sweep {
+  display: none;
+}
+
+/* Edge bevel: the thin bright lip of a milled card */
+.rim {
+  background: linear-gradient(
+    90deg,
+    rgba(20, 14, 8, 0.07) 0%,
+    transparent 6%,
+    transparent 94%,
+    rgba(20, 14, 8, 0.07) 100%
+  );
+  border-radius: inherit;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    inset 0 -1px 0 rgba(40, 30, 20, 0.3),
+    inset 1px 0 0 rgba(255, 255, 255, 0.55),
+    inset -1px 0 0 rgba(40, 30, 20, 0.16),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.34);
+}
+
+.shell[data-secret="true"] .rim {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.3) 0%,
+    transparent 6%,
+    transparent 94%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.7),
+    inset 1px 0 0 rgba(255, 255, 255, 0.1),
+    inset -1px 0 0 rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+/* ------------------------------------------------------------------------- */
+/*  Print & relief                                                            */
+/* ------------------------------------------------------------------------- */
+
+.content {
+  display: flex;
+  flex-direction: column;
+  inset: 0;
+  padding: 5.6cqi 6.2cqi 5.8cqi;
+  pointer-events: none;
+  position: absolute;
+  transform-style: preserve-3d;
+  z-index: 3;
+}
+
+.topline {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+  transform: translateZ(1.4cqi);
+}
+
+/* Debossed micro type */
+.eyebrow,
+.meta {
+  align-items: center;
+  color: rgba(52, 42, 32, 0.6);
+  display: flex;
+  font-family: var(--font-mono);
+  font-size: max(1.9cqi, 0.56rem);
+  font-weight: 600;
+  gap: 1.3cqi;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-shadow: calc(-0.4px - var(--card-ex, -0.4) * 0.4px)
+    calc(-0.4px - var(--card-ey, -0.56) * 0.4px) 0 rgba(255, 255, 255, 0.72);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.eyebrow {
+  padding-top: 0.9cqi;
+}
+
+.content[data-secret="true"] .eyebrow,
+.content[data-secret="true"] .meta {
+  color: rgba(240, 232, 220, 0.58);
+  text-shadow: calc(0.4px + var(--card-ex, -0.4) * 0.4px)
+    calc(0.4px + var(--card-ey, -0.56) * 0.4px) 0 rgba(0, 0, 0, 0.7);
+}
+
+.eyebrowDot,
+.metaDot {
+  background: currentColor;
+  border-radius: 50%;
+  display: block;
+  height: 0.6cqi;
+  opacity: 0.55;
+  width: 0.6cqi;
+}
+
+/* Holographic monogram seal */
+.seal {
+  background:
+    radial-gradient(
+      circle at 32% 28%,
+      rgba(255, 255, 255, 0.88) 0%,
+      rgba(255, 255, 255, 0.2) 34%,
+      rgba(255, 255, 255, 0) 52%
+    ),
+    conic-gradient(
+      from calc(var(--card-ex, -0.4) * 150deg + var(--card-ey, -0.56) * 60deg + 200deg),
+      #e9ddc8 0%,
+      #cdd8e5 18%,
+      #e3d0e0 36%,
+      #d4e3cf 54%,
+      #efe1c3 72%,
+      #d8d2e6 88%,
+      #e9ddc8 100%
+    );
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.78),
+    inset 0 -1px 2px rgba(60, 48, 36, 0.2),
+    0 1px 0 rgba(255, 255, 255, 0.65),
+    0 0.5cqi 1.1cqi -0.5cqi rgba(40, 30, 20, 0.4);
+  display: grid;
+  height: 9cqi;
+  place-items: center;
+  transform: translateZ(2cqi);
+  width: 9cqi;
+}
+
+.seal > span {
+  color: rgba(60, 48, 36, 0.8);
+  font-family: var(--font-display);
+  font-size: 2.9cqi;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.content[data-secret="true"] .seal {
+  background:
+    radial-gradient(
+      circle at 32% 28%,
+      rgba(255, 255, 255, 0.34) 0%,
+      rgba(255, 255, 255, 0.06) 36%,
+      rgba(255, 255, 255, 0) 54%
+    ),
+    conic-gradient(
+      from calc(var(--card-ex, -0.4) * 150deg + var(--card-ey, -0.56) * 60deg + 200deg),
+      #4a4038 0%,
+      #39434d 18%,
+      #4b3d49 36%,
+      #3b4a3d 54%,
+      #52463a 72%,
+      #3f3b4c 88%,
+      #4a4038 100%
+    );
+  box-shadow:
+    inset 0 0 0 1px rgba(214, 182, 118, 0.5),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.5),
+    0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0.5cqi 1.1cqi -0.5cqi rgba(0, 0, 0, 0.7);
+}
+
+.content[data-secret="true"] .seal > span {
+  color: rgba(226, 198, 142, 0.92);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* Chip & contactless */
+.chipRow {
+  align-items: center;
+  display: flex;
+  gap: 3.2cqi;
+  margin-top: 5.2cqi;
+  transform: translateZ(2.8cqi);
+}
+
+.chip {
+  border-radius: 1.75cqi;
+  display: block;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.5))
+    drop-shadow(0 0.5cqi 0.9cqi rgba(40, 30, 20, 0.3));
+  height: 11.2cqi;
+  pointer-events: auto;
+  position: relative;
+  transition: transform var(--duration-state) var(--ease-standard);
+  width: 14.6cqi;
+}
+
+.content[data-secret="true"] .chip {
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.12))
+    drop-shadow(0 0.5cqi 1cqi rgba(0, 0, 0, 0.65));
+}
+
+.chip:hover,
+.chip:focus-visible {
+  outline: 0;
+  transform: translateY(-1px);
+}
+
+.chip:focus-visible .chipArt {
+  outline: 2px solid rgba(255, 252, 244, 0.95);
+  outline-offset: 3px;
+  border-radius: inherit;
+}
+
+.chipArt {
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+/* Reflection moving across the gold with the key light */
+.chipGlare {
+  background: radial-gradient(
+    circle at var(--card-lx, 30%) var(--card-ly, 22%),
+    rgba(255, 255, 255, 0.62) 0%,
+    rgba(255, 255, 255, 0.14) 38%,
+    transparent 66%
+  );
+  border-radius: inherit;
+  inset: 1px;
+  mix-blend-mode: soft-light;
+  opacity: calc(0.6 + 0.4 * var(--card-glare, 0));
+  pointer-events: none;
+  position: absolute;
+}
+
+.contactless {
+  color: rgba(52, 42, 32, 0.46);
+  filter: drop-shadow(-0.4px -0.4px 0 rgba(255, 255, 255, 0.6));
+  height: 5.4cqi;
+  width: 5.4cqi;
+}
+
+.content[data-secret="true"] .contactless {
+  color: rgba(240, 232, 220, 0.42);
+  filter: drop-shadow(0.4px 0.4px 0 rgba(0, 0, 0, 0.6));
+}
+
+/* Embossed name */
+.identity {
+  display: flex;
+  flex-direction: column;
+  margin-top: auto;
+  transform: translateZ(1.9cqi);
+}
+
+.name {
+  color: #3a322a;
+  font-family: var(--font-display);
+  font-size: max(4.5cqi, 0.95rem);
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  line-height: 1;
+  text-shadow:
+    calc(-0.5px + var(--card-ex, -0.4) * 0.6px) calc(-0.6px + var(--card-ey, -0.56) * 0.6px) 0
+      rgba(255, 255, 255, 0.92),
+    calc(0.6px - var(--card-ex, -0.4) * 0.7px) calc(0.7px - var(--card-ey, -0.56) * 0.7px) 1px
+      rgba(30, 22, 14, 0.34);
+  text-transform: uppercase;
+}
+
+.content[data-secret="true"] .name {
+  color: #efe7da;
+  text-shadow:
+    calc(-0.5px + var(--card-ex, -0.4) * 0.6px) calc(-0.6px + var(--card-ey, -0.56) * 0.6px) 0
+      rgba(255, 255, 255, 0.26),
+    calc(0.7px - var(--card-ex, -0.4) * 0.7px) calc(0.8px - var(--card-ey, -0.56) * 0.7px) 1px
+      rgba(0, 0, 0, 0.85);
+}
+
+.role {
+  color: rgba(52, 42, 32, 0.74);
+  font-family: var(--font-editorial), ui-serif, Georgia, serif;
+  font-size: max(3.3cqi, 0.8rem);
+  font-style: normal;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  margin-top: 1.5cqi;
+  text-shadow: calc(-0.3px + var(--card-ex, -0.4) * 0.3px)
+    calc(-0.3px + var(--card-ey, -0.56) * 0.3px) 0 rgba(255, 255, 255, 0.6);
+}
+
+.content[data-secret="true"] .role {
+  color: rgba(240, 232, 220, 0.72);
+  text-shadow: 0.4px 0.5px 0 rgba(0, 0, 0, 0.7);
+}
+
+/* Footer row */
+.bottomline {
+  align-items: flex-end;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4.6cqi;
+  transform: translateZ(1.2cqi);
+}
+
+.meta {
+  padding-bottom: 2.2cqi;
+}
+
+.open {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 1px rgba(52, 42, 32, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  color: #3a322a;
+  display: flex;
+  height: 7.6cqi;
+  justify-content: center;
+  pointer-events: auto;
+  position: relative;
+  transition:
+    background-color var(--duration-state) var(--ease-standard),
+    transform var(--duration-state) var(--ease-standard);
+  width: 7.6cqi;
+}
+
+.open svg {
+  height: 3.1cqi;
+  width: 3.1cqi;
+}
+
+.open:hover,
+.open:focus-visible {
+  background: rgba(255, 255, 255, 0.76);
+  outline: 0;
+  transform: translate(2px, -2px);
+}
+
+.open:focus-visible {
+  box-shadow:
+    inset 0 0 0 1px rgba(52, 42, 32, 0.22),
+    0 0 0 2px rgba(255, 252, 244, 0.95),
+    0 0 0 4px rgba(91, 55, 28, 0.72);
+}
+
+.content[data-secret="true"] .open {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 0 0 1px rgba(226, 198, 142, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  color: #efe7da;
+}
+
+.content[data-secret="true"] .open:hover,
+.content[data-secret="true"] .open:focus-visible {
+  background: rgba(226, 198, 142, 0.22);
+}
+
+/* Hover labels for the two in-card links */
+.controlLabel {
+  background: rgba(35, 25, 19, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #fffaf2;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  font-style: normal;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  opacity: 0;
+  padding: 7px 9px;
+  pointer-events: none;
+  position: absolute;
+  text-shadow: none;
+  text-transform: uppercase;
+  transform: translateY(-3px);
+  transition:
+    opacity var(--duration-feedback) var(--ease-standard),
+    transform var(--duration-feedback) var(--ease-standard);
+  white-space: nowrap;
+  z-index: 8;
+}
+
+.chip .controlLabel {
+  left: 0;
+  top: calc(100% + 10px);
+}
+
+.open .controlLabel {
+  bottom: calc(100% + 10px);
+  right: 0;
+}
+
+.chip:hover .controlLabel,
+.chip:focus-visible .controlLabel,
+.open:hover .controlLabel,
+.open:focus-visible .controlLabel {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Whole-card press target that opens the folio */
+.expand {
+  background: transparent;
+  border: 0;
+  border-radius: inherit;
+  cursor: zoom-in;
+  inset: 0;
+  padding: 0;
+  position: absolute;
+  z-index: 2;
+}
+
+.expand:focus-visible {
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 252, 244, 0.96),
+    inset 0 0 0 5px rgba(91, 55, 28, 0.72);
+  outline: 0;
+}
+
+/* ------------------------------------------------------------------------- */
+/*  Motion                                                                    */
+/* ------------------------------------------------------------------------- */
+
+@keyframes card-sweep {
+  0% {
+    opacity: 0;
+    transform: translate3d(-170%, 0, 0) skewX(-18deg);
+  }
+
+  28% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(460%, 0, 0) skewX(-18deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transform: none !important;
+  }
+
+  .body {
+    display: none;
+  }
+
+  .shadow {
+    transform: translateY(10px) !important;
+  }
+
+  .sweep {
+    animation: none !important;
+    display: none;
+  }
+
+  .chip,
+  .open,
+  .controlLabel {
+    transition-duration: 1ms !important;
+  }
+}

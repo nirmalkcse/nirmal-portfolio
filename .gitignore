@@ -24,3 +24,24 @@ pnpm-debug.log*
 
 # typescript
 *.tsbuildinfo
+
+# local server and tool logs
+*.log
+
+# generated test, screenshot and review output
+/output
+/test-results
+/.playwright-cli
+/tmp
+
+# personal documents kept beside the project, not part of the site
+# (the public résumés live in public/resume)
+/*.docx
+/*.pdf
+/*.html
+/research_outputs
+/page_tsx_views.txt
+
+# local editor and agent config
+/.claude
+/.wrangler

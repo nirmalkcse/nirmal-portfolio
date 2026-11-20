@@ -1,6 +1,17 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { RecognitionPanel } from "@/components/signature/recognition-seal";
+import { IssuerMark, normalizeIssuer as brandIssuer } from "@/components/brand/brand-logos";
+import {
+  useCallback,
+  useMemo,
+  useState,
+  type CSSProperties,
+  type FocusEvent,
+  type PointerEvent,
+  type ReactNode
+} from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   certificationGroups,
   certifications,
@@ -9,6 +20,8 @@ import {
   projects
 } from "@/data";
 import type { Certification } from "@/data";
+
+// Issuer marks come from @/components/brand/brand-logos (official vectors).
 
 type EvidenceState =
   | "verified"
@@ -47,7 +60,7 @@ const allGroups = ["All", ...certificationGroups] as const;
 const defaultEvidenceBySlug: Record<string, EvidenceProfile> = {
   "fabric-data-engineer-associate": {
     state: "verified-expired",
-    label: "Verified, expired",
+    label: "Expired",
     shortLabel: "Expired",
     tone: "warning",
     issueDate: "Apr 30, 2025",
@@ -55,11 +68,11 @@ const defaultEvidenceBySlug: Record<string, EvidenceProfile> = {
     proofUrl: microsoftCredentialCandidateUrls[0],
     proofLabel: "Microsoft Learn",
     drawerSummary:
-      "Public Microsoft Learn verification was captured, but the credential expired on May 1, 2026. Keep the card truthful until a renewed page is available.",
+      "Public Microsoft Learn verification is available, but the credential expired on May 1, 2026. Keep it historical until a renewed page is available.",
     metadata: [
       "Credential page manually checked on May 16, 2026",
       "Public profile name captured from Microsoft Learn",
-      "Credential IDs intentionally hidden from card-level UI"
+      "Credential ID kept out of the card for cleaner public scanning"
     ]
   },
   "fabric-analytics-engineer-associate": {
@@ -72,26 +85,26 @@ const defaultEvidenceBySlug: Record<string, EvidenceProfile> = {
     proofUrl: microsoftCredentialCandidateUrls[1],
     proofLabel: "Microsoft Learn",
     drawerSummary:
-      "Direct Microsoft Learn verification is captured and current through Jun 23, 2026.",
+      "Direct Microsoft Learn verification is available and current through Jun 23, 2026.",
     metadata: [
       "Credential page manually checked on May 16, 2026",
       "Public profile name captured from Microsoft Learn",
-      "Current public verification path is available"
+      "Current public link is available"
     ]
   },
   "databricks-data-engineer-associate": {
     state: "indirectly-supported",
-    label: "Indirectly supported",
-    shortLabel: "Supported",
+    label: "Supporting link",
+    shortLabel: "Supporting",
     tone: "info",
-    issueDate: "Pending",
-    expiry: "Pending",
+    issueDate: "Date not shown",
+    expiry: "Date not shown",
     proofUrl: databricksCredentialUrl,
-    proofLabel: "Supporting Databricks proof",
+    proofLabel: "Supporting Databricks reference",
     drawerSummary:
-      "The direct Data Engineer Associate credential URL is still pending. The verified Databricks UC Upgrade credential supports the claim because it is granted to Databricks Certified Data Engineer Associates in the partner community.",
+      "A direct public Data Engineer Associate credential link should be attached before this item is promoted. The Databricks reference remains useful as supporting context, but it should not be presented as the standalone credential link.",
     metadata: [
-      "Direct public credential URL still needed",
+      "Direct public credential URL to add",
       "Supporting Databricks credential is verified",
       "Do not present as a direct standalone public credential yet"
     ]
@@ -106,7 +119,7 @@ const defaultEvidenceBySlug: Record<string, EvidenceProfile> = {
     proofUrl: databricksCredentialUrl,
     proofLabel: "Databricks credential",
     drawerSummary:
-      "Direct Databricks credential verification is captured and current through Feb 18, 2028.",
+      "Direct Databricks credential verification is available and current through Feb 18, 2028.",
     metadata: [
       "Accredible credential URL captured",
       "Owner verified as Nirmal Kumar Pukazhenthi",
@@ -115,69 +128,69 @@ const defaultEvidenceBySlug: Record<string, EvidenceProfile> = {
   },
   "databricks-fundamentals": {
     state: "resume-claimed",
-    label: "Resume claimed",
-    shortLabel: "Pending",
+    label: "Public link to add",
+    shortLabel: "Link to add",
     tone: "muted",
-    issueDate: "Pending",
-    expiry: "Pending",
+    issueDate: "Date not shown",
+    expiry: "Date not shown",
     proofUrl: null,
-    proofLabel: "Verification pending",
+    proofLabel: "Verification link to add",
     drawerSummary:
-      "The credential appears in source resume content, but no public verification URL has been captured yet.",
+      "This credential is listed on the resume; a public verification link should be attached before it is promoted.",
     metadata: [
-      "Public credential URL needed",
-      "Issue and expiry metadata pending",
-      "Keep as a lower-emphasis pending credential"
+      "Public credential URL to add",
+      "Issue and expiry dates not shown",
+      "Keep as a lower-emphasis credential until a public link is added"
     ]
   },
   "github-copilot": {
     state: "resume-claimed",
-    label: "Resume claimed",
-    shortLabel: "Pending",
+    label: "Public link to add",
+    shortLabel: "Link to add",
     tone: "muted",
-    issueDate: "Pending",
-    expiry: "Pending",
+    issueDate: "Date not shown",
+    expiry: "Date not shown",
     proofUrl: null,
-    proofLabel: "Verification pending",
+    proofLabel: "Verification link to add",
     drawerSummary:
-      "The credential appears in source resume content, but no public verification URL has been captured yet.",
+      "This credential is listed on the resume; a public verification link should be attached before it is promoted.",
     metadata: [
-      "Public credential URL needed",
-      "Issue and expiry metadata pending",
-      "Use as a supporting developer-productivity signal"
+      "Public credential URL to add",
+      "Issue and expiry dates not shown",
+      "Use as a supporting developer-productivity indicator"
     ]
   },
   "google-data-analytics-professional": {
     state: "resume-claimed",
-    label: "Resume claimed",
-    shortLabel: "Pending",
+    label: "Public link to add",
+    shortLabel: "Link to add",
     tone: "muted",
-    issueDate: "Pending",
-    expiry: "Pending",
+    issueDate: "Date not shown",
+    expiry: "Date not shown",
     proofUrl: null,
-    proofLabel: "Verification pending",
+    proofLabel: "Verification link to add",
     drawerSummary:
-      "The credential appears in source resume content, but no public verification URL has been captured yet.",
+      "This credential is listed on the resume; a public verification link should be attached before it is promoted.",
     metadata: [
-      "Public credential URL needed",
-      "Issue and expiry metadata pending",
+      "Public credential URL to add",
+      "Issue and expiry dates not shown",
       "Best used as supporting analytics context"
     ]
   },
   "oracle-cloud-infrastructure-foundations": {
     state: "resume-claimed",
-    label: "Resume claimed",
-    shortLabel: "Pending",
+    label: "Public link to add",
+    shortLabel: "Link to add",
     tone: "muted",
-    issueDate: "Pending",
-    expiry: "Pending",
+    issueDate: "Date not shown",
+    expiry: "Date not shown",
     proofUrl: null,
-    proofLabel: "Verification pending",
+    proofLabel: "Verification link to add",
     drawerSummary:
-      "The credential appears in source resume content, but no public verification URL has been captured yet.",
+      "This credential is listed on the resume; a public verification link should be attached before it is promoted.",
     metadata: [
-      "Public credential URL needed",
-      "Issue and expiry metadata pending",
+      "Public credential URL to add",
+      "Issue and expiry dates not shown",
       "Keep in the cloud fundamentals support layer"
     ]
   }
@@ -188,20 +201,27 @@ const fallbackEvidence: EvidenceProfile = {
   label: "Link captured",
   shortLabel: "Captured",
   tone: "warning",
-  issueDate: "Pending",
-  expiry: "Pending",
+  issueDate: "Date not shown",
+  expiry: "Date not shown",
   proofUrl: null,
-  proofLabel: "Captured link",
+  proofLabel: "Public link",
   drawerSummary:
-    "A credential path exists in the data layer, but the public page still needs manual rendered verification before metadata is promoted.",
-  metadata: ["Rendered-page verification still needed"]
+    "A credential path exists in the data layer, but the public page should be checked before metadata is promoted.",
+  metadata: ["Public page check to complete"]
 };
 
 const statusFilters: readonly { id: StatusFilter; label: string }[] = [
-  { id: "all", label: "All states" },
-  { id: "verified", label: "Verified paths" },
-  { id: "needs-proof", label: "Needs proof" }
+  { id: "all", label: "All credentials" },
+  { id: "verified", label: "Verification links" },
+  { id: "needs-proof", label: "Public link to add" }
 ];
+
+const credentialRelevanceSignals = [
+  "Fabric migration",
+  "Databricks engineering",
+  "BI semantic modeling",
+  "governance"
+] as const;
 
 const stateOrder: Record<EvidenceState, number> = {
   verified: 0,
@@ -211,40 +231,27 @@ const stateOrder: Record<EvidenceState, number> = {
   "resume-claimed": 4
 };
 
-const toneClasses: Record<
-  EvidenceTone,
-  { badge: string; dot: string; panel: string; border: string }
-> = {
+// Royal theme color palette mapping
+const toneClasses: Record<EvidenceTone, { badge: string; dot: string; text: string }> = {
   success: {
-    badge:
-      "border-[color-mix(in_srgb,var(--color-success)_58%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] text-[var(--color-success)]",
-    dot: "bg-[var(--color-success)]",
-    panel:
-      "bg-[color-mix(in_srgb,var(--color-deep-emerald)_30%,transparent)]",
-    border: "border-[color-mix(in_srgb,var(--color-success)_48%,transparent)]"
+    badge: "border-[#476a53]/20 bg-[#476a53]/5 text-[#476a53]",
+    dot: "bg-[#476a53]",
+    text: "text-[#476a53]"
   },
   warning: {
-    badge:
-      "border-[color-mix(in_srgb,var(--color-warning)_58%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)] text-[var(--color-champagne)]",
-    dot: "bg-[var(--color-warning)]",
-    panel:
-      "bg-[color-mix(in_srgb,var(--color-antique-gold)_16%,transparent)]",
-    border: "border-[color-mix(in_srgb,var(--color-warning)_48%,transparent)]"
+    badge: "border-[#b98a50]/20 bg-[#b98a50]/5 text-[#b98a50]",
+    dot: "bg-[#b98a50]",
+    text: "text-[#b98a50]"
   },
   info: {
-    badge:
-      "border-[color-mix(in_srgb,var(--color-signal-blue)_58%,transparent)] bg-[color-mix(in_srgb,var(--color-signal-blue)_12%,transparent)] text-[var(--color-signal-blue)]",
-    dot: "bg-[var(--color-signal-blue)]",
-    panel:
-      "bg-[color-mix(in_srgb,var(--color-signal-blue)_14%,transparent)]",
-    border: "border-[color-mix(in_srgb,var(--color-signal-blue)_48%,transparent)]"
+    badge: "border-[#8c5b36]/20 bg-[#8c5b36]/5 text-[#8c5b36]",
+    dot: "bg-[#8c5b36]",
+    text: "text-[#8c5b36]"
   },
   muted: {
-    badge:
-      "border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-warm-silver)_8%,transparent)] text-[var(--color-warm-silver)]",
-    dot: "bg-[var(--color-warm-silver)]",
-    panel: "bg-[color-mix(in_srgb,var(--color-warm-silver)_8%,transparent)]",
-    border: "border-[var(--border-subtle)]"
+    badge: "border-[#74685a]/20 bg-[#74685a]/5 text-[#74685a]",
+    dot: "bg-[#74685a]",
+    text: "text-[#74685a]"
   }
 };
 
@@ -253,15 +260,16 @@ function uniqueValues(values: readonly string[]) {
 }
 
 function normalizeIssuer(issuer: string) {
-  if (issuer.includes("Microsoft")) {
-    return "Microsoft";
-  }
-
-  if (issuer.includes("Databricks")) {
-    return "Databricks";
-  }
-
+  if (issuer.includes("Microsoft")) return "Microsoft";
+  if (issuer.includes("Databricks")) return "Databricks";
+  if (issuer.includes("Google")) return "Google";
+  if (issuer.includes("Oracle")) return "Oracle";
+  if (issuer.includes("GitHub")) return "GitHub";
   return issuer;
+}
+
+function getIssuerLogo(issuer: string) {
+  return brandIssuer(issuer) ? <IssuerMark issuer={issuer} size={34} /> : null;
 }
 
 function toCredentialView(credential: Certification): CredentialView {
@@ -280,84 +288,44 @@ function toCredentialView(credential: Certification): CredentialView {
     return projects.find((project) => project.slug === slug)?.title ?? slug;
   });
 
-  return {
-    ...credential,
-    evidence,
-    proofUrls,
-    relatedProjectTitles
-  };
+  return { ...credential, evidence, proofUrls, relatedProjectTitles };
 }
 
-function matchesStatusFilter(
-  credential: CredentialView,
-  statusFilter: StatusFilter
-) {
-  if (statusFilter === "all") {
-    return true;
-  }
-
+function matchesStatusFilter(credential: CredentialView, statusFilter: StatusFilter) {
+  if (statusFilter === "all") return true;
   if (statusFilter === "verified") {
-    return [
-      "verified",
-      "verified-expired",
-      "indirectly-supported"
-    ].includes(credential.evidence.state);
+    return ["verified", "verified-expired", "indirectly-supported"].includes(credential.evidence.state);
   }
-
-  return ["link-captured", "resume-claimed"].includes(
-    credential.evidence.state
-  );
+  return ["link-captured", "resume-claimed"].includes(credential.evidence.state);
 }
 
-function ExternalLink({
-  ariaLabel,
-  children,
-  className,
-  href
-}: {
-  ariaLabel?: string;
-  children: ReactNode;
-  className: string;
-  href: string;
-}) {
+function ExternalLink({ ariaLabel, children, className, href }: { ariaLabel?: string; children: ReactNode; className: string; href: string; }) {
   return (
-    <a
-      aria-label={ariaLabel ? `${ariaLabel}. Opens in a new tab.` : undefined}
-      className={className}
-      href={href}
-      rel="noreferrer"
-      target="_blank"
-    >
+    <a aria-label={ariaLabel ? `${ariaLabel}. Opens in a new tab.` : undefined} className={className} href={href} rel="noreferrer" target="_blank">
       {children}
     </a>
   );
 }
 
-function EmptyProofButton() {
+function EmptyReferenceButton() {
   return (
-    <span
-      aria-disabled="true"
-      className="inline-flex min-h-10 items-center justify-center rounded-[var(--radius-control)] border border-[var(--border-subtle)] px-3 text-sm font-medium text-[var(--color-warm-silver)] opacity-[var(--button-disabled-opacity)]"
-    >
-      Proof pending
+    <span aria-disabled="true" className="inline-flex min-h-10 shrink-0 items-center justify-center border-b border-[#74685a]/30 px-2 text-sm font-medium text-[#74685a] opacity-60">
+      Link to add
     </span>
   );
 }
 
 function StatusBadge({ evidence }: { evidence: EvidenceProfile }) {
+  const tone = toneClasses[evidence.tone];
   return (
-    <span
-      className={`inline-flex items-center gap-2 rounded-[var(--radius-control)] border px-2.5 py-1 font-mono text-[0.6875rem] uppercase leading-none ${toneClasses[evidence.tone].badge}`}
-    >
-      <span
-        aria-hidden="true"
-        className={`h-1.5 w-1.5 rounded-full ${toneClasses[evidence.tone].dot}`}
-      />
+    <span className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1.5 font-mono text-[0.625rem] uppercase tracking-widest ${tone.badge}`}>
+      <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${tone.dot}`} />
       {evidence.label}
     </span>
   );
 }
 
+// Ultra Luxury Miniature Certificate Card
 function CredentialCard({
   credential,
   isSelected,
@@ -369,302 +337,256 @@ function CredentialCard({
 }) {
   const tone = toneClasses[credential.evidence.tone];
   const primaryProofUrl = credential.evidence.proofUrl ?? credential.proofUrls[0];
+  const issuerLogo = getIssuerLogo(credential.issuer);
+  const normalizedIssuer = normalizeIssuer(credential.issuer);
 
   return (
-    <article
-      className={`motion-card motion-lens-choice group relative overflow-hidden rounded-[var(--radius-card)] border bg-[var(--card-bg)] shadow-[var(--shadow-hairline-inset)] transition duration-[var(--duration-state)] ease-[var(--ease-standard)] hover:-translate-y-[var(--motion-distance-xs)] hover:bg-[var(--card-bg-hover)] ${
+    <motion.article
+      layout
+      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.8, filter: "blur(8px)", transition: { duration: 0.3, ease: "easeInOut" } }}
+      transition={{
+        layout: { type: "spring", bounce: 0.25, duration: 0.9 },
+        opacity: { duration: 0.5 },
+        default: { type: "spring", bounce: 0.25, duration: 0.9 }
+      }}
+      className={`group relative flex min-h-[380px] flex-col overflow-hidden rounded-2xl transition-all duration-700 ease-out hover:-translate-y-2 hover:shadow-[0_40px_80px_-20px_rgba(36,27,19,0.12)] ${
         isSelected
-          ? "border-[var(--border-gold)] shadow-[var(--shadow-gold-trace)]"
-          : "border-[var(--card-border)]"
+          ? "bg-[linear-gradient(135deg,#ffffff_0%,#fdfbf7_100%)] border border-[#cba871]/60 shadow-[0_30px_60px_-15px_rgba(203,168,113,0.25)] ring-1 ring-[#cba871]/30"
+          : "bg-[linear-gradient(135deg,#ffffff_0%,#fcfaf6_100%)] border border-[#1a1511]/10 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)]"
       }`}
     >
-      <div
-        aria-hidden="true"
-        className={`absolute inset-x-0 top-0 h-1 ${tone.panel}`}
-      />
+      {/* High-End Vector Seal */}
+      <div className="absolute right-6 top-6 z-10 h-[4.5rem] w-[4.5rem] transition-transform duration-1000 group-hover:rotate-180">
+        <svg viewBox="0 0 100 100" className="h-full w-full drop-shadow-sm">
+          <defs>
+            <path id="circlePath" d="M 50, 50 m -34, 0 a 34,34 0 1,1 68,0 a 34,34 0 1,1 -68,0" />
+            <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#cba871" />
+              <stop offset="100%" stopColor="#8c5b36" />
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="48" fill="none" stroke="url(#goldGradient)" strokeWidth="0.5" opacity="0.3" />
+          <path d="M 50 38 L 52.5 45.5 L 60 45.5 L 54 50 L 56 57.5 L 50 53 L 44 57.5 L 46 50 L 40 45.5 L 47.5 45.5 Z" fill="url(#goldGradient)" opacity="0.9" />
+          <text fill="url(#goldGradient)" fontSize="11" fontWeight="700" letterSpacing="0.22em" className="font-mono uppercase">
+            <textPath href="#circlePath" startOffset="0%">
+              • OFFICIAL • CERTIFIED 
+            </textPath>
+          </text>
+        </svg>
+      </div>
+
       <button
         aria-controls={CREDENTIAL_DETAIL_PANEL_ID}
         aria-pressed={isSelected}
-        className="flex min-h-[210px] w-full flex-col items-start gap-5 px-5 pb-5 pt-6 text-left"
+        className="relative z-10 flex w-full flex-1 flex-col items-start px-8 pt-8 text-left outline-none"
         onClick={onSelect}
         type="button"
       >
-        <div className="flex w-full items-start justify-between gap-3">
-          <span className="font-mono text-xs uppercase text-[var(--color-warm-silver)]">
-            {credential.issuer}
-          </span>
-          <StatusBadge evidence={credential.evidence} />
+        <div className="mb-8 flex h-12 items-center justify-start opacity-90 transition-opacity duration-500 group-hover:opacity-100">
+          {issuerLogo ? (
+            <div className="flex h-12 items-center gap-3">
+              {issuerLogo}
+              <span className="text-[0.9375rem] font-semibold tracking-[-0.01em] text-[#1a1511]">
+                {normalizedIssuer}
+              </span>
+            </div>
+          ) : (
+            <span className="font-mono text-xs uppercase tracking-widest text-[#74685a]">
+              {normalizedIssuer}
+            </span>
+          )}
         </div>
 
-        <div>
-          <h2 className="text-xl font-semibold leading-[1.18] text-[var(--color-ivory)]">
+        <div className="pr-14">
+          <h2 className="font-[var(--font-editorial)] text-3xl font-medium leading-[1.15] tracking-tight text-[#1a1511] transition-colors duration-500 group-hover:text-[#cba871]">
             {credential.title}
           </h2>
-          <p className="mt-3 text-sm leading-6 text-[var(--color-warm-silver)]">
+          <p className="mt-4 font-mono text-xs uppercase tracking-widest text-[#74685a]">
             {credential.category}
           </p>
         </div>
 
-        <dl className="mt-auto grid w-full grid-cols-2 gap-3 border-t border-[var(--border-subtle)] pt-4">
+        <dl className="mb-8 mt-auto grid w-full grid-cols-2 gap-6 pt-10">
           <div>
-            <dt className="font-mono text-[0.6875rem] uppercase text-[var(--color-steel)]">
+            <dt className="font-mono text-[0.625rem] uppercase tracking-widest text-[#a3998b]">
               Issued
             </dt>
-            <dd className="mt-1 text-sm text-[var(--color-ivory-soft)]">
+            <dd className="mt-2 text-sm font-medium text-[#241b13]">
               {credential.evidence.issueDate}
             </dd>
           </div>
           <div>
-            <dt className="font-mono text-[0.6875rem] uppercase text-[var(--color-steel)]">
+            <dt className="font-mono text-[0.625rem] uppercase tracking-widest text-[#a3998b]">
               Expiry
             </dt>
-            <dd className="mt-1 text-sm text-[var(--color-ivory-soft)]">
+            <dd className="mt-2 text-sm font-medium text-[#241b13]">
               {credential.evidence.expiry}
             </dd>
           </div>
         </dl>
       </button>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border-subtle)] px-5 py-4">
-        <span className="font-mono text-xs text-[var(--color-warm-silver)]">
-          {credential.relatedSkills.length} skills /{" "}
-          {credential.relatedProjects.length} projects
-        </span>
+      <div className="relative z-10 flex min-h-[80px] w-full flex-wrap items-center justify-end border-t border-[#1a1511]/5 bg-white/30 px-8 py-5 backdrop-blur-md">
         {primaryProofUrl ? (
           <ExternalLink
             ariaLabel={`Verify ${credential.title}`}
-            className="motion-cta inline-flex min-h-10 items-center justify-center rounded-[var(--radius-control)] border border-[var(--border-gold)] bg-[var(--button-primary-bg)] px-3 text-sm font-medium text-[var(--button-primary-text)] transition duration-[var(--duration-feedback)] hover:-translate-y-[var(--motion-distance-xs)] hover:border-[var(--color-champagne)]"
+            className="group/link flex items-center gap-2 border-b border-transparent pb-0.5 text-sm font-semibold tracking-wide text-[#1a1511] transition-all duration-300 hover:border-[#cba871] hover:text-[#cba871]"
             href={primaryProofUrl}
           >
-            Verify
+            Verify <span className="transition-transform duration-300 group-hover/link:translate-x-1">→</span>
           </ExternalLink>
         ) : (
-          <EmptyProofButton />
+          <EmptyReferenceButton />
         )}
       </div>
-    </article>
+    </motion.article>
   );
 }
 
-function FilterButton({
-  active,
-  children,
-  onClick
-}: {
-  active: boolean;
-  children: ReactNode;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      aria-pressed={active}
-      className={`motion-lens-choice min-h-10 rounded-[var(--radius-control)] border px-3 text-sm transition duration-[var(--duration-feedback)] hover:-translate-y-[var(--motion-distance-xs)] ${
-        active
-          ? "border-[var(--border-cool)] bg-[color-mix(in_srgb,var(--color-signal-blue)_14%,transparent)] text-[var(--color-ivory)]"
-          : "border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-carbon)_72%,transparent)] text-[var(--color-warm-silver)] hover:border-[var(--border-strong)] hover:text-[var(--color-ivory-soft)]"
-      }`}
-      onClick={onClick}
-      type="button"
-    >
-      {children}
-    </button>
-  );
-}
-
+// Editorial Detail Dossier
 function DetailShell({ credential }: { credential: CredentialView }) {
   const tone = toneClasses[credential.evidence.tone];
 
   return (
-    <aside
+    <motion.aside
+      layout
+      initial={{ opacity: 0, filter: "blur(12px)", x: 20 }}
+      animate={{ opacity: 1, filter: "blur(0px)", x: 0 }}
+      exit={{ opacity: 0, filter: "blur(12px)", x: 10, transition: { duration: 0.3 } }}
+      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       aria-labelledby={`${CREDENTIAL_DETAIL_PANEL_ID}-title`}
       aria-live="polite"
-      className="motion-detail-swap rounded-[var(--radius-panel)] border border-[var(--console-border)] bg-[var(--console-bg)] shadow-[var(--shadow-surface)] xl:sticky xl:top-[var(--site-header-offset)] xl:max-h-[var(--sticky-panel-max-height)] xl:overflow-y-auto"
+      className="xl:sticky xl:top-[120px] xl:max-h-[calc(100vh-140px)] xl:overflow-y-auto pb-20 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] [mask-image:linear-gradient(to_bottom,black_90%,transparent_100%)]"
       id={CREDENTIAL_DETAIL_PANEL_ID}
       role="region"
     >
-      <div className={`border-b ${tone.border} px-5 py-5`}>
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="font-mono text-xs uppercase text-[var(--console-prompt)]">
-            Detail shell
-          </span>
-          <StatusBadge evidence={credential.evidence} />
-        </div>
+      <div className="relative mb-12 flex flex-col items-start pb-10">
+        <div className="absolute bottom-0 left-0 h-[1px] w-full bg-gradient-to-r from-[#cba871]/40 to-transparent" />
+        
+        <span className="mb-6 rounded-full border border-[#cba871]/30 px-4 py-1.5 font-serif text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-[#cba871] shadow-[0_2px_10px_rgba(203,168,113,0.1)]">
+          Official Dossier
+        </span>
+        
         <h2
-          className="mt-4 text-2xl font-semibold leading-[1.16] text-[var(--color-ivory)]"
+          className="font-[var(--font-editorial)] text-5xl font-medium leading-[1.05] tracking-tight text-[#1a1511] lg:text-6xl drop-shadow-sm"
           id={`${CREDENTIAL_DETAIL_PANEL_ID}-title`}
         >
           {credential.title}
         </h2>
-        <p className="mt-3 text-sm leading-6 text-[var(--console-muted)]">
+        <p className="mt-8 max-w-lg font-serif text-lg leading-relaxed text-[#74685a]">
           {credential.evidence.drawerSummary}
         </p>
       </div>
 
-      <div className="space-y-6 px-5 py-5">
-        <dl className="grid grid-cols-2 gap-3">
-          {[
-            ["Issuer", credential.issuer],
-            ["Category", credential.category],
-            ["Issued", credential.evidence.issueDate],
-            ["Expiry", credential.evidence.expiry]
-          ].map(([label, value]) => (
-            <div
-              className="rounded-[var(--radius-control)] border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-carbon)_58%,transparent)] p-3"
-              key={label}
-            >
-              <dt className="font-mono text-[0.6875rem] uppercase text-[var(--color-steel)]">
-                {label}
-              </dt>
-              <dd className="mt-1 text-sm leading-5 text-[var(--color-ivory-soft)]">
-                {value}
-              </dd>
-            </div>
-          ))}
-        </dl>
+      <div className="space-y-14 pr-4">
+        <section>
+          <h3 className="mb-8 flex items-center gap-4 font-mono text-[0.6875rem] uppercase tracking-widest text-[#cba871]">
+            <span className="h-px flex-1 bg-[#cba871]/20"></span>
+            Specifications
+            <span className="h-px flex-1 bg-[#cba871]/20"></span>
+          </h3>
+          <dl className="grid grid-cols-2 gap-y-10">
+            {[
+              ["Issuer", credential.issuer],
+              ["Category", credential.category],
+              ["Issued", credential.evidence.issueDate],
+              ["Expiry", credential.evidence.expiry]
+            ].map(([label, value]) => (
+              <div key={label} className="flex flex-col border-l-[0.5px] border-[#cba871]/30 pl-5">
+                <dt className="font-mono text-[0.625rem] uppercase tracking-widest text-[#a3998b]">
+                  {label}
+                </dt>
+                <dd className="mt-3 font-serif text-sm font-medium tracking-wide text-[#1a1511]">
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
 
         <section>
-          <h3 className="font-mono text-xs uppercase text-[var(--color-champagne)]">
-            Verification actions
+          <h3 className="mb-8 flex items-center gap-4 font-mono text-[0.6875rem] uppercase tracking-widest text-[#cba871]">
+            <span className="h-px flex-1 bg-[#cba871]/20"></span>
+            Public Links
+            <span className="h-px flex-1 bg-[#cba871]/20"></span>
           </h3>
-          <div className="mt-3 flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             {credential.proofUrls.length > 0 ? (
               credential.proofUrls.map((url, index) => (
                 <ExternalLink
-                  ariaLabel={`${
-                    index === 0
-                      ? credential.evidence.proofLabel
-                      : `Captured proof ${index + 1}`
-                  } for ${credential.title}`}
-                  className="motion-cta flex min-h-11 items-center justify-between gap-3 rounded-[var(--radius-control)] border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-carbon)_70%,transparent)] px-3 text-sm text-[var(--color-ivory-soft)] transition duration-[var(--duration-feedback)] hover:border-[var(--border-gold)] hover:text-[var(--color-ivory)]"
+                  ariaLabel={`Link to ${credential.title}`}
+                  className="group relative flex items-center justify-between overflow-hidden rounded-xl border border-[#cba871]/20 bg-[#fdfbf7] p-5 shadow-[0_4px_20px_-10px_rgba(203,168,113,0.15)] transition-all duration-500 hover:-translate-y-1 hover:border-[#cba871]/60 hover:shadow-[0_8px_30px_-10px_rgba(203,168,113,0.25)]"
                   href={url}
                   key={url}
                 >
-                  <span>
-                    {index === 0
-                      ? credential.evidence.proofLabel
-                      : `Captured proof ${index + 1}`}
+                  <span className="font-serif text-sm font-medium text-[#1a1511] transition-transform duration-500 group-hover:translate-x-2">
+                    {index === 0 ? credential.evidence.proofLabel : `Captured reference ${index + 1}`}
                   </span>
-                  <span
-                    aria-hidden="true"
-                    className="font-mono text-xs text-[var(--console-prompt)]"
-                  >
-                    OPEN
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#cba871]/10 text-[#cba871] transition-colors duration-500 group-hover:bg-[#cba871] group-hover:text-white">
+                    →
                   </span>
                 </ExternalLink>
               ))
             ) : (
-              <p className="rounded-[var(--radius-control)] border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-warm-silver)_8%,transparent)] px-3 py-3 text-sm leading-6 text-[var(--color-warm-silver)]">
-                No public verification link is captured yet. This credential
-                stays visible as a pending proof item.
+              <p className="font-serif text-sm leading-relaxed text-[#74685a]">
+                Public verification link to add. This credential stays lower emphasis until the link is attached.
               </p>
             )}
           </div>
         </section>
 
         <section>
-          <h3 className="font-mono text-xs uppercase text-[var(--color-champagne)]">
-            Evidence notes
+          <h3 className="mb-8 flex items-center gap-4 font-mono text-[0.6875rem] uppercase tracking-widest text-[#cba871]">
+            <span className="h-px flex-1 bg-[#cba871]/20"></span>
+            Status Notes
+            <span className="h-px flex-1 bg-[#cba871]/20"></span>
           </h3>
-          <ul className="mt-3 space-y-2">
+          <ul className="space-y-4">
             {credential.evidence.metadata.map((item) => (
-              <li
-                className="flex gap-3 text-sm leading-6 text-[var(--console-muted)]"
-                key={item}
-              >
-                <span
-                  aria-hidden="true"
-                  className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${tone.dot}`}
-                />
+              <li className="flex items-start gap-4 font-serif text-sm leading-relaxed text-[#44372a]" key={item}>
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#cba871]/60"></span>
                 {item}
               </li>
             ))}
           </ul>
         </section>
 
-        <section>
-          <h3 className="font-mono text-xs uppercase text-[var(--color-champagne)]">
-            Related skill tags
-          </h3>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {credential.relatedSkills.map((skill) => (
-              <span
-                className="rounded-[var(--radius-control)] border border-[var(--border-subtle)] px-2.5 py-1 text-xs text-[var(--color-ivory-soft)]"
-                key={skill}
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
-        </section>
-
-        <section>
-          <h3 className="font-mono text-xs uppercase text-[var(--color-champagne)]">
-            Project evidence
-          </h3>
-          {credential.relatedProjectTitles.length > 0 ? (
-            <ul className="mt-3 space-y-2">
-              {credential.relatedProjectTitles.map((project) => (
-                <li
-                  className="rounded-[var(--radius-control)] border border-[var(--border-subtle)] px-3 py-2 text-sm text-[var(--color-ivory-soft)]"
-                  key={project}
-                >
-                  {project}
-                </li>
+        {credential.relatedSkills.length > 0 && (
+          <section>
+            <h3 className="mb-8 flex items-center gap-4 font-mono text-[0.6875rem] uppercase tracking-widest text-[#cba871]">
+              <span className="h-px flex-1 bg-[#cba871]/20"></span>
+              Related Elements
+              <span className="h-px flex-1 bg-[#cba871]/20"></span>
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {credential.relatedSkills.map((skill) => (
+                <span className="rounded-full border border-[#cba871]/20 bg-[#fdfbf7] px-4 py-2 font-serif text-xs font-medium tracking-wide text-[#1a1511]" key={skill}>
+                  {skill}
+                </span>
               ))}
-            </ul>
-          ) : (
-            <p className="mt-3 rounded-[var(--radius-control)] border border-[var(--border-subtle)] px-3 py-2 text-sm text-[var(--color-warm-silver)]">
-              No project evidence has been attached yet.
-            </p>
-          )}
-        </section>
+            </div>
+            {credential.relatedProjectTitles.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {credential.relatedProjectTitles.map((project) => (
+                  <span className="rounded-full bg-[#cba871]/10 px-4 py-2 font-serif text-xs font-medium tracking-wide text-[#1a1511]" key={project}>
+                    {project}
+                  </span>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
       </div>
-    </aside>
-  );
-}
-
-function ConsoleMetrics({ credentials }: { credentials: readonly CredentialView[] }) {
-  const verified = credentials.filter((credential) =>
-    ["verified", "verified-expired", "indirectly-supported"].includes(
-      credential.evidence.state
-    )
-  ).length;
-  const directLinks = credentials.filter(
-    (credential) => credential.evidence.proofUrl
-  ).length;
-  const pending = credentials.length - verified;
-
-  return (
-    <dl className="motion-list grid grid-cols-2 gap-3">
-      {[
-        ["Credentials", credentials.length.toString()],
-        ["Public proof paths", verified.toString()],
-        ["Pending URLs", pending.toString()],
-        ["External CTAs", directLinks.toString()]
-      ].map(([label, value]) => (
-        <div
-          className="motion-card rounded-[var(--radius-panel)] border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-carbon)_72%,transparent)] p-4"
-          key={label}
-        >
-          <dt className="font-mono text-[0.6875rem] uppercase text-[var(--color-steel)]">
-            {label}
-          </dt>
-          <dd className="mt-2 text-2xl font-semibold text-[var(--color-ivory)]">
-            {value}
-          </dd>
-        </div>
-      ))}
-    </dl>
+    </motion.aside>
   );
 }
 
 export function CertificationConsole() {
-  const [activeGroup, setActiveGroup] =
-    useState<(typeof allGroups)[number]>("All");
+  const [activeGroup, setActiveGroup] = useState<(typeof allGroups)[number]>("All");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [providerFilter, setProviderFilter] = useState("All");
-  const [categoryFilter, setCategoryFilter] = useState("All");
-  const [selectedSlug, setSelectedSlug] = useState(certifications[0]?.slug ?? "");
+  const [selectedSlug, setSelectedSlug] = useState("");
 
   const credentialViews = useMemo(
     () =>
@@ -680,34 +602,9 @@ export function CertificationConsole() {
     []
   );
 
-  const categories = useMemo(
-    () => ["All", ...uniqueValues(credentialViews.map((item) => item.category))],
-    [credentialViews]
-  );
-
-  const providers = useMemo(
-    () => [
-      "All",
-      ...uniqueValues(credentialViews.map((item) => normalizeIssuer(item.issuer)))
-    ],
-    [credentialViews]
-  );
-
   const filteredCredentials = credentialViews.filter((credential) => {
-    const groupMatches =
-      activeGroup === "All" || credential.group === activeGroup;
-    const providerMatches =
-      providerFilter === "All" ||
-      normalizeIssuer(credential.issuer) === providerFilter;
-    const categoryMatches =
-      categoryFilter === "All" || credential.category === categoryFilter;
-
-    return (
-      groupMatches &&
-      providerMatches &&
-      categoryMatches &&
-      matchesStatusFilter(credential, statusFilter)
-    );
+    const groupMatches = activeGroup === "All" || credential.group === activeGroup;
+    return groupMatches && matchesStatusFilter(credential, statusFilter);
   });
 
   const selectedCredential =
@@ -715,176 +612,146 @@ export function CertificationConsole() {
     filteredCredentials[0];
 
   return (
-    <main className="min-h-screen px-[var(--layout-gutter)] py-10">
-      <section className="motion-section gold-thread-section mx-auto flex max-w-[var(--layout-wide-max)] flex-col gap-8">
-        <header className="grid gap-8 border-b border-[var(--border-subtle)] pb-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
-          <div className="max-w-4xl">
-            <p className="font-mono text-xs uppercase text-[var(--console-prompt)]">
-              Certification console
-            </p>
-            <h1 className="mt-4 max-w-3xl font-[var(--font-display)] text-4xl font-semibold leading-[1.08] text-[var(--color-ivory)] sm:text-6xl">
-              Credential verification, without the hand-waving.
-            </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--color-warm-silver)] sm:text-lg">
-              A compact proof dashboard for Fabric, Databricks, analytics, and
-              cloud credentials, with direct verification actions separated
-              from resume-claimed items.
-            </p>
-          </div>
-          <ConsoleMetrics credentials={credentialViews} />
-        </header>
+    <main
+      className="relative min-h-screen bg-[var(--color-porcelain)] px-[var(--layout-gutter)] pb-24 pt-[calc(var(--site-header-offset)+var(--space-8))]"
+      id="main-content"
+      tabIndex={-1}
+    >
+      {/* Subtle luxury noise/gradient overlay */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(203,168,113,0.05),transparent_50%)]" />
 
-        <section
-          aria-label="Credential filters"
-          className="motion-panel-enter rounded-[var(--radius-panel)] border border-[var(--console-border)] bg-[var(--surface-console)] p-4 shadow-[var(--shadow-surface)]"
-        >
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(220px,320px)]">
-            <div>
-              <p className="mb-3 font-mono text-xs uppercase text-[var(--color-champagne)]">
-                Provider groups
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {allGroups.map((group) => (
-                  <FilterButton
-                    active={activeGroup === group}
-                    key={group}
-                    onClick={() => setActiveGroup(group)}
+      <div className="relative mx-auto flex max-w-[var(--layout-wide-max)] flex-col gap-16">
+        
+        {/* Ultra Premium Header */}
+      <header className="mb-20">
+        <div className="flex flex-col items-start justify-between gap-12 md:flex-row md:items-end">
+          
+          <div className="max-w-2xl">
+            <div className="mb-8 flex items-center gap-5">
+              <span className="h-[1px] w-12 bg-gradient-to-r from-[#cba871] to-transparent"></span>
+              <span className="font-mono text-[0.55rem] uppercase tracking-[0.3em] text-[#a3998b]">
+                Official Credentials
+              </span>
+            </div>
+            
+            <h1 className="editorial-title editorial-title--display">
+              Credentials<span className="editorial-accent">.</span>
+            </h1>
+            
+          </div>
+          
+          <div className="flex items-end gap-6 mt-12 md:mt-0">
+            <div className="flex flex-col items-end text-right pb-2">
+              <span className="font-mono text-[0.55rem] uppercase tracking-[0.4em] text-[#1a1511]">
+                Verified Records
+              </span>
+              <span className="font-serif text-[0.75rem] text-[#a3998b] mt-1.5">
+                Lifetime Achievements
+              </span>
+            </div>
+            
+            {/* Ultra minimal typographic metric */}
+            <div className="flex items-start">
+              <span className="font-mono text-[0.55rem] tracking-widest text-[#cba871] leading-none pt-[0.6rem] mr-1">NO.</span>
+              <span className="font-[var(--font-editorial)] text-6xl text-[#1a1511] tracking-tighter leading-none">
+                {credentialViews.length < 10 ? `0${credentialViews.length}` : credentialViews.length}
+              </span>
+            </div>
+          </div>
+          
+        </div>
+
+        <div className="mt-16 h-[1px] w-full bg-gradient-to-r from-[#cba871]/40 via-[#1a1511]/10 to-transparent" />
+
+        <RecognitionPanel className="mt-12" showCaseLink showScope />
+
+        <div className="my-20 flex w-full flex-col items-center gap-16 relative">
+          
+          {/* Status Filter tucked away elegantly */}
+          <div className="absolute right-0 top-[-80px] hidden md:flex items-center gap-3">
+            <span className="font-mono text-[0.55rem] uppercase tracking-[0.2em] text-[#a3998b]">
+              View
+            </span>
+            <select
+              className="cursor-pointer appearance-none bg-transparent pr-4 font-serif text-sm italic text-[#cba871] outline-none transition-colors duration-300 hover:text-[#1a1511]"
+              onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+              value={statusFilter}
+              style={{ backgroundImage: "url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3998b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e\")", backgroundRepeat: "no-repeat", backgroundPosition: "right center", backgroundSize: "0.8em" }}
+            >
+              {statusFilters.map((filter) => (
+                <option key={filter.id} value={filter.id} className="text-[#1a1511] not-italic">{filter.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Optical Focus Navigation */}
+          <nav className="flex flex-wrap items-center justify-center gap-x-12 gap-y-10">
+            {allGroups.map((group) => {
+              const isActive = activeGroup === group;
+              return (
+                <motion.button
+                  layout
+                  className="group relative flex flex-col items-center outline-none"
+                  key={group}
+                  onClick={() => setActiveGroup(group as any)}
+                >
+                  <motion.span
+                    layout
+                    className={`relative block transition-all duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                      isActive
+                        ? "font-[var(--font-editorial)] text-4xl tracking-tight text-[#1a1511] blur-none opacity-100"
+                        : "font-serif text-xl tracking-wide text-[#a3998b] blur-[1px] opacity-50 group-hover:text-[#1a1511] group-hover:opacity-100 group-hover:blur-none"
+                    }`}
                   >
                     {group}
-                  </FilterButton>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              <label className="block">
-                <span className="mb-2 block font-mono text-xs uppercase text-[var(--color-champagne)]">
-                  Verification state
-                </span>
-                <select
-                  className="min-h-10 w-full rounded-[var(--radius-control)] border border-[var(--border-subtle)] bg-[var(--color-carbon)] px-3 text-sm text-[var(--color-ivory-soft)]"
-                  onChange={(event) =>
-                    setStatusFilter(event.target.value as StatusFilter)
-                  }
-                  value={statusFilter}
+                    
+                    {/* Delicate hover underline to indicate clickability */}
+                    {!isActive && (
+                      <span className="absolute -bottom-1 left-1/2 h-[1px] w-0 -translate-x-1/2 bg-[#cba871]/40 transition-all duration-500 ease-out group-hover:w-full" />
+                    )}
+                  </motion.span>
+                </motion.button>
+              );
+            })}
+          </nav>
+        </div>
+      </header>
+        {/* Main Layout Grid */}
+        <section className="grid gap-12 xl:grid-cols-[minmax(0,1fr)_480px] xl:gap-20">
+          <motion.div layout className="grid auto-rows-max grid-cols-1 gap-8 md:grid-cols-2">
+            <AnimatePresence>
+              {filteredCredentials.length > 0 ? (
+                filteredCredentials.map((credential) => (
+                  <CredentialCard
+                    credential={credential}
+                    isSelected={credential.slug === selectedCredential?.slug}
+                    key={credential.slug}
+                    onSelect={() => setSelectedSlug(credential.slug)}
+                  />
+                ))
+              ) : (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.5 }}
+                  className="col-span-1 py-20 text-center md:col-span-2"
                 >
-                  {statusFilters.map((filter) => (
-                    <option key={filter.id} value={filter.id}>
-                      {filter.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                  <p className="font-[var(--font-editorial)] text-4xl text-[#1a1511]">No credentials found.</p>
+                  <p className="mt-4 text-[#74685a]">Adjust your filters to see more results.</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
 
-              <label className="block">
-                <span className="mb-2 block font-mono text-xs uppercase text-[var(--color-champagne)]">
-                  Category
-                </span>
-                <select
-                  className="min-h-10 w-full rounded-[var(--radius-control)] border border-[var(--border-subtle)] bg-[var(--color-carbon)] px-3 text-sm text-[var(--color-ivory-soft)]"
-                  onChange={(event) => setCategoryFilter(event.target.value)}
-                  value={categoryFilter}
-                >
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-          </div>
-
-          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-[var(--border-subtle)] pt-4">
-            <span className="font-mono text-xs uppercase text-[var(--color-steel)]">
-              Providers
-            </span>
-            {providers.map((provider) => (
-              <button
-                aria-pressed={providerFilter === provider}
-                className={`motion-lens-choice min-h-9 rounded-[var(--radius-control)] border px-2.5 text-xs transition duration-[var(--duration-feedback)] ${
-                  providerFilter === provider
-                    ? "border-[var(--border-cool)] bg-[color-mix(in_srgb,var(--color-signal-blue)_14%,transparent)] text-[var(--color-ivory)]"
-                    : "border-[var(--border-subtle)] text-[var(--color-warm-silver)] hover:border-[var(--border-strong)] hover:text-[var(--color-ivory-soft)]"
-                }`}
-                key={provider}
-                onClick={() => setProviderFilter(provider)}
-                type="button"
-              >
-                {provider}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-          <div className="motion-list grid content-start gap-4 sm:grid-cols-2">
-            {filteredCredentials.length > 0 ? (
-              filteredCredentials.map((credential) => (
-                <CredentialCard
-                  credential={credential}
-                  isSelected={credential.slug === selectedCredential?.slug}
-                  key={credential.slug}
-                  onSelect={() => setSelectedSlug(credential.slug)}
-                />
-              ))
-            ) : (
-              <div className="sm:col-span-2 rounded-[var(--radius-panel)] border border-dashed border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-carbon)_56%,transparent)] p-8">
-                <p className="font-mono text-xs uppercase text-[var(--console-prompt)]">
-                  Empty state
-                </p>
-                <h2 className="mt-3 text-2xl font-semibold text-[var(--color-ivory)]">
-                  No credentials match this filter set.
-                </h2>
-                <p className="mt-3 max-w-xl text-sm leading-6 text-[var(--color-warm-silver)]">
-                  Clear a group, category, or verification filter to return to
-                  the full credential evidence queue.
-                </p>
-              </div>
+          <AnimatePresence mode="wait">
+            {selectedCredential && (
+              <DetailShell credential={selectedCredential} key={selectedCredential.slug} />
             )}
-          </div>
-
-          {selectedCredential ? (
-            <DetailShell
-              credential={selectedCredential}
-              key={selectedCredential.slug}
-            />
-          ) : null}
+          </AnimatePresence>
         </section>
 
-        <section className="motion-section gold-thread-section rounded-[var(--radius-panel)] border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--color-carbon)_70%,transparent)] p-5">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p className="font-mono text-xs uppercase text-[var(--console-prompt)]">
-                Future verification queue
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold text-[var(--color-ivory)]">
-                Metadata still waiting on public-safe proof.
-              </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-warm-silver)]">
-                The console intentionally keeps unverified credentials visible
-                but lower-emphasis, so future proof collection has a clear
-                landing place.
-              </p>
-            </div>
-            <div className="grid gap-2 sm:grid-cols-2 lg:min-w-[420px]">
-              {[
-                "Direct Databricks Data Engineer Associate URL",
-                "Databricks Fundamentals verification",
-                "Google, Oracle, and Copilot public pages",
-                "Renewed DP-700 page after May 1, 2026"
-              ].map((item) => (
-                <span
-                  className="rounded-[var(--radius-control)] border border-[var(--border-subtle)] px-3 py-2 text-sm text-[var(--color-ivory-soft)]"
-                  key={item}
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
-      </section>
+      </div>
     </main>
   );
 }

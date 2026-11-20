@@ -32,18 +32,18 @@ export function RoleGateway() {
       <div className={styles.inner}>
         <div className={styles.header}>
           <div>
-            <p className={styles.eyebrow}>Soft role lens</p>
+            <p className={styles.eyebrow}>Review focus</p>
             <h2 className={styles.title} id="role-gateway-title">
-              Choose how the proof should lean.
+              Choose the most useful review path.
             </h2>
             <p className={styles.copy}>
-              This lens changes emphasis and next steps without blocking the
+              This focus changes emphasis and next steps without blocking the
               rest of the portfolio. Keeping the balanced path is always valid.
             </p>
           </div>
 
           <div className={`${styles.statusPanel} motion-panel-enter`} aria-live="polite">
-            <span className={styles.statusLabel}>Active lens</span>
+            <span className={styles.statusLabel}>Active focus</span>
             <strong>{activeLabel}</strong>
             <button
               aria-controls={ROLE_GATEWAY_DETAIL_ID}
@@ -59,7 +59,7 @@ export function RoleGateway() {
         </div>
 
         <div
-          aria-label="Role lens options"
+          aria-label="Review focus options"
           className={`${styles.cardGrid} motion-list`}
           role="group"
         >
@@ -99,7 +99,7 @@ export function RoleGateway() {
             </div>
 
             <div
-              aria-label="Change role lens"
+              aria-label="Change review focus"
               className={styles.switcher}
               role="group"
             >
@@ -130,7 +130,7 @@ export function RoleGateway() {
           </div>
 
           <div className={styles.evidencePanel}>
-            <p className={styles.evidenceTitle}>Featured proof for this lens</p>
+            <p className={styles.evidenceTitle}>Featured work for this focus</p>
             <ul className={styles.evidenceList}>
               {activeModel.evidence.map((item) => (
                 <li className={styles.evidenceItem} key={`${item.kind}-${item.label}`}>

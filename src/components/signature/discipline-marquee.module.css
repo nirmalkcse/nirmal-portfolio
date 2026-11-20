@@ -1,0 +1,74 @@
+.marquee {
+  position: relative;
+  padding: clamp(56px, 8vw, 120px) 0 clamp(48px, 6vw, 96px);
+  overflow: hidden;
+  background: transparent;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.viewport {
+  overflow: hidden;
+  /* Feathered edges so phrases arrive and leave instead of being cut. */
+  mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.run {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.phrase {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28em;
+  padding-right: 0.5em;
+  color: #1d1915;
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 6.6vw, 6.5rem);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+/* Apple's two-tone headline: the second word in a quieter warm grey. */
+.phrase em {
+  color: #a39383;
+  font-style: normal;
+}
+
+/* A plain bronze point between phrases, sitting on the x-height like a
+   typeset interpunct rather than an ornament. */
+.mark {
+  flex: none;
+  width: 0.11em;
+  height: 0.11em;
+  margin: 0 0.18em 0 0.34em;
+  border-radius: 50%;
+  background: #b98a50;
+  translate: 0 0.06em;
+}
+
+.rule {
+  display: block;
+  width: min(1180px, calc(100% - 2 * var(--layout-gutter)));
+  height: 1px;
+  margin: clamp(40px, 5vw, 72px) auto 0;
+  background: linear-gradient(90deg, transparent, rgba(154, 86, 55, 0.28), transparent);
+}

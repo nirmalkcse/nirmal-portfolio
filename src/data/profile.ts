@@ -5,26 +5,26 @@ export const profile = {
   name: "Nirmal Kumar P",
   displayName: "Nirmal Kumar",
   headline:
-    "Data Engineer building Fabric lakehouses, Databricks data products, and proof-backed BI systems.",
+    "Data Engineer building Microsoft Fabric, Databricks, SQL, PySpark, and Power BI systems for migration, validation, and reporting trust.",
   alternateHeadline:
     "Data Engineer | Microsoft Fabric & Databricks | SQL, PySpark, Power BI",
   shortBio:
-    "Nirmal Kumar is a data engineer focused on Microsoft Fabric and Databricks lakehouse delivery across ingestion, CDC/SCD Type 2, validation, BI migration, and data-product workflows.",
+    "Nirmal Kumar builds reliable data systems across Fabric lakehouse delivery, Databricks data products, SQL/PySpark validation, and BI modernization.",
   expandedBio:
-    "Nirmal Kumar builds enterprise-style data systems across Microsoft Fabric, Databricks, SQL, PySpark, and Power BI. His strongest work spans telecom migration assets for 3 source systems and 18-24 daily incremental tables, BI validation that reduced report discrepancies by 90%, Tableau-to-Power BI migrations, and a Databricks-hosted MDM/entity-resolution product with governance, orchestration, auditability, and explainability built in.",
+    "Nirmal Kumar builds data systems that make migration, reporting, and validation easier to trust. His strongest work spans telecom migration assets for 3 source systems and 18-24 daily incremental tables, BI validation that reduced report discrepancies by 90%, Tableau-to-Power BI migrations, and a Databricks-hosted MDM/entity-resolution product with governed orchestration, reviewable decisions, and role-based controls.",
   location: "Chennai, India",
   email: null,
   resumeOnePage: {
     label: "One-page resume",
     path: "C:\\Users\\nirma\\Downloads\\Nirmal_Kumar_Data_Engineer_Resume_One_Page_v7_revised.docx",
     publicDefault: true,
-    note: "Default recruiter download once the public asset path is confirmed."
+    note: "Default recruiter download."
   },
   resumeMaster: {
     label: "Master resume",
     path: "C:\\Users\\nirma\\Downloads\\Nirmal_Kumar_Data_Engineer_Master_Resume_v7_revised.docx",
     publicDefault: false,
-    note: "Deep-dive and proof-packet source, not the default public download."
+    note: "Expanded master resume, not the default public download."
   },
   roles: [
     {
@@ -49,7 +49,7 @@ export const profile = {
     engineer:
       "Lead with implementation depth across PySpark, SQL, CDC/SCD2, Delta, Fabric pipelines, Databricks APIs, Unity Catalog, RBAC, audit logging, and orchestration.",
     leader:
-      "Lead with ownership, governance workflows, validation systems, discrepancy reduction, delivery discipline, and business-facing modernization.",
+      "Lead with ownership, governed workflows, validation systems, discrepancy reduction, delivery discipline, and business-facing modernization.",
     explorer:
       "Lead with the hybrid arc across data engineering, analytics, AI/data agents, product engineering, certifications, research, demos, and learning momentum."
   },

@@ -1,17 +1,15 @@
 import type { Metadata } from "next";
-import { ProjectCaseFilesIndex } from "@/components/project-case-file";
-import { RoleLensProvider } from "@/context/role-lens-context";
+import { storyMono, storySans } from "@/components/story/story-fonts";
+import { WorkShowcase } from "@/components/work";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Projects",
+export const metadata: Metadata = createPageMetadata({
+  title: "Work",
   description:
-    "Role-aware project case files for Nirmal Kumar's data engineering, BI modernization, research, and AI/data-agent proof points."
-};
+    "Project case studies for Nirmal Kumar's Fabric, Databricks, BI validation, research, and data product work.",
+  path: "/projects"
+});
 
 export default function ProjectsPage() {
-  return (
-    <RoleLensProvider>
-      <ProjectCaseFilesIndex />
-    </RoleLensProvider>
-  );
+  return <WorkShowcase className={`${storySans.variable} ${storyMono.variable}`} />;
 }

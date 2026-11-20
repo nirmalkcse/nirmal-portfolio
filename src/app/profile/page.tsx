@@ -1,17 +1,20 @@
 import type { Metadata } from "next";
 import { ProfessionalProfile } from "@/components/profile";
-import { RoleLensProvider } from "@/context/role-lens-context";
+import { JsonLd } from "@/components/seo";
+import { createPageMetadata, profilePageJsonLd } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Profile",
+export const metadata: Metadata = createPageMetadata({
+  title: "Contact",
   description:
-    "Professional profile for Nirmal Kumar, connecting role positioning, proof links, social links, resume access, and public-safe contact context."
-};
+    "Contact Nirmal Kumar through LinkedIn, download the one-page PDF resume, and explore selected Data Engineer work.",
+  path: "/profile"
+});
 
 export default function ProfilePage() {
   return (
-    <RoleLensProvider>
+    <>
+      <JsonLd data={profilePageJsonLd} />
       <ProfessionalProfile />
-    </RoleLensProvider>
+    </>
   );
 }

@@ -1,18 +1,26 @@
 export const plannedRoutes = [
   {
     href: "/proof",
-    label: "Proof",
-    shortLabel: "Proof",
+    label: "Skills",
+    shortLabel: "Skills",
     ownerSession: "Session 12",
-    description: "Role-aware graph connecting skills, projects, credentials, and proof gaps.",
+    description: "Skill map tying tools, proof points, credentials, and case-study evidence.",
     showInPrimaryNav: true
   },
   {
     href: "/projects",
-    label: "Projects",
+    label: "Work",
     shortLabel: "Work",
     ownerSession: "Session 15",
-    description: "Case files for data engineering, BI modernization, research, and AI/data-agent work.",
+    description: "Selected case studies across Fabric, Databricks, BI validation, and governed data products.",
+    showInPrimaryNav: true
+  },
+  {
+    href: "/certifications",
+    label: "Credentials",
+    shortLabel: "Credentials",
+    ownerSession: "Session 14",
+    description: "Verified and supporting credentials grouped by platform and proof strength.",
     showInPrimaryNav: true
   },
   {
@@ -20,47 +28,55 @@ export const plannedRoutes = [
     label: "Timeline",
     shortLabel: "Timeline",
     ownerSession: "Session 13",
-    description: "Career, education, certification, project, and exploration momentum.",
+    description: "Career, education, credentials, projects, and learning milestones in one arc.",
     showInPrimaryNav: true
   },
   {
-    href: "/certifications",
-    label: "Certifications",
-    shortLabel: "Credentials",
-    ownerSession: "Session 14",
-    description: "Credential console with verification states and public proof links.",
+    href: "/journey",
+    label: "Journey",
+    shortLabel: "Journey",
+    ownerSession: "Session 21",
+    description: "The work told through five elements, from bedrock foundations to the night sky of entity resolution.",
     showInPrimaryNav: true
   },
   {
     href: "/future-projects",
-    label: "Future Projects",
-    shortLabel: "Future",
+    label: "Learning Roadmap",
+    shortLabel: "Learning",
     ownerSession: "Session 16",
-    description: "Currently exploring tracks grounded in existing proof.",
-    showInPrimaryNav: true
+    description: "Near-term demos and deliverables grounded in current Fabric, Databricks, and BI work.",
+    showInPrimaryNav: false
   },
   {
     href: "/resume",
     label: "Resume",
     shortLabel: "Resume",
     ownerSession: "Session 17",
-    description: "One-page and master resume downloads with role-aware recommendations.",
-    showInPrimaryNav: true
+    description: "One-page and master resume PDFs with clear review paths.",
+    showInPrimaryNav: false
   },
   {
     href: "/documents",
     label: "Documents",
     shortLabel: "Docs",
     ownerSession: "Session 18",
-    description: "Reserved document hub for proof packets, exports, and portfolio document flows.",
-    showInPrimaryNav: true
+    description: "Resume PDFs, editable DOCX copies, and audience-specific proof routes.",
+    showInPrimaryNav: false
   },
   {
     href: "/profile",
-    label: "Profile",
-    shortLabel: "Profile",
+    label: "Contact",
+    shortLabel: "Contact",
     ownerSession: "Session 03",
-    description: "Professional profile, social links, and public contact strategy.",
-    showInPrimaryNav: false
+    description: "LinkedIn contact path, PDF resume, and professional profile links.",
+    showInPrimaryNav: true
+  },
+  {
+    href: "/testimonials",
+    label: "Testimonials",
+    shortLabel: "Reviews",
+    ownerSession: "Session 20",
+    description: "Client testimonials in a liquid glass carousel.",
+    showInPrimaryNav: true
   }
 ] as const;
